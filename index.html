@@ -6,6 +6,7 @@
   <meta name="description" content="既存サービスのUIを、雰囲気・構造・AIへの指示文まで分解して探せるデザイン参照ライブラリ。" />
   <title>Like What? — UI reference library</title>
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles-extra.css" />
 </head>
 <body>
   <header class="site-header">
@@ -17,15 +18,15 @@
     <section class="hero">
       <p class="eyebrow">DESIGN REFERENCE LIBRARY</p>
       <h1>「こんな感じ」を、<br><em>ちゃんと言葉にする。</em></h1>
-      <p class="hero-copy">Apple、Notion、Linear…。ブランド名だけで終わらせず、<strong>どの画面の、何が効いているのか</strong>まで分解。ミニモックを見ながら、AIに渡せる指示文へ変換する。</p>
+      <p class="hero-copy">Apple、Notion、Linear、オモコロ、集英社、Nintendo…。ブランド名だけで終わらせず、<strong>どの画面の、何が効いているのか</strong>まで分解。ミニモックを見ながら、AIに渡せる指示文へ変換する。</p>
 
       <div class="search-shell" role="search">
         <span aria-hidden="true">⌕</span>
-        <input id="searchInput" type="search" autocomplete="off" placeholder="例：Apple 設定 / Linear 高密度 / 右から詳細 / 静かなUI" aria-label="パターンを検索" />
+        <input id="searchInput" type="search" autocomplete="off" placeholder="例：Nintendo カタログ / オモコロ 記事 / Linear 高密度 / 静かなUI" aria-label="パターンを検索" />
         <kbd>⌘ K</kbd>
       </div>
       <div class="query-examples" aria-label="検索例">
-        <button data-query="静か">静か</button><button data-query="高密度">高密度</button><button data-query="設定">設定</button><button data-query="Sidebar">Sidebar</button><button data-query="Progressive Disclosure">Progressive Disclosure</button>
+        <button data-query="静か">静か</button><button data-query="高密度">高密度</button><button data-query="Editorial">Editorial</button><button data-query="カタログ">カタログ</button><button data-query="Progressive Disclosure">Progressive Disclosure</button>
       </div>
     </section>
 
@@ -56,7 +57,9 @@
   </footer>
 
   <script src="patterns.js"></script>
+  <script src="patterns-extra.js"></script>
   <script src="ui.js"></script>
+  <script src="ui-extra.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
