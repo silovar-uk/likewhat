@@ -6,29 +6,76 @@
 
 - 既存ブランド / サービスを主入口にパターンを探す
 - 一覧のミニモックで違いを視覚的に確認する
-- 「Visual Hierarchy」「Progressive Disclosure」「Editorial Rhythm」「Master–detail」などの専門語でも横断検索する
+- 「Visual Hierarchy」「Progressive Disclosure」「Maximalism」「Spatial IA」などの専門語でも横断検索する
 - 各パターンを **Implementation / Design System / Philosophy** の3層で言語化する
 - 異なるブランドからランダムに3パターンを抽出し、意図的なセレンディピティを作る
 - AIへそのまま渡せる、専門語彙付きの設計指示をコピーする
-- 公式プロダクト / デザインシステムへの参考リンクを持つ
+- Web/SaaSだけでなく、Game UI / OS / Physical Space / Public Service / Old Webまで同じ設計空間に置く
 
 ## Library
 
-39 patterns across Apple, Notion, Linear, Arc, GitHub, Google, Stripe, Slack, Figma, Shopify, Airbnb, Vercel, オモコロ, 集英社 and Nintendo.
+51 patterns. Initial 39 patterns plus 12 deliberately distant design-space extremes:
+
+- GOV.UK — Public / Institutional
+- ドン・キホーテ — Maximalism / Chaos
+- LEGO — Play / Children
+- CELINE — Luxury / Restraint
+- Persona 5 — Game UI
+- Windows 95 — OS / Device
+- Google Maps — Maps / Movement
+- Bloomberg Terminal — Dense Information / Monitoring
+- ほぼ日 — Culture / Art Direction
+- Wikipedia — Primitive / Old Web
+- IKEA — Physical / Environmental Design
+- チケットぴあ — Deliberate Friction / Ritual
+
+## Taxonomy schema v2
+
+`taxonomy.js` enriches every pattern without breaking the original data objects.
+
+Each pattern can now carry:
+
+- `domain`
+- `medium`
+- `archetype`
+- `interactionModel`
+- `philosophy`
+- `designSpace`
+- `implementationTerms`
+- `designTerms`
+- `philosophyTerms`
+- `opposites`
+- `related`
+
+### Design Space axes
+
+All patterns can be positioned on six 0–100 axes:
+
+- Density: Sparse ↔ Dense
+- Emotional Intensity: Calm ↔ Excitable
+- Goal Orientation: Efficiency ↔ Exploration
+- Authority: Personal ↔ Institutional
+- Interaction: Observation ↔ Direct Manipulation
+- Order: Chaotic ↔ Systematic
+
+These coordinates are the foundation for Diversity Score, opposite references, the future design-space map and Far Apart random selection.
 
 ## Design grammar
 
-`vocabulary.js` がパターンのブランド、family、tags、UI parts、mock typeから専門語彙を推定します。
+`vocabulary.js` maps patterns to specialist terms.
 
 - **Implementation**: CSS Grid, responsive composition, focus management, UI state machine, semantic grouping...
 - **Design System**: Visual hierarchy, Information Architecture, Progressive disclosure, Mini-IA, Editorial rhythm, Master–detail...
 - **Philosophy**: Recognition over recall, User agency, Cognitive-load management, Preserve context, Content-first design...
 
-これらの語彙は詳細ページ表示だけでなく、全文検索とAI向け設計指示にも使用します。
+## Pattern modules
 
-## Add a pattern
-
-基本スキーマと追加ルールは [`docs/plan.md`](docs/plan.md) を参照してください。初期パターンは `patterns.js`、追加セットは `patterns-extra.js` に保持しています。独自ミニモックは `ui-extra.js` / `styles-extra.css` で拡張できます。
+- `patterns.js` — initial library
+- `patterns-extra.js` — オモコロ / 集英社 / Nintendo expansion
+- `patterns-wave1.js` — 12 design-space extremes
+- `taxonomy.js` — schema v2 and Design Space enrichment
+- `ui-extra.js` / `styles-extra.css` — Japanese media mocks
+- `ui-wave1.js` / `styles-wave1.css` — mocks for the 12 extremes
 
 ## Run locally
 
@@ -38,4 +85,4 @@ python3 -m http.server 8000
 
 ## GitHub Pages
 
-`.github/workflows/pages.yml` が `main` へのpushで静的サイトをdeployします。
+`.github/workflows/pages.yml` deploys the static site on every push to `main`.
