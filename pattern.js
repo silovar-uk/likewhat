@@ -2,6 +2,7 @@
   const patterns = window.LIKEWHAT_PATTERNS || [];
   const { render, esc } = window.LikeWhatUI;
   const vocabulary = window.LikeWhatVocabulary;
+  const designSpace = window.LikeWhatDesignSpace;
   const root = document.getElementById('patternPage');
   const id = new URLSearchParams(location.search).get('id');
   const p = patterns.find(item => item.id === id) || patterns[0];
@@ -13,14 +14,21 @@
 
   document.title = `${p.name} — Like What?`;
   const lex = vocabulary ? vocabulary.forPattern(p) : {implementation:[],design:[],philosophy:[]};
+  const libraryMean = designSpace ? designSpace.mean(patterns) : {};
   const related = patterns.filter(x => x.id !== p.id).map(x => ({x, score:(x.brand===p.brand?5:0)+x.tags.filter(t=>p.tags.includes(t)).length})).filter(v=>v.score>0).sort((a,b)=>b.score-a.score).slice(0,4).map(v=>v.x);
 
   function lexiconColumn(label, title, items) {
     return `<section class="lexicon-column"><p class="eyebrow">${esc(label)}</p><h3>${esc(title)}</h3><div class="lexicon-items">${items.map(item=>`<article class="lexicon-item"><strong>${esc(item.term)}</strong><span>${esc(item.ja)}</span><p>${esc(item.note)}</p></article>`).join('')}</div></section>`;
   }
 
+  function metaCard(label, value) {
+    return `<div class="space-meta"><small>${esc(label)}</small><strong>${esc(value || '—')}</strong></div>`;
+  }
+
   const vocabularyLine = [...lex.design,...lex.philosophy].slice(0,8).map(x=>x.term).join(' / ');
-  const expertPrompt = `${p.prompt}\n\n設計語彙として、${vocabularyLine} を意識してください。単にブランドの表層表現を模倣するのではなく、情報階層・密度・文脈保持・操作の開示タイミングまで設計原則として再現してください。`;
+  const spaceSummary = designSpace ? designSpace.summary(p.designSpace) : '';
+  const spacePrompt = p.designSpace ? `\nDesign Space上の位置は、Density ${p.designSpace.density} / Emotional Intensity ${p.designSpace.emotion} / Exploration ${p.designSpace.exploration} / Authority ${p.designSpace.authority} / Direct Manipulation ${p.designSpace.interaction} / Systematic Order ${p.designSpace.order}。この数値を装飾ではなく、情報量・感情強度・探索性・権威性・操作直接性・秩序性の設計判断として反映してください。` : '';
+  const expertPrompt = `${p.prompt}\n\n設計語彙として、${vocabularyLine} を意識してください。単にブランドの表層表現を模倣するのではなく、情報階層・密度・文脈保持・操作の開示タイミングまで設計原則として再現してください。${spacePrompt}`;
 
   root.innerHTML = `
     <section class="detail-hero">
@@ -35,6 +43,24 @@
     <section class="detail-grid">
       <article class="detail-main">
         <section class="detail-block"><p class="eyebrow">DESIGN INTENT</p><h2>設計意図を言語化すると</h2><p class="large-copy">${esc(p.description)}</p></section>
+
+        ${designSpace && p.designSpace ? `<section class="detail-block design-space-block">
+          <p class="eyebrow">DESIGN SPACE / POSITIONING</p>
+          <h2>このデザインは、どこに位置する？</h2>
+          <p class="design-space-intro">6つの対立軸で、このパターンの設計上の重心を可視化する。レーダーは全体形状、右側のスケールは各軸の意味を読むためのもの。破線は現在のLike What?ライブラリ全体の平均。</p>
+          <div class="space-layout">
+            ${designSpace.radar(p.designSpace, libraryMean)}
+            ${designSpace.bars(p.designSpace, libraryMean)}
+          </div>
+          <div class="space-profile">
+            ${metaCard('Domain', p.domain)}
+            ${metaCard('Medium', p.medium)}
+            ${metaCard('Archetype', p.archetype)}
+            ${metaCard('Interaction Model', p.interactionModel)}
+          </div>
+          <p class="space-summary"><strong>Character profile:</strong> ${esc(spaceSummary)}</p>
+          <p class="space-method-note">※ Design Spaceの0–100は客観的な品質点ではなく、パターン同士を比較するための編集的・ヒューリスティックな座標。今後のDiversity Score、対極参照、Design Mapに共通利用する。</p>
+        </section>` : ''}
 
         <section class="detail-block grammar-block">
           <p class="eyebrow">DESIGN GRAMMAR</p><h2>技術・デザイン・思想の3層で分解する</h2>
@@ -52,7 +78,7 @@
       </article>
 
       <aside class="detail-aside">
-        <div class="sticky-note"><p class="eyebrow">DISCOVERY TERMS</p><h3>検索・参照に使う語彙</h3><div class="detail-tags">${[...lex.design.slice(0,3).map(x=>x.term),...p.tags].map(t=>`<a href="./?q=${encodeURIComponent(t)}#patterns">${esc(t)}</a>`).join('')}</div><hr><p class="eyebrow">SURFACE / COMPONENTS</p><div class="detail-tags muted">${p.uiParts.map(t=>`<span>${esc(t)}</span>`).join('')}</div></div>
+        <div class="sticky-note"><p class="eyebrow">DISCOVERY TERMS</p><h3>検索・参照に使う語彙</h3><div class="detail-tags">${[...lex.design.slice(0,3).map(x=>x.term),...p.tags].map(t=>`<a href="./?q=${encodeURIComponent(t)}#patterns">${esc(t)}</a>`).join('')}</div><hr><p class="eyebrow">SURFACE / COMPONENTS</p><div class="detail-tags muted">${p.uiParts.map(t=>`<span>${esc(t)}</span>`).join('')}</div>${p.philosophy?.length?`<hr><p class="eyebrow">PHILOSOPHICAL POSITION</p><div class="detail-tags muted">${p.philosophy.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}</div>
       </aside>
     </section>
 
@@ -60,7 +86,7 @@
 
   const btn = document.getElementById('copyPrompt');
   btn.addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(expertPrompt); btn.textContent='コピー済み'; document.getElementById('copyStatus').textContent='専門語彙を含む設計指示をコピーした。'; setTimeout(()=>btn.textContent='コピー',1800); }
+    try { await navigator.clipboard.writeText(expertPrompt); btn.textContent='コピー済み'; document.getElementById('copyStatus').textContent='専門語彙とDesign Space座標を含む設計指示をコピーした。'; setTimeout(()=>btn.textContent='コピー',1800); }
     catch { document.getElementById('copyStatus').textContent='コピーできなかったため、本文を選択してコピーしてください。'; }
   });
 })();
