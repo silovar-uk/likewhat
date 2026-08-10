@@ -27,6 +27,7 @@
   };
 
   function normalize(value) { return String(value || '').toLowerCase().normalize('NFKC'); }
+  function reducedMotion(){ return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches; }
   function searchable(p) {
     const expert = vocabulary ? vocabulary.searchText(p) : '';
     const taxonomy = [p.domain,p.medium,p.archetype,p.interactionModel,...(p.philosophy||[]),...(p.implementationTerms||[]),...(p.designTerms||[]),...(p.philosophyTerms||[])].join(' ');
@@ -54,12 +55,16 @@
   function renderBrandFilters() {
     brandFilters.innerHTML = ['All', ...brands].map(name => {
       const count = name === 'All' ? patterns.length : patterns.filter(p => p.brand === name).length;
-      return `<button class="brand-chip ${brand===name?'active':''}" data-brand="${esc(name)}"><span>${esc(name)}</span><small>${count}</small></button>`;
+      const active=brand===name;
+      return `<button class="brand-chip ${active?'active':''}" data-brand="${esc(name)}" aria-pressed="${active}"><span>${esc(name)}</span><small>${count}</small></button>`;
     }).join('');
   }
 
   function renderPartFilters() {
-    partFilters.innerHTML = parts.map(name => `<button class="part-chip ${part===name?'active':''}" data-part="${esc(name)}">${esc(name)}</button>`).join('');
+    partFilters.innerHTML = parts.map(name => {
+      const active=part===name;
+      return `<button class="part-chip ${active?'active':''}" data-part="${esc(name)}" aria-pressed="${active}">${esc(name)}</button>`;
+    }).join('');
   }
 
   function card(p) {
@@ -207,15 +212,20 @@
     randomResults.innerHTML = `${randomMeta(selected)}<div class="random-grid">${selected.map(card).join('')}</div>`;
     randomDraw.querySelector('span').textContent = '引き直す';
     randomDraw.querySelector('small').textContent = modeCopy[randomMode].title;
-    randomResults.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    randomResults.scrollIntoView({ behavior: reducedMotion()?'auto':'smooth', block: 'nearest' });
   }
 
   function setRandomMode(mode) {
     randomMode=modeCopy[mode]?mode:'random';
-    randomModes?.querySelectorAll('[data-random-mode]').forEach(btn=>btn.classList.toggle('active',btn.dataset.randomMode===randomMode));
+    randomModes?.querySelectorAll('[data-random-mode]').forEach(btn=>{
+      const active=btn.dataset.randomMode===randomMode;
+      btn.classList.toggle('active',active);
+      btn.setAttribute('aria-pressed',String(active));
+    });
     if(randomDraw){
       randomDraw.querySelector('span').textContent=modeCopy[randomMode].label;
       randomDraw.querySelector('small').textContent=modeCopy[randomMode].title;
+      randomDraw.setAttribute('aria-label',`${modeCopy[randomMode].title}: ${modeCopy[randomMode].description}`);
     }
     if(randomResults) randomResults.innerHTML='';
   }
