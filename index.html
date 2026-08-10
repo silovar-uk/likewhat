@@ -10,14 +10,16 @@
   <link rel="stylesheet" href="styles-extra.css" />
   <link rel="stylesheet" href="styles-enhancements.css" />
   <link rel="stylesheet" href="styles-wave1.css" />
+  <link rel="stylesheet" href="styles-qa.css" />
 </head>
 <body>
+  <a class="skip-link" href="#main-content">本文へ移動</a>
   <header class="site-header">
-    <a class="brandmark" href="./"><span>Like</span> What?</a>
-    <nav><a href="#patterns">Patterns</a><a href="map.html">Design Map</a><a href="vocabulary.html">Vocabulary</a><a href="https://github.com/silovar-uk/likewhat" target="_blank" rel="noreferrer">GitHub ↗</a></nav>
+    <a class="brandmark" href="./" aria-label="Like What? ホーム"><span>Like</span> What?</a>
+    <nav aria-label="Global navigation"><a href="#patterns">Patterns</a><a href="map.html">Design Map</a><a href="vocabulary.html">Vocabulary</a><a href="https://github.com/silovar-uk/likewhat" target="_blank" rel="noreferrer">GitHub ↗</a></nav>
   </header>
 
-  <main>
+  <main id="main-content">
     <section class="hero">
       <p class="eyebrow">VISUAL GRAMMAR / DESIGN REFERENCE LIBRARY</p>
       <h1>「こんな感じ」を、<br><em>設計語彙に変換する。</em></h1>
@@ -29,7 +31,7 @@
         <kbd>⌘ K</kbd>
       </div>
       <div class="query-examples" aria-label="検索例">
-        <button data-query="Maximalism">Maximalism</button><button data-query="Spatial IA">Spatial IA</button><button data-query="Deliberate Friction">Deliberate Friction</button><button data-query="Hypertext-first">Hypertext-first</button><button data-query="Institutional Trust">Institutional Trust</button>
+        <button type="button" data-query="Maximalism">Maximalism</button><button type="button" data-query="Spatial IA">Spatial IA</button><button type="button" data-query="Deliberate Friction">Deliberate Friction</button><button type="button" data-query="Hypertext-first">Hypertext-first</button><button type="button" data-query="Institutional Trust">Institutional Trust</button>
       </div>
     </section>
 
@@ -57,9 +59,9 @@
         <h2 id="randomTitle">意図的に、文脈を外す。</h2>
         <p>偶然に任せる、設計空間で遠くへ飛ぶ、異質な思想を衝突させる。3種類の引き方で、普段の参照範囲から抜け出す。</p>
         <div id="randomModes" class="random-modes" aria-label="ランダム抽出モード">
-          <button type="button" class="active" data-random-mode="random"><strong>Random</strong><span>偶然に任せる</span></button>
-          <button type="button" data-random-mode="far"><strong>Far Apart</strong><span>最も遠くへ</span></button>
-          <button type="button" data-random-mode="weird"><strong>Weird Combination</strong><span>異質さを衝突</span></button>
+          <button type="button" class="active" data-random-mode="random" aria-pressed="true"><strong>Random</strong><span>偶然に任せる</span></button>
+          <button type="button" data-random-mode="far" aria-pressed="false"><strong>Far Apart</strong><span>最も遠くへ</span></button>
+          <button type="button" data-random-mode="weird" aria-pressed="false"><strong>Weird Combination</strong><span>異質さを衝突</span></button>
         </div>
       </div>
       <button id="randomDraw" class="random-draw-button" type="button"><span>3つ引く</span><small>Random 3</small></button>
@@ -72,12 +74,12 @@
           <p class="eyebrow">BROWSE BY BRAND</p>
           <h2>ブランドから、設計パターンへ。</h2>
         </div>
-        <p id="resultCount" class="count"></p>
+        <p id="resultCount" class="count" aria-live="polite"></p>
       </div>
       <div id="brandFilters" class="brand-filters" aria-label="ブランドで絞り込む"></div>
       <div class="secondary-filter-row">
         <span>Pattern type</span>
-        <div id="partFilters" class="part-filters"></div>
+        <div id="partFilters" class="part-filters" aria-label="パターン種別で絞り込む"></div>
       </div>
       <div id="patternGroups" class="pattern-groups"></div>
       <div id="emptyState" class="empty-state" hidden>
