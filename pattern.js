@@ -18,9 +18,37 @@
   const diversity = designSpace && p.designSpace ? designSpace.diversity(p, patterns) : null;
   const opposite = designSpace && p.designSpace ? designSpace.editorialOpposite(p, patterns) : null;
   const related = patterns.filter(x => x.id !== p.id).map(x => ({x, score:(x.brand===p.brand?5:0)+x.tags.filter(t=>p.tags.includes(t)).length})).filter(v=>v.score>0).sort((a,b)=>b.score-a.score).slice(0,4).map(v=>v.x);
+  const curatedPair = patterns.find(x => x.id !== p.id && ((p.related || []).includes(x.id) || (x.related || []).includes(p.id))) || null;
+  const editorialPair = curatedPair || related[0] || null;
+  const compareTargets = [
+    diversity?.nearest?.pattern ? {
+      key:'nearest',
+      label:'NEAREST',
+      question:'Similarity / 微差を見る',
+      pattern:diversity.nearest.pattern,
+      distance:diversity.nearest.distance,
+      copy:'6軸で最も近い参照。似ているからこそ、残っている小さな差が設計判断として見える。'
+    } : null,
+    editorialPair ? {
+      key:'curated',
+      label:curatedPair ? 'CURATED PAIR' : 'EDITORIAL RELATED',
+      question:'Contrast / 分岐を見る',
+      pattern:editorialPair,
+      distance:designSpace && p.designSpace && editorialPair.designSpace ? designSpace.distanceBetween(p.designSpace, editorialPair.designSpace) : null,
+      copy:curatedPair ? '編集上、同じ問題領域の別解として結び付けた参照。何を残し、どこで優先順位を変えたかを見る。' : 'ブランド・タグ・視覚文法の近接から選んだ参照。共通項を保ったまま、別の組み立て方を読む。'
+    } : null,
+    opposite?.pattern ? {
+      key:'opposite',
+      label:'OPPOSITE',
+      question:'Inversion / 反転を見る',
+      pattern:opposite.pattern,
+      distance:opposite.currentDistance,
+      copy:'6軸の優先順位を反転した先に近い参照。元の設計が「何を選ばなかったか」まで見える。'
+    } : null
+  ].filter(Boolean);
 
   function lexiconColumn(label, title, items) {
-    return `<section class="lexicon-column"><p class="eyebrow">${esc(label)}</p><h3>${esc(title)}</h3><div class="lexicon-items">${items.map(item=>`<article class="lexicon-item"><strong>${esc(item.term)}</strong><span>${esc(item.ja)}</span><p>${esc(item.note)}</p></article>`).join('')}</div></section>`;
+    return `<section class="lexicon-column"><p class="eyebrow">${esc(label)}</p><h3>${esc(title)}</h3><div class="lexicon-items">${items.map(item=>`<article class="lexicon-item"><a class="lexicon-term-link" href="vocabulary.html?term=${encodeURIComponent(item.term)}"><strong>${esc(item.term)}</strong><span>${esc(item.ja)}</span></a><p>${esc(item.note)}</p></article>`).join('')}</div></section>`;
   }
 
   function metaCard(label, value) {
@@ -53,6 +81,24 @@
       <i>→</i>
       <span class="to">${esc(flip.toLabel)} <b>${Math.round(flip.b)}</b></span>
     </div>`).join('');
+  }
+
+  function compareRouteCard(item) {
+    const target = item.pattern;
+    const diffs = designSpace && p.designSpace && target.designSpace ? designSpace.differenceBreakdown(p.designSpace, target.designSpace).slice(0,2) : [];
+    const distance = Number.isFinite(item.distance) ? item.distance.toFixed(1) : '—';
+    return `<a class="compare-route-card compare-route-${esc(item.key)}" href="compare.html?a=${encodeURIComponent(p.id)}&b=${encodeURIComponent(target.id)}">
+      <div class="compare-route-preview">${render(target, 'related')}</div>
+      <div class="compare-route-body">
+        <div class="compare-route-meta"><span>${esc(item.label)}</span><b>${distance}</b></div>
+        <small>${esc(item.question)}</small>
+        <strong>${esc(target.brand)}</strong>
+        <h3>${esc(target.name)}</h3>
+        <p>${esc(item.copy)}</p>
+        ${diffs.length ? `<div class="compare-route-diffs">${diffs.map(d=>`<span>${esc(d.name)} <b>Δ${Math.round(d.diff)}</b></span>`).join('')}</div>` : ''}
+        <em>Compare this pair ↗</em>
+      </div>
+    </a>`;
   }
 
   const vocabularyLine = [...lex.design,...lex.philosophy].slice(0,8).map(x=>x.term).join(' / ');
@@ -129,6 +175,15 @@
           </section>` : ''}
 
           <p class="space-method-note">※ Design Spaceの0–100は客観的な品質点ではなく、パターン同士を比較するための編集的・ヒューリスティックな座標。Diversity ScoreとOpposition Fitも現在の収録パターン構成に依存する相対的な参照指標。</p>
+        </section>` : ''}
+
+        ${compareTargets.length ? `<section class="detail-block compare-route-block">
+          <div class="compare-route-heading">
+            <div><p class="eyebrow">COMPARE WITH / THREE DIRECTIONS</p><h2>何と比べると、この設計が見える？</h2><p>比較の目的を変えると、同じパターンから別の設計判断が見える。Nearestは微差、Curatedは同じ問題への別解、Oppositeは優先順位の反転を見る。</p></div>
+            <a href="compare.html?a=${encodeURIComponent(p.id)}&b=${encodeURIComponent(compareTargets[0].pattern.id)}">Contrastを開く ↗</a>
+          </div>
+          <div class="compare-route-grid">${compareTargets.map(compareRouteCard).join('')}</div>
+          <p class="compare-route-note">同じ参照が複数の役割に現れる場合がある。それは「距離が近い」「編集上の対照である」など、別の理由が同時に成立していることを示す。</p>
         </section>` : ''}
 
         <section class="detail-block grammar-block">
