@@ -162,25 +162,25 @@
 
   function positionSentence(point){return axes.map(axis=>`${axisNames[axis.key]}=${axisLabel(axis,point[axis.key])}(${point[axis.key]})`).join(' / ');}
 
-  const waveConcepts=termStats.filter(item=>item.node.category!=='Implementation').slice(0,18);
+  const researchConcepts=termStats.filter(item=>item.node.category!=='Implementation').slice(0,18);
   const underDomains=domainCounts.length?domainCounts:[{name:'new domain',count:0}];
   const underMedia=mediumCounts.length?mediumCounts:[{name:'new medium',count:0}];
-  const waveBriefs=spatialGaps.map((gap,index)=>{
-    const concept=waveConcepts.length?waveConcepts[index%waveConcepts.length]:(termStats.length?termStats[index%termStats.length]:null);
+  const researchBriefs=spatialGaps.map((gap,index)=>{
+    const concept=researchConcepts.length?researchConcepts[index%researchConcepts.length]:(termStats.length?termStats[index%termStats.length]:null);
     const domain=underDomains[index%Math.min(underDomains.length,8)];
     const medium=underMedia[(index*2)%Math.min(underMedia.length,6)];
     const spatialScore=Math.round((gap.nearest.distance/maxSpatial)*100);
     const conceptScore=conceptPressure(concept);
     const contextScore=contextPressure(domain,medium);
     const priority=Math.round(spatialScore*.55+conceptScore*.25+contextScore*.20);
-    const brief=`Wave 3候補として、次の条件を満たす実在サービス／ブランド／環境を調査する。\n\nDesign Space:\n${positionSentence(gap.point)}\n\nConcept gap:\n${concept?`${concept.node.term}（現在 ${concept.support} patterns / ${concept.brands.length} brands）`:'未指定'}\n\nContext preference:\nDomain: ${domain?.name||'新規Domain'}\nMedium: ${medium?.name||'新規Medium'}\n\nNearest existing reference:\n${gap.nearest.pattern.brand} / ${gap.nearest.pattern.name}（Design Distance ${gap.nearest.distance.toFixed(1)}）\n\n選定条件:\n- 表層の見た目ではなく、上記座標と概念を実際のIA・操作・情報密度として確認できること\n- 既存の主要ブランド群と異なる文脈を優先すること\n- 公式サイト、公式Design System、製品ドキュメント等で根拠を追跡できること\n- 既存Patternとほぼ同じなら採用せず、何を新しく説明できるかを1文で示すこと`;
+    const brief=`次期候補として、次の条件を満たす実在サービス／ブランド／環境を調査する。\n\nDesign Space:\n${positionSentence(gap.point)}\n\nConcept gap:\n${concept?`${concept.node.term}（現在 ${concept.support} patterns / ${concept.brands.length} brands）`:'未指定'}\n\nContext preference:\nDomain: ${domain?.name||'新規Domain'}\nMedium: ${medium?.name||'新規Medium'}\n\nNearest existing reference:\n${gap.nearest.pattern.brand} / ${gap.nearest.pattern.name}（Design Distance ${gap.nearest.distance.toFixed(1)}）\n\n選定条件:\n- 表層の見た目ではなく、上記座標と概念を実際のIA・操作・情報密度として確認できること\n- 既存の主要ブランド群と異なる文脈を優先すること\n- 公式サイト、公式Design System、製品ドキュメント等で根拠を追跡できること\n- 既存Patternとほぼ同じなら採用せず、何を新しく説明できるかを1文で示すこと`;
     return {gap,concept,domain,medium,spatialScore,conceptScore,contextScore,priority,brief};
   }).sort((a,b)=>b.priority-a.priority);
 
-  function renderWave3(){
+  function renderResearchBriefs(){
     const el=document.getElementById('wave3Briefs');
     if(!el)return;
-    el.innerHTML=waveBriefs.map((item,index)=>`<article class="wave3-card">
+    el.innerHTML=researchBriefs.map((item,index)=>`<article class="wave3-card">
       <div class="wave3-score"><span>PRIORITY</span><strong>${item.priority}</strong><small>/ 100</small></div>
       <div class="wave3-copy"><p class="eyebrow">BRIEF ${String(index+1).padStart(2,'0')}</p><h3>${esc(profileTitle(item.gap.point))}</h3><p>空白座標に、<strong>${esc(item.concept?.node.term||'thin concept')}</strong>と、薄いContextを重ねた調査条件。</p></div>
       <div class="wave3-components"><span><small>SPATIAL</small><b>${item.spatialScore}</b></span><span><small>CONCEPT</small><b>${item.conceptScore}</b></span><span><small>CONTEXT</small><b>${item.contextScore}</b></span></div>
@@ -192,7 +192,7 @@
     el.addEventListener('click',async event=>{
       const button=event.target.closest('[data-copy-brief]');
       if(!button)return;
-      const item=waveBriefs[Number(button.dataset.copyBrief)];
+      const item=researchBriefs[Number(button.dataset.copyBrief)];
       if(!item)return;
       try{await navigator.clipboard.writeText(item.brief);button.textContent='コピー済み';setTimeout(()=>button.textContent='Briefをコピー',1500);}catch{button.textContent='選択してコピー';}
     });
@@ -202,5 +202,5 @@
   renderSpatial();
   renderVocabulary();
   renderContext();
-  renderWave3();
+  renderResearchBriefs();
 })();
