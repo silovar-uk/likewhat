@@ -1,12 +1,15 @@
 (function () {
   const patterns = window.LIKEWHAT_PATTERNS || [];
   const { render, esc } = window.LikeWhatUI;
+  const vocabulary = window.LikeWhatVocabulary;
   const input = document.getElementById('searchInput');
   const brandFilters = document.getElementById('brandFilters');
   const partFilters = document.getElementById('partFilters');
   const groups = document.getElementById('patternGroups');
   const resultCount = document.getElementById('resultCount');
   const empty = document.getElementById('emptyState');
+  const randomDraw = document.getElementById('randomDraw');
+  const randomResults = document.getElementById('randomResults');
   let brand = 'All';
   let part = 'All';
   let query = new URLSearchParams(location.search).get('q') || '';
@@ -16,7 +19,18 @@
   const parts = ['All', 'Navigation', 'List', 'Dashboard', 'Settings', 'Editor', 'Command', 'Cards', 'Detail'];
 
   function normalize(value) { return String(value || '').toLowerCase().normalize('NFKC'); }
-  function searchable(p) { return normalize([p.brand,p.family,p.name,p.oneLiner,p.description,...p.tags,...p.uiParts,...p.visual,...p.useCases,p.prompt].join(' ')); }
+  function searchable(p) {
+    const expert = vocabulary ? vocabulary.searchText(p) : '';
+    return normalize([p.brand,p.family,p.name,p.oneLiner,p.description,...p.tags,...p.uiParts,...p.visual,...p.useCases,p.prompt,expert].join(' '));
+  }
+  function shuffle(items) {
+    const arr = [...items];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
 
   function filterPatterns() {
     const q = normalize(query).trim();
@@ -40,14 +54,16 @@
   }
 
   function card(p) {
+    const lex = vocabulary ? vocabulary.forPattern(p) : null;
+    const expertTerm = lex?.design?.[0]?.term || p.family;
     return `<a class="pattern-card" href="pattern.html?id=${encodeURIComponent(p.id)}" data-brand="${esc(p.brand)}">
       <div class="card-preview">${render(p, 'card')}</div>
       <div class="card-body">
         <div class="card-meta"><span>${esc(p.brand)}</span><span>${esc(p.family)}</span></div>
         <h3>${esc(p.name)}</h3>
         <p class="one-liner">${esc(p.oneLiner)}</p>
-        <div class="tag-row">${p.tags.slice(0,3).map(t=>`<span>${esc(t)}</span>`).join('')}</div>
-        <div class="card-arrow">見る <span>↗</span></div>
+        <div class="tag-row"><span class="expert-tag">${esc(expertTerm)}</span>${p.tags.slice(0,2).map(t=>`<span>${esc(t)}</span>`).join('')}</div>
+        <div class="card-arrow">Analyze <span>↗</span></div>
       </div>
     </a>`;
   }
@@ -64,12 +80,33 @@
     </section>`).join('');
   }
 
+  function drawThree() {
+    if (!randomDraw || !randomResults || patterns.length < 3) return;
+    const selected = [];
+    for (const brandName of shuffle(brands)) {
+      const candidates = patterns.filter(p => p.brand === brandName);
+      if (candidates.length) selected.push(candidates[Math.floor(Math.random() * candidates.length)]);
+      if (selected.length === 3) break;
+    }
+    if (selected.length < 3) {
+      for (const p of shuffle(patterns)) {
+        if (!selected.some(x => x.id === p.id)) selected.push(p);
+        if (selected.length === 3) break;
+      }
+    }
+    randomResults.innerHTML = `<div class="random-grid">${selected.map(card).join('')}</div>`;
+    randomDraw.querySelector('span').textContent = '引き直す';
+    randomDraw.querySelector('small').textContent = 'Draw again';
+    randomResults.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
   function update() { renderBrandFilters(); renderPartFilters(); renderResults(); }
 
   brandFilters.addEventListener('click', e => { const btn=e.target.closest('[data-brand]'); if(!btn)return; brand=btn.dataset.brand; update(); });
   partFilters.addEventListener('click', e => { const btn=e.target.closest('[data-part]'); if(!btn)return; part=btn.dataset.part; update(); });
   input.addEventListener('input', () => { query=input.value; renderResults(); });
-  document.querySelector('.query-examples').addEventListener('click', e => { const btn=e.target.closest('[data-query]'); if(!btn)return; input.value=btn.dataset.query; query=btn.dataset.query; brand='All'; part='All'; update(); input.focus(); });
+  document.querySelector('.query-examples')?.addEventListener('click', e => { const btn=e.target.closest('[data-query]'); if(!btn)return; input.value=btn.dataset.query; query=btn.dataset.query; brand='All'; part='All'; update(); input.focus(); });
+  randomDraw?.addEventListener('click', drawThree);
   document.addEventListener('keydown', e => { if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();input.focus();input.select();} if(e.key==='Escape'&&document.activeElement===input){input.value='';query='';input.blur();update();} });
 
   update();
