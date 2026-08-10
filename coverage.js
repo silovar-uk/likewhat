@@ -8,7 +8,6 @@
   const axes=ds.axes;
   const axisNames=ds.axisNames;
   const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  const clamp=n=>Math.max(0,Math.min(100,Number(n)||0));
   const unique=items=>[...new Set(items.filter(Boolean))];
   const average=items=>items.length?items.reduce((a,b)=>a+b,0)/items.length:0;
 
@@ -80,13 +79,12 @@
   const maxSpatial=Math.max(1,...spatialGaps.map(g=>g.nearest.distance));
   const avgNearest=average(valid.map(p=>ds.nearestDistance(p,valid)));
   const frontierCount=valid.filter(p=>ds.diversity(p,valid)?.score>=75).length;
-  const thinTerms=termStats.filter(item=>item.support<=2).slice(0,12);
+  const allThinTerms=termStats.filter(item=>item.support<=2);
+  const thinTerms=allThinTerms.slice(0,12);
   const oneBrandTerms=termStats.filter(item=>item.support>0&&item.brands.length===1).length;
   const singletonDomains=domainCounts.filter(item=>item.count===1).length;
 
-  function axisLabel(axis,value){
-    return value===50?'Balanced':value<50?axis.low:axis.high;
-  }
+  function axisLabel(axis,value){return value===50?'Balanced':value<50?axis.low:axis.high;}
 
   function profileTitle(point){
     const parts=axes.filter(axis=>point[axis.key]!==50).slice(0,3).map(axis=>axisLabel(axis,point[axis.key]));
@@ -107,7 +105,7 @@
     el.innerHTML=[
       ['REFERENCES',patterns.length,'current library'],
       ['AVG LOCAL SEPARATION',avgNearest.toFixed(1),'mean nearest distance'],
-      ['THIN CONCEPTS',thinTerms.length,'≤ 2 connected patterns'],
+      ['THIN CONCEPTS',allThinTerms.length,'≤ 2 connected patterns'],
       ['SINGLE-BRAND TERMS',oneBrandTerms,'concept dependency'],
       ['FRONTIER',frontierCount,'Diversity ≥ 75'],
       ['SINGLETON DOMAINS',singletonDomains,'only 1 reference']
@@ -162,15 +160,13 @@
     return Math.round((d*.65+m*.35)*100);
   }
 
-  function positionSentence(point){
-    return axes.map(axis=>`${axisNames[axis.key]}=${axisLabel(axis,point[axis.key])}(${point[axis.key]})`).join(' / ');
-  }
+  function positionSentence(point){return axes.map(axis=>`${axisNames[axis.key]}=${axisLabel(axis,point[axis.key])}(${point[axis.key]})`).join(' / ');}
 
   const waveConcepts=termStats.filter(item=>item.node.category!=='Implementation').slice(0,18);
-  const underDomains=domainCounts.length?domainCounts: [{name:'new domain',count:0}];
+  const underDomains=domainCounts.length?domainCounts:[{name:'new domain',count:0}];
   const underMedia=mediumCounts.length?mediumCounts:[{name:'new medium',count:0}];
   const waveBriefs=spatialGaps.map((gap,index)=>{
-    const concept=waveConcepts[index%waveConcepts.length]||termStats[index%termStats.length]||null;
+    const concept=waveConcepts.length?waveConcepts[index%waveConcepts.length]:(termStats.length?termStats[index%termStats.length]:null);
     const domain=underDomains[index%Math.min(underDomains.length,8)];
     const medium=underMedia[(index*2)%Math.min(underMedia.length,6)];
     const spatialScore=Math.round((gap.nearest.distance/maxSpatial)*100);
