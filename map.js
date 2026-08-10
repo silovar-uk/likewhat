@@ -78,11 +78,17 @@
     const r=5+Math.min(5,(stat?.score||0)/20);
     const frontier=(stat?.score||0)>=75;
     const selected=p.id===selectedId;
-    return `<g class="map-point ${frontier?'frontier':''} ${selected?'selected':''}" data-id="${esc(p.id)}" tabindex="0" role="link" aria-label="${esc(p.brand)} ${esc(p.name)}">
+    return `<g class="map-point ${frontier?'frontier':''} ${selected?'selected':''}" data-id="${esc(p.id)}" tabindex="0" role="button" aria-pressed="${selected}" aria-label="${esc(p.brand)}、${esc(p.name)}。${esc(ds.axisNames[xKey])} ${Math.round(p.designSpace[xKey])}、${esc(ds.axisNames[yKey])} ${Math.round(p.designSpace[yKey])}">
       ${frontier?`<circle class="map-point-ring" cx="${x}" cy="${y}" r="${r+5}"/>`:''}
       <circle class="map-point-dot" cx="${x}" cy="${y}" r="${r}"/>
       ${(frontier||selected)?`<text class="map-point-label" x="${x+12}" y="${y-10}">${esc(p.brand)}</text>`:''}
     </g>`;
+  }
+
+  function updatePresetStates(){
+    document.querySelectorAll('.map-presets [data-x][data-y]').forEach(btn=>{
+      btn.setAttribute('aria-pressed',String(btn.dataset.x===xKey&&btn.dataset.y===yKey));
+    });
   }
 
   function renderMap(){
@@ -98,6 +104,7 @@
     projectionTitle.textContent=`${ds.axisNames[xKey]} × ${ds.axisNames[yKey]}`;
     projectionDescription.textContent=`横：${xAxis.low} → ${xAxis.high} ／ 縦：${yAxis.low} → ${yAxis.high}`;
     visibleCount.textContent=items.length;
+    svg.setAttribute('aria-label',`${ds.axisNames[xKey]} と ${ds.axisNames[yKey]} のDesign Map。${items.length}件を表示`);
 
     const grid=[25,50,75].map(v=>`<line x1="${plotX(v)}" y1="62" x2="${plotX(v)}" y2="582"/><line x1="72" y1="${plotY(v)}" x2="917" y2="${plotY(v)}"/>`).join('');
     const zoneMarks=zones.map(z=>`<g class="map-open-zone"><circle cx="${plotX(z.x)}" cy="${plotY(z.y)}" r="23"/><text x="${plotX(z.x)}" y="${plotY(z.y)+3}" text-anchor="middle">OPEN</text></g>`).join('');
@@ -115,6 +122,7 @@
 
     renderOpenSpaces(zones);
     ensureSelection(items);
+    updatePresetStates();
     bindMapEvents();
   }
 
@@ -124,10 +132,10 @@
   }
 
   function renderOpenSpaces(zones){
-    openSpaceList.innerHTML=zones.map((zone,i)=>`<button class="open-space-item" type="button" data-open-index="${i}">
+    openSpaceList.innerHTML=zones.map((zone,i)=>`<article class="open-space-item">
       <span>${String(i+1).padStart(2,'0')}</span>
       <div><strong>${esc(openZoneLabel(zone))}</strong><small>X ${zone.x} / Y ${zone.y} · nearest 2D gap ${zone.nearest.toFixed(1)}</small></div>
-    </button>`).join('');
+    </article>`).join('');
   }
 
   function renderInspector(){
@@ -175,9 +183,17 @@
 
   function hideTooltip(){tooltip.hidden=true;}
 
-  function selectPoint(id){
+  function selectPoint(id,restoreFocus=false){
     selectedId=id;
     renderMap();
+    if(restoreFocus)requestAnimationFrame(()=>svg.querySelector(`.map-point[data-id="${CSS.escape(id)}"]`)?.focus());
+  }
+
+  function movePointFocus(node,delta){
+    const points=[...svg.querySelectorAll('.map-point')];
+    const index=points.indexOf(node);
+    if(index<0||!points.length)return;
+    points[(index+delta+points.length)%points.length].focus();
   }
 
   function bindMapEvents(){
@@ -193,7 +209,11 @@
       });
       node.addEventListener('blur',hideTooltip);
       node.addEventListener('click',()=>selectPoint(p.id));
-      node.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectPoint(p.id);}});
+      node.addEventListener('keydown',e=>{
+        if(e.key==='Enter'||e.key===' '){e.preventDefault();selectPoint(p.id,true);}
+        if(e.key==='ArrowRight'||e.key==='ArrowDown'){e.preventDefault();movePointFocus(node,1);}
+        if(e.key==='ArrowLeft'||e.key==='ArrowUp'){e.preventDefault();movePointFocus(node,-1);}
+      });
     });
   }
 
