@@ -9,6 +9,14 @@
     {key:'order',low:'Chaotic',high:'Systematic'}
   ];
   const axisNames={density:'Density',emotion:'Emotional Intensity',exploration:'Goal Orientation',authority:'Authority',interaction:'Interaction',order:'Order'};
+  const axisConcepts={
+    density:{low:'情報を絞り、余白と選択的提示を使う',high:'情報を圧縮し、同時提示量を増やす'},
+    emotion:{low:'静かで低刺激な情緒に抑える',high:'高揚・演出・感情刺激を強める'},
+    exploration:{low:'最短完遂と予測可能性を優先する',high:'寄り道・発見・探索を価値にする'},
+    authority:{low:'個人的・親密・非制度的に振る舞う',high:'制度性・公式性・権威の明確さを強める'},
+    interaction:{low:'観察・読解・受容を中心にする',high:'直接操作・即時反応・介入を中心にする'},
+    order:{low:'競合・揺らぎ・カオスを許容する',high:'系統性・反復・規則性を強く保つ'}
+  };
   const clamp=n=>Math.max(0,Math.min(100,Number(n)||0));
   const MAX_RAW_DISTANCE=Math.sqrt(axes.length*10000);
 
@@ -160,5 +168,70 @@
     };
   }
 
-  window.LikeWhatDesignSpace={axes,axisNames,mean,radar,bars,summary,profile,distanceBetween,differenceBreakdown,neighbors,nearestDistance,diversity,distanceLabel};
+  function oppositeVector(space){
+    const out={};
+    axes.forEach(axis=>{out[axis.key]=100-clamp(space?.[axis.key]??50);});
+    return out;
+  }
+
+  function oppositionFlips(spaceA,spaceB){
+    return axes.map(axis=>{
+      const a=clamp(spaceA?.[axis.key]??50);
+      const b=clamp(spaceB?.[axis.key]??50);
+      const crossed=(a<50&&b>50)||(a>50&&b<50);
+      const strength=Math.abs(a-50)+Math.abs(b-50);
+      const aSide=a<50?'low':a>50?'high':'mid';
+      const bSide=b<50?'low':b>50?'high':'mid';
+      const fromConcept=aSide==='mid'?'中間的なバランス':axisConcepts[axis.key][aSide];
+      const toConcept=bSide==='mid'?'中間的なバランス':axisConcepts[axis.key][bSide];
+      return {
+        key:axis.key,
+        name:axisNames[axis.key],
+        a,b,
+        fromLabel:axisPosition(axis,a),
+        toLabel:axisPosition(axis,b),
+        crossed,
+        strength,
+        fromConcept,
+        toConcept
+      };
+    }).sort((x,y)=>(Number(y.crossed)-Number(x.crossed))||(y.strength-x.strength));
+  }
+
+  function editorialOpposite(pattern,patterns){
+    if(!pattern?.designSpace)return null;
+    const valid=(patterns||[]).filter(x=>x.id!==pattern.id&&x.designSpace);
+    if(!valid.length)return null;
+    const ideal=oppositeVector(pattern.designSpace);
+    const manualId=(pattern.opposites||[]).find(id=>valid.some(x=>x.id===id));
+    let selected=null;
+    let mode='computed';
+
+    if(manualId){
+      selected=valid.find(x=>x.id===manualId);
+      mode='curated';
+    }else{
+      selected=valid.map(candidate=>{
+        const targetDistance=distanceBetween(ideal,candidate.designSpace);
+        const contextPenalty=(candidate.brand===pattern.brand?12:0)+(candidate.domain===pattern.domain?4:0)+(candidate.archetype===pattern.archetype?3:0)+(candidate.medium===pattern.medium?1:0);
+        return {candidate,targetDistance,editorialCost:targetDistance+contextPenalty};
+      }).sort((a,b)=>a.editorialCost-b.editorialCost)[0]?.candidate||null;
+    }
+
+    if(!selected)return null;
+    const targetDistance=distanceBetween(ideal,selected.designSpace);
+    const currentDistance=distanceBetween(pattern.designSpace,selected.designSpace);
+    return {
+      pattern:selected,
+      mode,
+      ideal,
+      targetDistance,
+      currentDistance,
+      fit:Math.round(Math.max(0,100-targetDistance)),
+      flips:oppositionFlips(pattern.designSpace,selected.designSpace),
+      differences:differenceBreakdown(pattern.designSpace,selected.designSpace)
+    };
+  }
+
+  window.LikeWhatDesignSpace={axes,axisNames,axisConcepts,axisPosition,mean,radar,bars,summary,profile,distanceBetween,differenceBreakdown,neighbors,nearestDistance,diversity,distanceLabel,oppositeVector,oppositionFlips,editorialOpposite};
 })();
