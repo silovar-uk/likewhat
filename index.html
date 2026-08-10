@@ -44,9 +44,14 @@
 
     <section class="randomizer" aria-labelledby="randomTitle">
       <div class="randomizer-copy">
-        <p class="eyebrow">SERENDIPITY / RANDOM DRAW</p>
+        <p class="eyebrow">SERENDIPITY / COLLISION ENGINE</p>
         <h2 id="randomTitle">意図的に、文脈を外す。</h2>
-        <p>いつもの好みから離れて、異なるブランド・異なる設計思想を3つ抽出。偶然の組み合わせから新しい参照軸をつくる。</p>
+        <p>偶然に任せる、設計空間で遠くへ飛ぶ、異質な思想を衝突させる。3種類の引き方で、普段の参照範囲から抜け出す。</p>
+        <div id="randomModes" class="random-modes" aria-label="ランダム抽出モード">
+          <button type="button" class="active" data-random-mode="random"><strong>Random</strong><span>偶然に任せる</span></button>
+          <button type="button" data-random-mode="far"><strong>Far Apart</strong><span>最も遠くへ</span></button>
+          <button type="button" data-random-mode="weird"><strong>Weird Combination</strong><span>異質さを衝突</span></button>
+        </div>
       </div>
       <button id="randomDraw" class="random-draw-button" type="button"><span>3つ引く</span><small>Random 3</small></button>
       <div id="randomResults" class="random-results" aria-live="polite"></div>
@@ -82,6 +87,7 @@
   <script src="patterns-extra.js"></script>
   <script src="patterns-wave1.js"></script>
   <script src="taxonomy.js"></script>
+  <script src="design-space.js"></script>
   <script src="vocabulary.js"></script>
   <script src="ui.js"></script>
   <script src="ui-extra.js"></script>
