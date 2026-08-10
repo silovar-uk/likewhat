@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="Like What?のDesign Space・Vocabulary・Domain・Mediumの偏りを分析し、次に追加すべき参照条件を考えるCoverage Planner。" />
+  <meta name="description" content="Like What?の78参照についてDesign Space・Vocabulary・Domain・Mediumの偏りを分析し、次に追加すべき参照条件を考えるCoverage Planner。" />
   <title>Coverage Planner — Like What?</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
@@ -20,11 +20,11 @@
     <section class="coverage-hero">
       <p class="eyebrow">COVERAGE PLANNER / WHERE THE LIBRARY IS THIN</p>
       <h1>どこが、<br><em>まだ薄い？</em></h1>
-      <p>有名なブランドを順番に足すのではなく、現在のライブラリが<strong>何をまだ説明できていないか</strong>から次の参照を決める。6次元Design Space、Vocabulary、Domain / Medium、ブランド集中を別々に測り、Wave 3の調査条件へ変換する。</p>
+      <p>有名なブランドを順番に足すのではなく、現在のライブラリが<strong>何をまだ説明できていないか</strong>から次の参照を決める。6次元Design Space、Vocabulary、Domain / Medium、ブランド集中を別々に測り、次の調査条件へ変換する。</p>
     </section>
 
     <section class="coverage-snapshot" aria-labelledby="snapshotTitle">
-      <div class="coverage-section-head"><div><p class="eyebrow">COVERAGE SNAPSHOT</p><h2 id="snapshotTitle">いまの63件を、欠け方から見る。</h2></div><p>値は現在の収録データに依存する相対指標。品質点ではない。</p></div>
+      <div class="coverage-section-head"><div><p class="eyebrow">COVERAGE SNAPSHOT</p><h2 id="snapshotTitle">いまの78件を、欠け方から見る。</h2></div><p>値は現在の収録データに依存する相対指標。品質点ではない。</p></div>
       <div id="coverageStats" class="coverage-stats" aria-live="polite"></div>
     </section>
 
@@ -47,7 +47,7 @@
     </section>
 
     <section class="coverage-section wave3-section" aria-labelledby="wave3Title">
-      <div class="coverage-section-head"><div><p class="eyebrow">04 / WAVE 3 RESEARCH BRIEFS</p><h2 id="wave3Title">次は「ブランド名」ではなく、条件から探す。</h2><p>Spatial Gapを主軸に、薄いVocabularyと不足Contextを組み合わせた調査仕様。候補ブランドはこのBriefを満たすかどうかで評価する。</p></div></div>
+      <div class="coverage-section-head"><div><p class="eyebrow">04 / NEXT RESEARCH BRIEFS</p><h2 id="wave3Title">次も「ブランド名」ではなく、条件から探す。</h2><p>Wave 3追加後のSpatial Gapを主軸に、薄いVocabularyと不足Contextを組み合わせた次回調査仕様。追加するたびに再計算される。</p></div></div>
       <div id="wave3Briefs" class="wave3-grid"></div>
     </section>
 
@@ -55,16 +55,16 @@
       <details>
         <summary>Coverage Plannerの計算方法 <span>Method / explainability</span></summary>
         <div class="coverage-method-body">
-          <p><strong>Spatial Gap</strong>：6軸を10 / 50 / 90の3値に離散化した729点について、既存63件への最短Design Distanceを計算。近接した候補点を間引き、異なる空白方向を残す。</p>
+          <p><strong>Spatial Gap</strong>：6軸を10 / 50 / 90の3値に離散化した729点について、既存78件への最短Design Distanceを計算。近接した候補点を間引き、異なる空白方向を残す。</p>
           <p><strong>Thin Vocabulary</strong>：各語彙に接続するPattern数・ブランド数・Domain数を数え、実例数が少なく単一ブランド / 単一Domainに偏るほど優先度を上げる。</p>
           <p><strong>Context Balance</strong>：Domain / Medium / Brandごとの単純収録数。粒度が異なるため、異カテゴリ間の数値を直接比較しない。</p>
-          <p><strong>Wave 3 Priority</strong>：Spatial 55% + Concept 25% + Context 20%。これは「追加価値」を決める絶対スコアではなく、調査順序を作るための編集的ヒューリスティック。</p>
+          <p><strong>Research Priority</strong>：Spatial 55% + Concept 25% + Context 20%。これは「追加価値」を決める絶対スコアではなく、調査順序を作るための編集的ヒューリスティック。</p>
         </div>
       </details>
     </section>
   </main>
 
   <footer><p>Like What? — coverage before expansion.</p><p>Coverage analysis is relative to the current reference library and changes as patterns are added.</p></footer>
-  <script src="patterns.js"></script><script src="patterns-extra.js"></script><script src="patterns-wave1.js"></script><script src="patterns-wave2.js"></script><script src="taxonomy.js"></script><script src="design-space.js"></script><script src="vocabulary.js"></script><script src="coverage.js"></script>
+  <script src="patterns.js"></script><script src="patterns-extra.js"></script><script src="patterns-wave1.js"></script><script src="patterns-wave2.js"></script><script src="patterns-wave3.js"></script><script src="taxonomy.js"></script><script src="design-space.js"></script><script src="vocabulary.js"></script><script src="coverage.js"></script>
 </body>
 </html>
