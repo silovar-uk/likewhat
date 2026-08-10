@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Like What?のDesign Space・Vocabulary・Domain・Mediumの偏りを分析し、次に追加すべき参照条件を考えるCoverage Planner。" />
+  <title>Coverage Planner — Like What?</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles-extra.css" />
+  <link rel="stylesheet" href="styles-enhancements.css" />
+  <link rel="stylesheet" href="styles-qa.css" />
+  <link rel="stylesheet" href="styles-coverage.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main-content">本文へ移動</a>
+  <header class="site-header"><a class="brandmark" href="./" aria-label="Like What? ホーム"><span>Like</span> What?</a><nav aria-label="Global navigation"><a href="./#patterns">Patterns</a><a href="map.html">Design Map</a><a href="vocabulary.html">Vocabulary</a><a href="compare.html">Contrast</a><a href="coverage.html" aria-current="page">Coverage</a><a href="https://github.com/silovar-uk/likewhat" target="_blank" rel="noreferrer">GitHub ↗</a></nav></header>
+
+  <main id="main-content" class="coverage-page">
+    <section class="coverage-hero">
+      <p class="eyebrow">COVERAGE PLANNER / WHERE THE LIBRARY IS THIN</p>
+      <h1>どこが、<br><em>まだ薄い？</em></h1>
+      <p>有名なブランドを順番に足すのではなく、現在のライブラリが<strong>何をまだ説明できていないか</strong>から次の参照を決める。6次元Design Space、Vocabulary、Domain / Medium、ブランド集中を別々に測り、Wave 3の調査条件へ変換する。</p>
+    </section>
+
+    <section class="coverage-snapshot" aria-labelledby="snapshotTitle">
+      <div class="coverage-section-head"><div><p class="eyebrow">COVERAGE SNAPSHOT</p><h2 id="snapshotTitle">いまの63件を、欠け方から見る。</h2></div><p>値は現在の収録データに依存する相対指標。品質点ではない。</p></div>
+      <div id="coverageStats" class="coverage-stats" aria-live="polite"></div>
+    </section>
+
+    <section class="coverage-section" aria-labelledby="spatialTitle">
+      <div class="coverage-section-head"><div><p class="eyebrow">01 / 6D SPATIAL GAPS</p><h2 id="spatialTitle">既存参照から遠い座標。</h2><p>6軸それぞれをLow / Mid / Highの3段階に離散化し、729候補点を走査。最も近い既存Patternまでの距離が大きい点を「空白候補」として提示する。</p></div><a href="map.html">Design Mapで見る ↗</a></div>
+      <div id="spatialGaps" class="spatial-gap-grid"></div>
+      <p class="coverage-method-note">候補点そのものを「良いデザイン」と推奨しているわけではない。あくまで現在の参照集合が説明しにくい方向を探すための探索プローブ。</p>
+    </section>
+
+    <section class="coverage-split">
+      <section class="coverage-section" aria-labelledby="vocabCoverageTitle">
+        <div class="coverage-section-head compact"><div><p class="eyebrow">02 / THIN VOCABULARY</p><h2 id="vocabCoverageTitle">言葉はあるが、実例が薄い。</h2><p>Vocabularyノードごとに接続Pattern・ブランド・Domainを数える。</p></div><a href="vocabulary.html">Vocabulary ↗</a></div>
+        <div id="thinVocabulary" class="thin-vocabulary"></div>
+      </section>
+
+      <section class="coverage-section" aria-labelledby="contextCoverageTitle">
+        <div class="coverage-section-head compact"><div><p class="eyebrow">03 / CONTEXT BALANCE</p><h2 id="contextCoverageTitle">どの世界に偏っている？</h2><p>Domain / Medium / Brandの収録量を分けて見る。</p></div></div>
+        <div id="contextBalance" class="context-balance"></div>
+      </section>
+    </section>
+
+    <section class="coverage-section wave3-section" aria-labelledby="wave3Title">
+      <div class="coverage-section-head"><div><p class="eyebrow">04 / WAVE 3 RESEARCH BRIEFS</p><h2 id="wave3Title">次は「ブランド名」ではなく、条件から探す。</h2><p>Spatial Gapを主軸に、薄いVocabularyと不足Contextを組み合わせた調査仕様。候補ブランドはこのBriefを満たすかどうかで評価する。</p></div></div>
+      <div id="wave3Briefs" class="wave3-grid"></div>
+    </section>
+
+    <section class="coverage-method">
+      <details>
+        <summary>Coverage Plannerの計算方法 <span>Method / explainability</span></summary>
+        <div class="coverage-method-body">
+          <p><strong>Spatial Gap</strong>：6軸を10 / 50 / 90の3値に離散化した729点について、既存63件への最短Design Distanceを計算。近接した候補点を間引き、異なる空白方向を残す。</p>
+          <p><strong>Thin Vocabulary</strong>：各語彙に接続するPattern数・ブランド数・Domain数を数え、実例数が少なく単一ブランド / 単一Domainに偏るほど優先度を上げる。</p>
+          <p><strong>Context Balance</strong>：Domain / Medium / Brandごとの単純収録数。粒度が異なるため、異カテゴリ間の数値を直接比較しない。</p>
+          <p><strong>Wave 3 Priority</strong>：Spatial 55% + Concept 25% + Context 20%。これは「追加価値」を決める絶対スコアではなく、調査順序を作るための編集的ヒューリスティック。</p>
+        </div>
+      </details>
+    </section>
+  </main>
+
+  <footer><p>Like What? — coverage before expansion.</p><p>Coverage analysis is relative to the current reference library and changes as patterns are added.</p></footer>
+  <script src="patterns.js"></script><script src="patterns-extra.js"></script><script src="patterns-wave1.js"></script><script src="patterns-wave2.js"></script><script src="taxonomy.js"></script><script src="design-space.js"></script><script src="vocabulary.js"></script><script src="coverage.js"></script>
+</body>
+</html>
