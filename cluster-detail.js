@@ -6,7 +6,17 @@
   const esc=window.LikeWhatUI?.esc||((v)=>String(v??''));
   if(!root||!p||p.groupType!=='industry-cluster'||!(p.members||[]).length)return;
 
+  const heroSource=root.querySelector('.source-link');
+  if(heroSource){
+    const jump=document.createElement('a');
+    jump.className='source-link cluster-source-jump';
+    jump.href='#clusterSources';
+    jump.innerHTML=`Brand sources ↓<small>${p.members.length} official references</small>`;
+    heroSource.replaceWith(jump);
+  }
+
   const section=document.createElement('section');
+  section.id='clusterSources';
   section.className='cluster-variations detail-block';
   section.innerHTML=`
     <div class="cluster-variations-head">
