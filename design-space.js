@@ -10,6 +10,7 @@
   ];
   const axisNames={density:'Density',emotion:'Emotional Intensity',exploration:'Goal Orientation',authority:'Authority',interaction:'Interaction',order:'Order'};
   const clamp=n=>Math.max(0,Math.min(100,Number(n)||0));
+  const MAX_RAW_DISTANCE=Math.sqrt(axes.length*10000);
 
   function mean(patterns){
     const valid=(patterns||[]).filter(p=>p.designSpace);
@@ -92,5 +93,72 @@
     return strongest.map(x=>`${axisNames[x.axis.key]}: ${x.label}`).join(' / ');
   }
 
-  window.LikeWhatDesignSpace={axes,axisNames,mean,radar,bars,summary,profile};
+  function distanceBetween(spaceA,spaceB){
+    if(!spaceA||!spaceB)return 0;
+    const raw=Math.sqrt(axes.reduce((sum,axis)=>{
+      const diff=clamp(spaceA[axis.key])-clamp(spaceB[axis.key]);
+      return sum+diff*diff;
+    },0));
+    return Number(((raw/MAX_RAW_DISTANCE)*100).toFixed(2));
+  }
+
+  function differenceBreakdown(spaceA,spaceB){
+    return axes.map(axis=>{
+      const a=clamp(spaceA?.[axis.key]??50);
+      const b=clamp(spaceB?.[axis.key]??50);
+      return {key:axis.key,name:axisNames[axis.key],a,b,diff:Math.abs(a-b),direction:b>a?axis.high:b<a?axis.low:'Same'};
+    }).sort((x,y)=>y.diff-x.diff);
+  }
+
+  function neighbors(pattern,patterns){
+    if(!pattern?.designSpace)return [];
+    return (patterns||[]).filter(other=>other.id!==pattern.id&&other.designSpace).map(other=>({
+      pattern:other,
+      distance:distanceBetween(pattern.designSpace,other.designSpace),
+      differences:differenceBreakdown(pattern.designSpace,other.designSpace)
+    })).sort((a,b)=>a.distance-b.distance);
+  }
+
+  function nearestDistance(pattern,patterns){
+    return neighbors(pattern,patterns)[0]?.distance??0;
+  }
+
+  function diversityLabel(score){
+    if(score>=75)return 'Frontier';
+    if(score>=50)return 'Outlying';
+    if(score>=25)return 'Distinctive';
+    return 'Clustered';
+  }
+
+  function distanceLabel(distance){
+    if(distance<8)return 'Very close';
+    if(distance<15)return 'Nearby';
+    if(distance<25)return 'Separated';
+    if(distance<40)return 'Far';
+    return 'Very far';
+  }
+
+  function diversity(pattern,patterns){
+    const valid=(patterns||[]).filter(x=>x.designSpace);
+    const ordered=neighbors(pattern,valid);
+    const nearest=ordered[0]||null;
+    const farthest=ordered.length?ordered[ordered.length-1]:null;
+    const localDistance=nearest?.distance??0;
+    const allNearest=valid.map(item=>({id:item.id,distance:nearestDistance(item,valid)}));
+    const below=allNearest.filter(x=>x.distance<localDistance).length;
+    const equal=allNearest.filter(x=>x.distance===localDistance).length;
+    const denominator=Math.max(1,allNearest.length-1);
+    const percentile=Math.max(0,Math.min(100,Math.round(((below+Math.max(0,equal-1)*0.5)/denominator)*100)));
+    return {
+      score:percentile,
+      label:diversityLabel(percentile),
+      nearest,
+      farthest,
+      localDistance,
+      localDistanceLabel:distanceLabel(localDistance),
+      all:ordered
+    };
+  }
+
+  window.LikeWhatDesignSpace={axes,axisNames,mean,radar,bars,summary,profile,distanceBetween,differenceBreakdown,neighbors,nearestDistance,diversity,distanceLabel};
 })();
