@@ -19,6 +19,7 @@
   input.value=query;
   const terms=vocab.allTerms();
   const normalize=value=>String(value||'').normalize('NFKC').toLowerCase();
+  const reducedMotion=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   function usage(node){return vocab.patternsForTerm(node,patterns);}
   function filteredTerms(){
@@ -39,19 +40,21 @@
   function renderCategories(){
     categoryFilters.innerHTML=['All',...vocab.categories].map(cat=>{
       const n=cat==='All'?terms.length:terms.filter(t=>t.category===cat).length;
-      return `<button type="button" data-category="${esc(cat)}" class="${cat===category?'active':''}"><span>${esc(cat)}</span><small>${n}</small></button>`;
+      const active=cat===category;
+      return `<button type="button" data-category="${esc(cat)}" class="${active?'active':''}" aria-pressed="${active}"><span>${esc(cat)}</span><small>${n}</small></button>`;
     }).join('');
   }
 
   function termCard(node){
     const hits=usage(node);
     const brands=new Set(hits.map(p=>p.brand)).size;
-    return `<button class="term-card ${selected?.term===node.term?'selected':''}" type="button" data-term="${esc(node.term)}">
+    const active=selected?.term===node.term;
+    return `<button class="term-card ${active?'selected':''}" type="button" data-term="${esc(node.term)}" aria-pressed="${active}" aria-controls="termInspector">
       <span class="term-category">${esc(node.category)}</span>
       <strong>${esc(node.term)}</strong>
       <em>${esc(node.ja)}</em>
       <p>${esc(node.note)}</p>
-      <div><span>${hits.length} patterns</span><span>${brands} brands</span><b>→</b></div>
+      <div><span>${hits.length} patterns</span><span>${brands} brands</span><b aria-hidden="true">→</b></div>
     </button>`;
   }
 
@@ -113,7 +116,7 @@
       const url=new URL(location.href);url.searchParams.set('term',node.term);history.replaceState({},'',url);
     }
     renderGrid();renderInspector();
-    if(window.innerWidth<980)inspector.scrollIntoView({behavior:'smooth',block:'start'});
+    if(window.innerWidth<980)inspector.scrollIntoView({behavior:reducedMotion()?'auto':'smooth',block:'start'});
   }
 
   function update(){renderCategories();renderGrid();renderInspector();}
