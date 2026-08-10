@@ -9,6 +9,8 @@
 - 「Visual Hierarchy」「Progressive Disclosure」「Maximalism」「Spatial IA」などの専門語でも横断検索する
 - 各パターンを **Implementation / Design System / Philosophy** の3層で言語化する
 - 各詳細ページで6軸の **Design Space** をレーダー＋両極スケールで可視化し、ライブラリ平均と比較する
+- **Diversity Score** で、現在のライブラリ内にどれだけ似た参照が少ないかを測る
+- Design Space上の **Nearest / Farthest** を計算し、どの軸が距離を作っているか比較する
 - 異なるブランドからランダムに3パターンを抽出し、意図的なセレンディピティを作る
 - AIへそのまま渡せる、専門語彙＋Design Space座標付きの設計指示をコピーする
 - Web/SaaSだけでなく、Game UI / OS / Physical Space / Public Service / Old Webまで同じ設計空間に置く
@@ -69,7 +71,23 @@ Pattern detail pages show:
 - Domain / Medium / Archetype / Interaction Model
 - a short Character Profile derived from the strongest axis positions
 
-These coordinates are the foundation for the next phases: Diversity Score, opposite references, the global Design Map and Far Apart random selection.
+## Design Distance / Diversity Score
+
+Each pair of patterns has a normalized Euclidean distance across the six Design Space axes.
+
+`distance = sqrt(sum(axisDiff²)) / theoreticalMaxDistance × 100`
+
+For each pattern:
+
+- **Local Separation** = distance to the nearest pattern
+- **Diversity Score** = percentile rank of Local Separation inside the current library
+- **Nearest** = geometrically closest pattern in Design Space
+- **Farthest** = geometrically farthest pattern in the current library
+- **Axis delta** = the three axes contributing the largest difference between two references
+
+Diversity Score is a relative library statistic, not a quality score. A high score means the pattern occupies a comparatively underrepresented region of the current reference space. `Farthest` is deliberately described as a geometric result rather than an editorial “opposite”; philosophical opposite references are a separate next phase.
+
+These distance functions are the foundation for opposite references, the global Design Map and Far Apart random selection.
 
 ## Design grammar
 
@@ -85,7 +103,7 @@ These coordinates are the foundation for the next phases: Diversity Score, oppos
 - `patterns-extra.js` — オモコロ / 集英社 / Nintendo expansion
 - `patterns-wave1.js` — 12 design-space extremes
 - `taxonomy.js` — schema v2 and Design Space enrichment
-- `design-space.js` / `styles-design-space.css` — six-axis visualization and comparison baseline
+- `design-space.js` / `styles-design-space.css` — six-axis visualization, pairwise distance and Diversity Score
 - `ui-extra.js` / `styles-extra.css` — Japanese media mocks
 - `ui-wave1.js` / `styles-wave1.css` — mocks for the 12 extremes
 
