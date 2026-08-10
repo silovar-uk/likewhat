@@ -1,0 +1,24 @@
+window.LIKEWHAT_WAVES={
+  wave3:{
+    label:'Wave 3',
+    beforeCount:63,
+    afterCount:78,
+    ids:[
+      'duolingo-motivational-learning-path',
+      'spotify-personalized-discovery',
+      'canva-template-first-creation',
+      'blender-task-workspaces',
+      'ableton-nonlinear-session-grid',
+      'tesla-safety-constrained-hmi',
+      'tfl-network-wayfinding',
+      'monzo-accessible-financial-control',
+      'salesforce-object-record-workspace',
+      'discord-community-channel-architecture',
+      'strava-activity-performance-story',
+      'uber-driver-live-dispatch',
+      'nasa-eyes-scientific-exploration',
+      'alexa-conversational-voice-flow',
+      'oura-readiness-interpretation'
+    ]
+  }
+};
