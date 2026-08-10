@@ -15,6 +15,7 @@
   document.title = `${p.name} — Like What?`;
   const lex = vocabulary ? vocabulary.forPattern(p) : {implementation:[],design:[],philosophy:[]};
   const libraryMean = designSpace ? designSpace.mean(patterns) : {};
+  const diversity = designSpace && p.designSpace ? designSpace.diversity(p, patterns) : null;
   const related = patterns.filter(x => x.id !== p.id).map(x => ({x, score:(x.brand===p.brand?5:0)+x.tags.filter(t=>p.tags.includes(t)).length})).filter(v=>v.score>0).sort((a,b)=>b.score-a.score).slice(0,4).map(v=>v.x);
 
   function lexiconColumn(label, title, items) {
@@ -23,6 +24,20 @@
 
   function metaCard(label, value) {
     return `<div class="space-meta"><small>${esc(label)}</small><strong>${esc(value || '—')}</strong></div>`;
+  }
+
+  function distanceReference(item, label, sublabel) {
+    if (!item?.pattern) return '';
+    const target = item.pattern;
+    const diffs = item.differences.slice(0,3);
+    return `<a class="distance-reference" href="pattern.html?id=${encodeURIComponent(target.id)}">
+      <div class="distance-reference-preview">${render(target, 'related')}</div>
+      <div class="distance-reference-body">
+        <div class="distance-reference-head"><div><small>${esc(label)}</small><strong>${esc(target.brand)}</strong><span>${esc(target.name)}</span></div><b>${item.distance.toFixed(1)}</b></div>
+        <p>${esc(sublabel)}</p>
+        <div class="distance-diffs">${diffs.map(d=>`<span>${esc(d.name)} <b>Δ${Math.round(d.diff)}</b></span>`).join('')}</div>
+      </div>
+    </a>`;
   }
 
   const vocabularyLine = [...lex.design,...lex.philosophy].slice(0,8).map(x=>x.term).join(' / ');
@@ -59,7 +74,25 @@
             ${metaCard('Interaction Model', p.interactionModel)}
           </div>
           <p class="space-summary"><strong>Character profile:</strong> ${esc(spaceSummary)}</p>
-          <p class="space-method-note">※ Design Spaceの0–100は客観的な品質点ではなく、パターン同士を比較するための編集的・ヒューリスティックな座標。今後のDiversity Score、対極参照、Design Mapに共通利用する。</p>
+
+          ${diversity ? `<section class="diversity-analysis">
+            <div class="diversity-heading">
+              <div><p class="eyebrow">DESIGN DISTANCE / DIVERSITY SCORE</p><h3>近傍から、どれだけ離れている？</h3><p>最も近いパターンまでの6次元距離を基準に、現在のライブラリ内での希少性を測る。</p></div>
+              <div class="diversity-score" aria-label="Diversity Score ${diversity.score} out of 100"><strong>${diversity.score}</strong><span>/ 100</span><small>${esc(diversity.label)}</small></div>
+            </div>
+            <div class="diversity-metrics">
+              <div><small>LOCAL SEPARATION</small><strong>${diversity.localDistance.toFixed(1)}</strong><span>${esc(diversity.localDistanceLabel)}</span></div>
+              <div><small>NEAREST BRAND</small><strong>${esc(diversity.nearest?.pattern?.brand || '—')}</strong><span>最寄りの設計座標</span></div>
+              <div><small>FARTHEST BRAND</small><strong>${esc(diversity.farthest?.pattern?.brand || '—')}</strong><span>現ライブラリ内の最遠点</span></div>
+            </div>
+            <div class="distance-reference-grid">
+              ${distanceReference(diversity.nearest, 'NEAREST IN DESIGN SPACE', '似ている理由より、どの軸がまだ違うかを見る。')}
+              ${distanceReference(diversity.farthest, 'FARTHEST IN CURRENT LIBRARY', '「対極」と断定する前の、純粋な幾何学的最遠参照。')}
+            </div>
+            <p class="diversity-note">Diversity Scoreは「最寄りパターンまでの距離」のライブラリ内パーセンタイル。高いほど孤立した設計座標にいる。Farthestは6軸距離だけで計算しており、思想的な“対極”は次フェーズで別に定義する。</p>
+          </section>` : ''}
+
+          <p class="space-method-note">※ Design Spaceの0–100は客観的な品質点ではなく、パターン同士を比較するための編集的・ヒューリスティックな座標。Diversity Scoreも現在の収録パターン構成に応じて変動する相対値。</p>
         </section>` : ''}
 
         <section class="detail-block grammar-block">
