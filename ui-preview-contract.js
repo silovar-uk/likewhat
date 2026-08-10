@@ -14,6 +14,7 @@
     '.compare-preview',
     '.compare-route-preview',
     '.vocab-pattern-preview',
+    '.next-reference-preview',
     '.related-grid > a > div'
   ].join(',');
 
