@@ -6,92 +6,75 @@
 
 ## Current library
 
-**78 patterns**
+**91 references**
 
 - Initial library: 39
-- Wave 1: 12 deliberately distant Design Space extremes
+- Wave 1: 12 Design Space extremes
 - Wave 2: 12 neighboring / counterpoint references
-- Wave 3: 15 coverage-driven references selected from underrepresented interaction models and media
+- Wave 3: 15 coverage-driven references
+- Wave 4: 9 sports / club / live-event references
+- Eyewear Industry Cluster: 4 grouped references covering 10 eyewear brands
 
-Wave 3 adds Duolingo, Spotify, Canva, Blender, Ableton Live, Tesla, Transport for London, Monzo, Salesforce, Discord, Strava, Uber Driver, NASA Eyes, Amazon Alexa and Oura.
+## Information architecture v3
 
-The Wave 3 selection was intentionally not “15 more famous websites.” It expands the library into new media and operational contexts: embedded touchscreen, physical + digital wayfinding, voice, wearable health, interactive 3D, expert desktop creation, real-time field operations, finance, education and community spaces.
+The top-level library is no longer `1 Pattern = 1 card`.
+
+It now uses two entry types:
+
+### Brand View
+
+`Brand → multiple UI Patterns`
+
+A brand such as **Apple** appears once in the main library. Its card previews several UI grammars, and `brand.html?brand=Apple` opens a Brand View containing every Apple Pattern currently in the library.
+
+The Brand View keeps Pattern-level detail intact. It also displays Design Space as a **range** across the brand's patterns rather than flattening the brand into one averaged coordinate.
+
+The same automatic grouping applies to Notion, Linear, Nintendo and every other brand that has multiple Patterns.
+
+### Industry Cluster
+
+When several brands solve essentially the same industry problem, they can be compressed into one editorial reference instead of inflating the library with near-duplicates.
+
+Eyewear currently uses four clusters:
+
+1. **Everyday Omnichannel Eyewear** — Zoff / JINS / OWNDAYS / 眼鏡市場
+2. **Eyewear as Identity** — Ray-Ban / EYEVAN / Gentle Monster
+3. **Engineering & Craft Provenance** — 999.9 / 金子眼鏡
+4. **Professional Fitting & Consultation** — PARIS MIKI
+
+Each cluster has one Design Space coordinate and counts as **one Coverage reference**. Its detail page then expands into `COMMON GRAMMAR → BRAND VARIATIONS`, preserving the meaningful differences between members and their individual official sources.
+
+This creates three different levels:
+
+`Brand / Industry Cluster → UI Pattern / Brand Variation → Design Principle`
 
 ## Core exploration
 
-- Continuous three-column Pattern library
-- Search by brand, UI term, vocabulary and philosophy
-- Sort by Brand / Density / Exploration / Diversity / seeded Random
-- URL-preserved query, filters and sort state
-- 6-axis **Design Space**
-- **Diversity Score**, Nearest / Farthest and Opposite Reference
-- **NEXT REFERENCES** with Similar Position / Shared Principle-Different Context / Opposite Priorities
-- **Design Map** for explainable two-axis projection
-- **Design Vocabulary** knowledge graph
-- **Contrast Pair** comparison engine
-- **Collision Engine** with Random / Far Apart / Weird Combination
-- **Coverage Planner** for deciding what to add next
-- **Coverage Delta** for testing whether the previous expansion actually improved coverage
-- separate **Official Brand** and **Reference Source** links
+- Three-column Brand / Cluster library
+- Multiple UI previews inside each Brand card
+- Brand View for all Patterns belonging to one brand
+- Search by brand, cluster member, UI term, vocabulary and philosophy
+- Brand / Density / Exploration / Diversity / seeded Random sorting
+- Brand and Industry-level filters; Eyewear can be filtered as a whole or by member brand such as Ray-Ban or JINS
+- Separate small **Official ↗** link on Brand cards while the main card opens the internal Brand View
+- 6-axis Design Space
+- Diversity Score, Nearest / Farthest and Opposite Reference
+- NEXT REFERENCES with Similar Position / Shared Principle-Different Context / Opposite Priorities
+- Design Map
+- Design Vocabulary
+- Contrast Pair
+- Collision Engine
+- Coverage Planner and historical Coverage Delta
 
-## Coverage feedback loop
+## Coverage policy
 
-The library now treats expansion as a measurable editorial cycle rather than a one-way accumulation process.
+Expansion is not evaluated by card count.
 
 `Coverage → Expansion → Delta → Next Coverage`
 
-### 1. Coverage Planner
+Industry Clusters are intentionally counted once in Coverage so that adding Zoff, JINS, OWNDAYS and 眼鏡市場 does not make `Retail / Eyewear` look four times more represented merely because four similar brands were researched.
 
-`coverage.html` analyzes the current library itself rather than another design reference.
-
-It combines four signals:
-
-1. **6D Spatial Gaps** — scan `3^6 = 729` Low / Mid / High probe vectors and measure the nearest existing Pattern
-2. **Thin Vocabulary** — count Pattern / Brand / Domain support for each concept
-3. **Context Balance** — inspect underrepresented Domain / Medium and overrepresented brands
-4. **Research Briefs** — combine Spatial 55% + Concept 25% + Context 20% into explainable next-research conditions
-
-### 2. Coverage-driven expansion
-
-A new reference should answer:
-
-> What can this Pattern explain that the current library cannot explain well yet?
-
-Fame alone is not an inclusion criterion.
-
-### 3. Coverage Delta
-
-The Coverage page also compares **Before Wave 3 = 63 references** with **After Wave 3 = 78 references** using the same formulas.
-
-It deliberately does **not** collapse the result into one total score. Instead it compares:
-
-- Maximum 6D open gap
-- Mean of the top six open gaps
-- Average local separation
-- Unique Domains
-- Unique Media
-- Thin Vocabulary concepts
-- Singleton Domains
-- Largest-brand share
-
-This preserves trade-offs. For example, adding new Domains may improve breadth while simultaneously creating more one-example Domains that need later reinforcement.
-
-### 4. Open-vector compression
-
-The six sparse vectors identified in the 63-reference library are re-measured against the 78-reference library at the **same coordinates**. This shows which actual Design Space gaps Wave 3 filled rather than merely comparing two separately selected lists.
-
-### 5. Wave contribution
-
-Every Wave 3 reference is compared with its nearest Pattern in the old 63-reference library. The old-neighbor Design Distance is used as an explainable novelty signal:
-
-- **Frontier Gain** — far from the old library
-- **Territory Expansion** — clearly extends an existing region
-- **Bridge** — adds an adjacent route between regions
-- **Reinforcement** — primarily thickens an existing region
-
-New Domain and new Medium contributions are also marked separately.
-
-`wave-metadata.js` keeps the set of references belonging to Wave 3 explicit so longitudinal analysis does not depend on file order or brand-name guesses.
+The historical Coverage Delta still compares **63 → 78** for Wave 3 using the same formulas. The current 91-reference library is used by the live Coverage Snapshot and current gap analysis.
 
 ## Design Space
 
@@ -106,86 +89,26 @@ Six editorial 0–100 axes:
 
 Coordinates are comparative heuristics, not quality scores.
 
-Pairwise Design Distance uses normalized Euclidean distance across all six axes.
+## Key grouping files
 
-## Discovery Architecture v2
+- `library-groups.js` — builds Brand groups and keeps Industry Clusters standalone
+- `brand.html` / `brand.js` / `styles-brand-page.css` — Brand View
+- `patterns-eyewear.js` — four grouped Eyewear references
+- `ui-eyewear.js` / `styles-eyewear.css` — abstract Eyewear previews
+- `cluster-detail.js` / `styles-cluster-detail.css` — Common Grammar / Brand Variations
+- `cluster-brand-filter.js` — industry-level filter such as Eyewear
+- `group-sort.js` — applies existing sort semantics to grouped cards
+- `group-official-links.js` / `styles-group-official.css` — preserves direct official-brand links
+- `ui-preview-contract.js` / `styles-group-preview.css` — shared preview fitting for group mosaics and Brand View
 
-### Continuous library grid
+## Source policy
 
-Brand sections remain in the data but do not create separate visual rows. Pattern cards flow continuously across the grid.
+Normal Pattern pages distinguish:
 
-### Explainable sorting
+- **Official Brand** — brand-level official destination
+- **Reference Source** — exact official page grounding the Pattern analysis
 
-- Brand order
-- Density
-- Exploration
-- Diversity
-- Random with persistent seed
-
-### URL state
-
-The main library preserves `q`, `brand`, `part`, `sort` and Random `seed`.
-
-### NEXT REFERENCES
-
-Each Pattern exposes three different relationship semantics instead of one generic Related list:
-
-1. Similar Position
-2. Shared Principle / Different Context
-3. Opposite Priorities
-
-## Traceable Reference Layer
-
-The interface distinguishes:
-
-- **Official Brand** — a brand-level official destination
-- **Reference Source** — the exact official page grounding the Pattern analysis
-
-Wave 3 sources use official product help, manuals, design standards, design guidance or product documentation wherever possible.
-
-## Preview Contract
-
-All miniature product samples are illustrations, not embedded functional interfaces.
-
-`ui-preview-contract.js`:
-
-- neutralizes nested links, buttons, form controls and other interactive mock markup
-- renders samples on a shared 420×236 virtual canvas
-- fits that canvas into cards, Pattern detail, Design Map, Vocabulary, Contrast, Collision and NEXT REFERENCES
-- prevents a mock’s internal DOM from breaking outer navigation
-
-## Key files
-
-- `patterns.js` — initial library
-- `patterns-extra.js` — Japanese media / Nintendo expansion
-- `patterns-wave1.js` — Design Space extremes
-- `patterns-wave2.js` — neighboring contrast references
-- `patterns-wave3.js` — coverage-driven expansion
-- `wave-metadata.js` — explicit longitudinal wave membership
-- `ui-wave1.js` / `ui-wave2.js` / `ui-wave3.js` — abstract interface mocks
-- `styles-wave1.css` / `styles-wave2.css` / `styles-wave3.css` — mock styling
-- `taxonomy.js` — schema enrichment
-- `design-space.js` — six-axis geometry
-- `vocabulary.js` — grammar and knowledge graph
-- `app.js` — search, filters and Collision Engine
-- `discovery-v2.js` — sorting, URL state and NEXT REFERENCES
-- `coverage.html` / `coverage.js` / `styles-coverage.css` — Coverage Planner
-- `coverage-delta.js` / `styles-coverage-delta.css` — longitudinal Before / After analysis
-- `brand-links.js` — official brand / exact source separation
-- `ui-preview-contract.js` — inert preview / fitting contract
-- `map.html` / `map.js` — Design Map
-- `vocabulary.html` / `vocabulary-page.js` — Vocabulary explorer
-- `compare.html` / `compare.js` — Contrast Pair
-
-## Next expansion rule
-
-Do not select the next wave because a brand is famous.
-
-Prefer a reference when it can answer:
-
-> What can this Pattern explain that the current library cannot explain well yet?
-
-Then, after adding it, use Coverage Delta to check whether it actually filled the intended gap or merely increased the count.
+Industry Cluster pages do not pretend there is one canonical brand URL. Instead, every member variation keeps its own official source.
 
 ## Run locally
 
