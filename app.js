@@ -3,6 +3,7 @@
   const { render, esc } = window.LikeWhatUI;
   const vocabulary = window.LikeWhatVocabulary;
   const designSpace = window.LikeWhatDesignSpace;
+  const groupModel = window.LikeWhatLibraryGroups;
   const input = document.getElementById('searchInput');
   const brandFilters = document.getElementById('brandFilters');
   const partFilters = document.getElementById('partFilters');
@@ -16,9 +17,11 @@
   let brand = 'All';
   let part = 'All';
   let query = new URLSearchParams(location.search).get('q') || '';
-  input.value = query;
+  if(input) input.value = query;
 
-  const brands = [...new Set(patterns.map(p => p.brand))];
+  const normalBrands=[...new Set(patterns.filter(p=>p.groupType!=='industry-cluster').map(p=>p.brand))];
+  const memberBrands=[...new Set(patterns.flatMap(p=>p.memberBrands||[]))].filter(name=>!normalBrands.includes(name));
+  const brands=[...normalBrands,...memberBrands];
   const parts = ['All', 'Navigation', 'List', 'Dashboard', 'Settings', 'Editor', 'Command', 'Cards', 'Detail'];
   const modeCopy = {
     random:{title:'Random 3',label:'3つ引く',description:'異なるブランドから、偶然の組み合わせを3つ引く。'},
@@ -31,7 +34,8 @@
   function searchable(p) {
     const expert = vocabulary ? vocabulary.searchText(p) : '';
     const taxonomy = [p.domain,p.medium,p.archetype,p.interactionModel,...(p.philosophy||[]),...(p.implementationTerms||[]),...(p.designTerms||[]),...(p.philosophyTerms||[])].join(' ');
-    return normalize([p.brand,p.family,p.name,p.oneLiner,p.description,...p.tags,...p.uiParts,...p.visual,...p.useCases,p.prompt,taxonomy,expert].join(' '));
+    const members=(p.members||[]).flatMap(m=>[m.brand,m.role,m.note,m.sourceLabel]).join(' ');
+    return normalize([p.brand,p.family,p.name,p.oneLiner,p.description,...(p.memberBrands||[]),members,...p.tags,...p.uiParts,...p.visual,...p.useCases,p.prompt,taxonomy,expert].join(' '));
   }
   function shuffle(items) {
     const arr = [...items];
@@ -41,11 +45,12 @@
     }
     return arr;
   }
+  function brandMatches(p,name){return name==='All'||p.brand===name||(p.memberBrands||[]).includes(name);}
 
   function filterPatterns() {
     const q = normalize(query).trim();
     return patterns.filter(p => {
-      const brandOK = brand === 'All' || p.brand === brand;
+      const brandOK = brandMatches(p,brand);
       const partOK = part === 'All' || p.uiParts.some(x => normalize(x).includes(normalize(part))) || normalize(p.family).includes(normalize(part));
       const queryOK = !q || q.split(/\s+/).every(term => searchable(p).includes(term));
       return brandOK && partOK && queryOK;
@@ -53,14 +58,16 @@
   }
 
   function renderBrandFilters() {
+    if(!brandFilters)return;
     brandFilters.innerHTML = ['All', ...brands].map(name => {
-      const count = name === 'All' ? patterns.length : patterns.filter(p => p.brand === name).length;
+      const count = name === 'All' ? patterns.length : patterns.filter(p => brandMatches(p,name)).length;
       const active=brand===name;
       return `<button class="brand-chip ${active?'active':''}" data-brand="${esc(name)}" aria-pressed="${active}"><span>${esc(name)}</span><small>${count}</small></button>`;
     }).join('');
   }
 
   function renderPartFilters() {
+    if(!partFilters)return;
     partFilters.innerHTML = parts.map(name => {
       const active=part===name;
       return `<button class="part-chip ${active?'active':''}" data-part="${esc(name)}" aria-pressed="${active}">${esc(name)}</button>`;
@@ -82,21 +89,48 @@
     </a>`;
   }
 
+  function shortPatternName(p,brandName){
+    return String(p.name||'').replace(new RegExp(`^${String(brandName).replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\s*[—–-]\\s*`,'i'),'')||p.family;
+  }
+
+  function groupCard(group,index){
+    const cluster=group.type==='industry-cluster';
+    const items=group.patterns;
+    const previews=items.slice(0,4);
+    const previewCount=cluster?(group.cluster?.memberBrands?.length||1):items.length;
+    const kicker=cluster?`${esc(group.industry||'INDUSTRY').toUpperCase()} · ${previewCount} BRAND${previewCount===1?'':'S'}`:`BRAND · ${items.length} UI PATTERN${items.length===1?'':'S'}`;
+    const title=group.title;
+    const href=cluster?`pattern.html?id=${encodeURIComponent(group.cluster.id)}`:`brand.html?brand=${encodeURIComponent(group.brand)}`;
+    const list=cluster?(group.cluster.members||[]).map(m=>({label:m.brand,sub:m.role})) : items.map(p=>({label:shortPatternName(p,group.brand),sub:p.family}));
+    const previewMarkup=cluster
+      ? `<div class="group-preview-single">${render(group.cluster,'related')}</div>`
+      : `<div class="group-preview-mosaic count-${Math.min(4,previews.length)}">${previews.map((p,i)=>`<div class="group-preview-tile"><div>${render(p,'related')}</div><span>${esc(shortPatternName(p,group.brand))}</span></div>`).join('')}${items.length>4?`<b class="group-preview-more">+${items.length-4}</b>`:''}</div>`;
+    const density=group.centroid?.density??50;
+    const exploration=group.centroid?.exploration??50;
+    return `<article class="library-group-card ${cluster?'industry-cluster-card':'brand-group-card'}" data-group-key="${esc(group.key)}" data-group-type="${esc(group.type)}" data-brand="${esc(group.brand)}" data-sort-index="${index}" data-sort-density="${density}" data-sort-exploration="${exploration}" data-sort-diversity="${group.diversity??0}">
+      <a class="library-group-main" href="${href}">
+        <header><small>${kicker}</small><h3>${esc(title)}</h3></header>
+        <div class="library-group-preview">${previewMarkup}</div>
+        <div class="group-pattern-list">${list.slice(0,4).map(item=>`<div><strong>${esc(item.label)}</strong><span>${esc(item.sub||'')}</span></div>`).join('')}${list.length>4?`<p>+ ${list.length-4} more UI patterns</p>`:''}</div>
+        <footer><span>${cluster?'Open cluster':'Explore brand'}</span><b>↗</b></footer>
+      </a>
+    </article>`;
+  }
+
   function renderResults() {
+    if(!groups)return;
     const filtered = filterPatterns();
-    resultCount.textContent = `${filtered.length} / ${patterns.length} patterns`;
-    empty.hidden = filtered.length > 0;
-    groups.hidden = filtered.length === 0;
-    const byBrand = brands.map(name => [name, filtered.filter(p => p.brand === name)]).filter(([, items]) => items.length);
-    groups.innerHTML = byBrand.map(([name, items]) => `<section class="brand-section">
-      <div class="brand-section-head"><h3>${esc(name)}</h3><span>${items.length} patterns</span></div>
-      <div class="card-grid">${items.map(card).join('')}</div>
-    </section>`).join('');
+    const grouped=groupModel?groupModel.build(filtered):[];
+    resultCount.textContent = `${grouped.length} groups · ${filtered.length} / ${patterns.length} references`;
+    empty.hidden = grouped.length > 0;
+    groups.hidden = grouped.length === 0;
+    groups.innerHTML = grouped.map(groupCard).join('');
   }
 
   function ordinaryTriple() {
     const selected = [];
-    for (const brandName of shuffle(brands)) {
+    const selectableBrands=[...new Set(patterns.map(p=>p.brand))];
+    for (const brandName of shuffle(selectableBrands)) {
       const candidates = patterns.filter(p => p.brand === brandName);
       if (candidates.length) selected.push(candidates[Math.floor(Math.random() * candidates.length)]);
       if (selected.length === 3) break;
@@ -106,77 +140,45 @@
 
   function pairDistances(items) {
     if (!designSpace) return [0,0,0];
-    return [
-      designSpace.distanceBetween(items[0].designSpace,items[1].designSpace),
-      designSpace.distanceBetween(items[0].designSpace,items[2].designSpace),
-      designSpace.distanceBetween(items[1].designSpace,items[2].designSpace)
-    ];
+    return [designSpace.distanceBetween(items[0].designSpace,items[1].designSpace),designSpace.distanceBetween(items[0].designSpace,items[2].designSpace),designSpace.distanceBetween(items[1].designSpace,items[2].designSpace)];
   }
 
   function farApartTriple() {
     if (!designSpace) return ordinaryTriple();
     const valid = patterns.filter(p=>p.designSpace);
     let best = null;
-    for (let i=0;i<valid.length-2;i++) {
-      for (let j=i+1;j<valid.length-1;j++) {
-        for (let k=j+1;k<valid.length;k++) {
-          if (new Set([valid[i].brand,valid[j].brand,valid[k].brand]).size<3) continue;
-          const items=[valid[i],valid[j],valid[k]];
-          const distances=pairDistances(items);
-          const min=Math.min(...distances);
-          const avg=distances.reduce((a,b)=>a+b,0)/3;
-          const score=min*2+avg;
-          if (!best || score>best.score) best={items,distances,min,avg,score};
-        }
-      }
+    for (let i=0;i<valid.length-2;i++) for (let j=i+1;j<valid.length-1;j++) for (let k=j+1;k<valid.length;k++) {
+      if (new Set([valid[i].brand,valid[j].brand,valid[k].brand]).size<3) continue;
+      const items=[valid[i],valid[j],valid[k]],distances=pairDistances(items),min=Math.min(...distances),avg=distances.reduce((a,b)=>a+b,0)/3,score=min*2+avg;
+      if (!best || score>best.score) best={items,score};
     }
     return best?.items || ordinaryTriple();
   }
 
   function jaccardDissimilarity(a,b) {
-    const A=new Set((a||[]).map(normalize));
-    const B=new Set((b||[]).map(normalize));
-    const union=new Set([...A,...B]);
+    const A=new Set((a||[]).map(normalize)),B=new Set((b||[]).map(normalize)),union=new Set([...A,...B]);
     if (!union.size) return 1;
-    let intersection=0;
-    A.forEach(v=>{if(B.has(v))intersection++;});
+    let intersection=0;A.forEach(v=>{if(B.has(v))intersection++;});
     return 1-intersection/union.size;
   }
 
   function weirdTriple() {
     if (!designSpace) return ordinaryTriple();
-    const valid = patterns.filter(p=>p.designSpace);
-    const ranked=[];
-    for (let i=0;i<valid.length-2;i++) {
-      for (let j=i+1;j<valid.length-1;j++) {
-        for (let k=j+1;k<valid.length;k++) {
-          const items=[valid[i],valid[j],valid[k]];
-          if (new Set(items.map(x=>x.brand)).size<3) continue;
-          const distances=pairDistances(items);
-          const avgDistance=distances.reduce((a,b)=>a+b,0)/3;
-          const domainVariety=new Set(items.map(x=>x.domain)).size;
-          const mediumVariety=new Set(items.map(x=>x.medium)).size;
-          const archetypeVariety=new Set(items.map(x=>x.archetype)).size;
-          const philosophyGap=(
-            jaccardDissimilarity(items[0].philosophy,items[1].philosophy)+
-            jaccardDissimilarity(items[0].philosophy,items[2].philosophy)+
-            jaccardDissimilarity(items[1].philosophy,items[2].philosophy)
-          )/3;
-          const score=avgDistance+(domainVariety-1)*5+(mediumVariety-1)*2.5+(archetypeVariety-1)*4+philosophyGap*12;
-          ranked.push({items,score});
-        }
-      }
+    const valid = patterns.filter(p=>p.designSpace),ranked=[];
+    for (let i=0;i<valid.length-2;i++) for (let j=i+1;j<valid.length-1;j++) for (let k=j+1;k<valid.length;k++) {
+      const items=[valid[i],valid[j],valid[k]];
+      if (new Set(items.map(x=>x.brand)).size<3) continue;
+      const distances=pairDistances(items),avgDistance=distances.reduce((a,b)=>a+b,0)/3;
+      const domainVariety=new Set(items.map(x=>x.domain)).size,mediumVariety=new Set(items.map(x=>x.medium)).size,archetypeVariety=new Set(items.map(x=>x.archetype)).size;
+      const philosophyGap=(jaccardDissimilarity(items[0].philosophy,items[1].philosophy)+jaccardDissimilarity(items[0].philosophy,items[2].philosophy)+jaccardDissimilarity(items[1].philosophy,items[2].philosophy))/3;
+      ranked.push({items,score:avgDistance+(domainVariety-1)*5+(mediumVariety-1)*2.5+(archetypeVariety-1)*4+philosophyGap*12});
     }
     ranked.sort((a,b)=>b.score-a.score);
     const pool=ranked.slice(0,Math.min(18,ranked.length));
     return pool[Math.floor(Math.random()*pool.length)]?.items || farApartTriple();
   }
 
-  function selectionForMode() {
-    if (randomMode==='far') return farApartTriple();
-    if (randomMode==='weird') return weirdTriple();
-    return ordinaryTriple();
-  }
+  function selectionForMode() {return randomMode==='far'?farApartTriple():randomMode==='weird'?weirdTriple():ordinaryTriple();}
 
   function collisionPrompt(selected) {
     const [a,b,c]=selected;
@@ -184,68 +186,36 @@
   }
 
   function randomMeta(selected) {
-    const distances=designSpace?pairDistances(selected):[];
-    const min=distances.length?Math.min(...distances):null;
-    const avg=distances.length?distances.reduce((a,b)=>a+b,0)/distances.length:null;
-    const domains=new Set(selected.map(x=>x.domain)).size;
-    const archetypes=new Set(selected.map(x=>x.archetype)).size;
-    const prompt=collisionPrompt(selected);
-    return `<div class="random-analysis">
-      <div class="random-analysis-copy">
-        <p class="eyebrow">${esc(modeCopy[randomMode].title)} / DRAW ANALYSIS</p>
-        <h3>${randomMode==='random'?'偶然を、そのまま入口にする。':randomMode==='far'?'設計空間の三角形を、できるだけ大きくする。':'矛盾を消さず、ひとつの案へ衝突させる。'}</h3>
-        <p>${esc(modeCopy[randomMode].description)}</p>
-      </div>
-      <div class="random-metrics">
-        ${avg!==null?`<span><small>AVG DISTANCE</small><b>${avg.toFixed(1)}</b></span>`:''}
-        ${min!==null?`<span><small>MIN DISTANCE</small><b>${min.toFixed(1)}</b></span>`:''}
-        <span><small>DOMAINS</small><b>${domains}</b></span>
-        <span><small>ARCHETYPES</small><b>${archetypes}</b></span>
-      </div>
-      <details class="collision-brief"><summary>この3つを混ぜるなら？ <span>AI brief</span></summary><div><pre>${esc(prompt)}</pre><button type="button" data-copy-collision>指示文をコピー</button></div></details>
-    </div>`;
+    const distances=designSpace?pairDistances(selected):[],min=distances.length?Math.min(...distances):null,avg=distances.length?distances.reduce((a,b)=>a+b,0)/distances.length:null;
+    const domains=new Set(selected.map(x=>x.domain)).size,archetypes=new Set(selected.map(x=>x.archetype)).size,prompt=collisionPrompt(selected);
+    return `<div class="random-analysis"><div class="random-analysis-copy"><p class="eyebrow">${esc(modeCopy[randomMode].title)} / DRAW ANALYSIS</p><h3>${randomMode==='random'?'偶然を、そのまま入口にする。':randomMode==='far'?'設計空間の三角形を、できるだけ大きくする。':'矛盾を消さず、ひとつの案へ衝突させる。'}</h3><p>${esc(modeCopy[randomMode].description)}</p></div><div class="random-metrics">${avg!==null?`<span><small>AVG DISTANCE</small><b>${avg.toFixed(1)}</b></span>`:''}${min!==null?`<span><small>MIN DISTANCE</small><b>${min.toFixed(1)}</b></span>`:''}<span><small>DOMAINS</small><b>${domains}</b></span><span><small>ARCHETYPES</small><b>${archetypes}</b></span></div><details class="collision-brief"><summary>この3つを混ぜるなら？ <span>AI brief</span></summary><div><pre>${esc(prompt)}</pre><button type="button" data-copy-collision>指示文をコピー</button></div></details></div>`;
   }
 
   function drawThree() {
     if (!randomDraw || !randomResults || patterns.length < 3) return;
     const selected = selectionForMode();
     randomResults.innerHTML = `${randomMeta(selected)}<div class="random-grid">${selected.map(card).join('')}</div>`;
-    randomDraw.querySelector('span').textContent = '引き直す';
-    randomDraw.querySelector('small').textContent = modeCopy[randomMode].title;
+    randomDraw.querySelector('span').textContent = '引き直す';randomDraw.querySelector('small').textContent = modeCopy[randomMode].title;
     randomResults.scrollIntoView({ behavior: reducedMotion()?'auto':'smooth', block: 'nearest' });
   }
 
   function setRandomMode(mode) {
     randomMode=modeCopy[mode]?mode:'random';
-    randomModes?.querySelectorAll('[data-random-mode]').forEach(btn=>{
-      const active=btn.dataset.randomMode===randomMode;
-      btn.classList.toggle('active',active);
-      btn.setAttribute('aria-pressed',String(active));
-    });
-    if(randomDraw){
-      randomDraw.querySelector('span').textContent=modeCopy[randomMode].label;
-      randomDraw.querySelector('small').textContent=modeCopy[randomMode].title;
-      randomDraw.setAttribute('aria-label',`${modeCopy[randomMode].title}: ${modeCopy[randomMode].description}`);
-    }
+    randomModes?.querySelectorAll('[data-random-mode]').forEach(btn=>{const active=btn.dataset.randomMode===randomMode;btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',String(active));});
+    if(randomDraw){randomDraw.querySelector('span').textContent=modeCopy[randomMode].label;randomDraw.querySelector('small').textContent=modeCopy[randomMode].title;randomDraw.setAttribute('aria-label',`${modeCopy[randomMode].title}: ${modeCopy[randomMode].description}`);}
     if(randomResults) randomResults.innerHTML='';
   }
 
   function update() { renderBrandFilters(); renderPartFilters(); renderResults(); }
 
-  brandFilters.addEventListener('click', e => { const btn=e.target.closest('[data-brand]'); if(!btn)return; brand=btn.dataset.brand; update(); });
-  partFilters.addEventListener('click', e => { const btn=e.target.closest('[data-part]'); if(!btn)return; part=btn.dataset.part; update(); });
-  input.addEventListener('input', () => { query=input.value; renderResults(); });
+  brandFilters?.addEventListener('click', e => { const btn=e.target.closest('[data-brand]'); if(!btn)return; brand=btn.dataset.brand; update(); });
+  partFilters?.addEventListener('click', e => { const btn=e.target.closest('[data-part]'); if(!btn)return; part=btn.dataset.part; update(); });
+  input?.addEventListener('input', () => { query=input.value; renderResults(); });
   document.querySelector('.query-examples')?.addEventListener('click', e => { const btn=e.target.closest('[data-query]'); if(!btn)return; input.value=btn.dataset.query; query=btn.dataset.query; brand='All'; part='All'; update(); input.focus(); });
   randomModes?.addEventListener('click',e=>{const btn=e.target.closest('[data-random-mode]');if(btn)setRandomMode(btn.dataset.randomMode);});
   randomDraw?.addEventListener('click', drawThree);
-  randomResults?.addEventListener('click',async e=>{
-    const btn=e.target.closest('[data-copy-collision]');
-    if(!btn)return;
-    const pre=btn.closest('.collision-brief')?.querySelector('pre');
-    if(!pre)return;
-    try{await navigator.clipboard.writeText(pre.textContent);btn.textContent='コピー済み';setTimeout(()=>btn.textContent='指示文をコピー',1600);}catch{btn.textContent='選択してコピー';}
-  });
-  document.addEventListener('keydown', e => { if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();input.focus();input.select();} if(e.key==='Escape'&&document.activeElement===input){input.value='';query='';input.blur();update();} });
+  randomResults?.addEventListener('click',async e=>{const btn=e.target.closest('[data-copy-collision]');if(!btn)return;const pre=btn.closest('.collision-brief')?.querySelector('pre');if(!pre)return;try{await navigator.clipboard.writeText(pre.textContent);btn.textContent='コピー済み';setTimeout(()=>btn.textContent='指示文をコピー',1600);}catch{btn.textContent='選択してコピー';}});
+  document.addEventListener('keydown', e => { if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();input?.focus();input?.select();} if(e.key==='Escape'&&document.activeElement===input){input.value='';query='';input.blur();update();} });
 
   setRandomMode('random');
   update();
