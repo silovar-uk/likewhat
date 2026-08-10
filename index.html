@@ -3,8 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="既存サービスのUIを、雰囲気・構造・AIへの指示文まで分解して探せるデザイン参照ライブラリ。" />
+  <meta name="description" content="既存サービスのUIを、視覚文法・実装構造・設計思想・AI向け指示文まで分解して探せるデザイン参照ライブラリ。" />
   <title>Like What? — UI reference library</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="styles-extra.css" />
 </head>
@@ -16,25 +17,35 @@
 
   <main>
     <section class="hero">
-      <p class="eyebrow">DESIGN REFERENCE LIBRARY</p>
-      <h1>「こんな感じ」を、<br><em>ちゃんと言葉にする。</em></h1>
-      <p class="hero-copy">Apple、Notion、Linear、オモコロ、集英社、Nintendo…。ブランド名だけで終わらせず、<strong>どの画面の、何が効いているのか</strong>まで分解。ミニモックを見ながら、AIに渡せる指示文へ変換する。</p>
+      <p class="eyebrow">VISUAL GRAMMAR / DESIGN REFERENCE LIBRARY</p>
+      <h1>「こんな感じ」を、<br><em>設計語彙に変換する。</em></h1>
+      <p class="hero-copy">Apple、Notion、Linear、オモコロ、集英社、Nintendo…。ブランド名を表層的なスタイルとして真似るのではなく、<strong>情報アーキテクチャ、視覚的階層、インタラクションパターン、実装構造、設計思想</strong>まで分解。ミニモックと専門語彙を往復しながら、AIへ渡せる具体的な設計指示に変換する。</p>
 
       <div class="search-shell" role="search">
         <span aria-hidden="true">⌕</span>
-        <input id="searchInput" type="search" autocomplete="off" placeholder="例：Nintendo カタログ / オモコロ 記事 / Linear 高密度 / 静かなUI" aria-label="パターンを検索" />
+        <input id="searchInput" type="search" autocomplete="off" placeholder="例：Progressive Disclosure / Master–detail / Editorial Rhythm / Nintendo カタログ" aria-label="パターンを検索" />
         <kbd>⌘ K</kbd>
       </div>
       <div class="query-examples" aria-label="検索例">
-        <button data-query="静か">静か</button><button data-query="高密度">高密度</button><button data-query="Editorial">Editorial</button><button data-query="カタログ">カタログ</button><button data-query="Progressive Disclosure">Progressive Disclosure</button>
+        <button data-query="Visual Hierarchy">Visual Hierarchy</button><button data-query="Progressive Disclosure">Progressive Disclosure</button><button data-query="Editorial Rhythm">Editorial Rhythm</button><button data-query="Master–detail">Master–detail</button><button data-query="認知負荷">認知負荷</button>
       </div>
+    </section>
+
+    <section class="randomizer" aria-labelledby="randomTitle">
+      <div class="randomizer-copy">
+        <p class="eyebrow">SERENDIPITY / RANDOM DRAW</p>
+        <h2 id="randomTitle">意図的に、文脈を外す。</h2>
+        <p>いつもの好みから離れて、異なるブランド・異なる設計思想を3つ抽出。偶然の組み合わせから新しい参照軸をつくる。</p>
+      </div>
+      <button id="randomDraw" class="random-draw-button" type="button"><span>3つ引く</span><small>Random 3</small></button>
+      <div id="randomResults" class="random-results" aria-live="polite"></div>
     </section>
 
     <section class="browser" id="patterns">
       <div class="browser-head">
         <div>
           <p class="eyebrow">BROWSE BY BRAND</p>
-          <h2>まず、知っているサービスから。</h2>
+          <h2>ブランドから、設計パターンへ。</h2>
         </div>
         <p id="resultCount" class="count"></p>
       </div>
@@ -52,12 +63,13 @@
   </main>
 
   <footer>
-    <p>Like What? — a personal visual vocabulary for building with AI.</p>
+    <p>Like What? — visual grammar, interaction patterns and design philosophy for building with AI.</p>
     <p>References point to official product or design-system pages where available.</p>
   </footer>
 
   <script src="patterns.js"></script>
   <script src="patterns-extra.js"></script>
+  <script src="vocabulary.js"></script>
   <script src="ui.js"></script>
   <script src="ui-extra.js"></script>
   <script src="app.js"></script>
