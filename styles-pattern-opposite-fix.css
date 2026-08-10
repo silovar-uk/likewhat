@@ -1,0 +1,146 @@
+/* Opposite Reference v2 — compare two stable preview cards, not narrow split panes. */
+.opposite-reference-pair{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 56px minmax(0,1fr);
+  gap:12px;
+  align-items:stretch;
+  margin-top:22px;
+}
+
+.opposite-reference-card{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  grid-template-rows:clamp(184px,18vw,224px) minmax(0,1fr) !important;
+  min-width:0;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:#fff;
+  color:inherit;
+  text-decoration:none;
+}
+
+.opposite-reference-preview{
+  position:relative;
+  width:100%;
+  height:100%;
+  min-height:0 !important;
+  overflow:hidden;
+  border-right:0 !important;
+  border-bottom:1px solid var(--line);
+  background:#e9e7e1;
+}
+
+.opposite-reference-copy{
+  min-width:0;
+  min-height:124px;
+  padding:14px 15px 16px;
+  display:flex;
+  flex-direction:column;
+}
+
+.opposite-reference-copy small{
+  margin-bottom:5px;
+  font-size:7px;
+  letter-spacing:.09em;
+  color:var(--muted);
+}
+
+.opposite-reference-copy strong{
+  display:block;
+  font-size:13px;
+  line-height:1.25;
+}
+
+.opposite-reference-copy span{
+  display:block;
+  margin-top:3px;
+  font-size:9px;
+  line-height:1.45;
+  color:var(--muted);
+  overflow-wrap:anywhere;
+}
+
+.opposite-reference-copy p{
+  margin:10px 0 0;
+  font-size:9px;
+  line-height:1.65;
+  color:#656159;
+}
+
+.opposite-reference-card:not(.current){
+  transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease;
+}
+.opposite-reference-card:not(.current):hover{
+  transform:translateY(-2px);
+  border-color:#aaa59b;
+  box-shadow:0 10px 28px rgba(20,20,18,.06);
+}
+
+.opposite-switch{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  color:var(--muted);
+}
+.opposite-switch:before,
+.opposite-switch:after{
+  content:'';
+  width:1px;
+  height:34px;
+  background:var(--line);
+}
+.opposite-switch span{
+  font-size:24px;
+  line-height:1;
+  color:var(--ink);
+}
+.opposite-switch small{
+  font-size:6px;
+  letter-spacing:.1em;
+}
+
+/* Keep the explanatory deltas visually attached to the pair. */
+.opposite-flip-list{margin-top:12px}
+.opposite-axis-matrix{margin-top:12px}
+
+@media(max-width:900px){
+  .opposite-reference-pair{
+    grid-template-columns:1fr;
+    gap:9px;
+  }
+  .opposite-reference-card{
+    grid-template-rows:clamp(190px,42vw,240px) minmax(0,1fr) !important;
+  }
+  .opposite-switch{
+    height:42px;
+    flex-direction:row;
+  }
+  .opposite-switch:before,
+  .opposite-switch:after{
+    width:34px;
+    height:1px;
+  }
+  .opposite-switch span{transform:rotate(90deg)}
+}
+
+@media(max-width:650px){
+  .opposite-reference-card{
+    grid-template-rows:180px minmax(0,1fr) !important;
+    border-radius:16px;
+  }
+  .opposite-reference-copy{
+    min-height:0;
+    padding:12px 13px 14px;
+  }
+  .opposite-reference-copy strong{font-size:12px}
+  .opposite-reference-copy p{font-size:8px}
+  .opposite-switch{height:36px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .opposite-reference-card:not(.current){transition:none}
+}
