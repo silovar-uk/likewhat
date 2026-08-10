@@ -1,0 +1,170 @@
+/* Library grid v2 — brand order stays, brand sections no longer break rows. */
+#patternGroups.pattern-groups{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+  align-items:stretch;
+}
+
+/* Preserve the existing data grouping for filtering, but remove it from layout. */
+#patternGroups .brand-section,
+#patternGroups .card-grid{
+  display:contents;
+}
+#patternGroups .brand-section-head{
+  display:none;
+}
+
+/* One consistent card anatomy: brand + title, preview, concise explanation. */
+#patternGroups .pattern-card{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  grid-template-rows:30px 52px 190px 54px 31px 42px;
+  min-width:0;
+  height:399px;
+  overflow:hidden;
+  background:var(--surface);
+}
+
+#patternGroups .pattern-card .card-body{
+  display:contents;
+}
+
+#patternGroups .pattern-card .card-meta{
+  grid-row:1;
+  min-width:0;
+  padding:13px 16px 0;
+  margin:0;
+  display:block;
+  font-size:7px;
+  line-height:1;
+  font-weight:750;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  color:var(--muted);
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+#patternGroups .pattern-card .card-meta span:nth-child(2),
+#patternGroups .pattern-card .card-meta span+span:before{
+  display:none;
+  content:none;
+}
+
+#patternGroups .pattern-card h3{
+  grid-row:2;
+  min-width:0;
+  margin:0;
+  padding:3px 16px 10px;
+  font-size:17px;
+  line-height:1.15;
+  letter-spacing:-.035em;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
+}
+
+#patternGroups .pattern-card .card-preview{
+  grid-row:3;
+  width:100%;
+  height:190px !important;
+  min-height:0;
+  padding:12px;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+  background:#e9e7e1;
+  overflow:hidden;
+}
+
+#patternGroups .pattern-card .one-liner{
+  grid-row:4;
+  min-width:0;
+  min-height:0;
+  margin:0;
+  padding:11px 16px 0;
+  font-size:11px;
+  line-height:1.55;
+  color:#5e5c56;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
+}
+
+#patternGroups .pattern-card .tag-row{
+  grid-row:5;
+  min-width:0;
+  height:31px;
+  margin:0;
+  padding:5px 16px 0;
+  display:flex;
+  flex-wrap:nowrap;
+  gap:5px;
+  overflow:hidden;
+}
+#patternGroups .pattern-card .tag-row span{
+  flex:0 0 auto;
+  max-width:46%;
+  padding:4px 7px;
+  font-size:7px;
+  line-height:1.2;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+#patternGroups .pattern-card .card-arrow{
+  grid-row:6;
+  min-width:0;
+  margin:0 16px;
+  padding:11px 0 0;
+  align-self:stretch;
+  border-top:1px solid var(--line);
+  font-size:9px;
+  line-height:1;
+}
+
+/* The continuous grid should feel like one index, not stacked brand chapters. */
+#patternGroups .pattern-card:hover{
+  transform:translateY(-2px);
+}
+
+@media(max-width:880px){
+  #patternGroups.pattern-groups{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:11px;
+  }
+}
+
+@media(max-width:600px){
+  #patternGroups.pattern-groups{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  #patternGroups .pattern-card{
+    grid-template-rows:28px 48px 180px 50px 29px 40px;
+    height:375px;
+  }
+  #patternGroups .pattern-card .card-preview{
+    height:180px !important;
+    padding:10px;
+  }
+  #patternGroups .pattern-card .card-meta{
+    padding:12px 14px 0;
+  }
+  #patternGroups .pattern-card h3{
+    padding-left:14px;
+    padding-right:14px;
+  }
+  #patternGroups .pattern-card .one-liner,
+  #patternGroups .pattern-card .tag-row{
+    padding-left:14px;
+    padding-right:14px;
+  }
+  #patternGroups .pattern-card .card-arrow{
+    margin-left:14px;
+    margin-right:14px;
+  }
+}
