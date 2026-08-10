@@ -10,21 +10,23 @@
   <link rel="stylesheet" href="styles-extra.css" />
   <link rel="stylesheet" href="styles-wave1.css" />
   <link rel="stylesheet" href="styles-vocabulary.css" />
+  <link rel="stylesheet" href="styles-qa.css" />
 </head>
 <body>
+  <a class="skip-link" href="#main-content">本文へ移動</a>
   <header class="site-header">
-    <a class="brandmark" href="./"><span>Like</span> What?</a>
-    <nav><a href="./#patterns">Patterns</a><a href="map.html">Design Map</a><a href="vocabulary.html" aria-current="page">Vocabulary</a></nav>
+    <a class="brandmark" href="./" aria-label="Like What? ホーム"><span>Like</span> What?</a>
+    <nav aria-label="Global navigation"><a href="./#patterns">Patterns</a><a href="map.html">Design Map</a><a href="vocabulary.html" aria-current="page">Vocabulary</a><a href="https://github.com/silovar-uk/likewhat" target="_blank" rel="noreferrer">GitHub ↗</a></nav>
   </header>
 
-  <main class="vocab-page">
+  <main id="main-content" class="vocab-page">
     <section class="vocab-hero">
       <p class="eyebrow">DESIGN VOCABULARY / KNOWLEDGE GRAPH</p>
       <h1>名前がつくと、<br><em>別の世界へ渡れる。</em></h1>
       <p>ブランド名を覚えるための辞書ではなく、UIを成立させている原則を持ち運ぶための語彙集。ひとつの概念から、別ブランド・別業界の実例へ横断する。</p>
       <div class="vocab-search-row">
-        <div class="vocab-search" role="search"><span>⌕</span><input id="vocabSearch" type="search" autocomplete="off" placeholder="例：Wayfinding / Progressive disclosure / 文脈保持" aria-label="デザイン語彙を検索" /><kbd>⌘ K</kbd></div>
-        <button id="randomTerm" type="button">Random term <span>↝</span></button>
+        <div class="vocab-search" role="search"><span aria-hidden="true">⌕</span><input id="vocabSearch" type="search" autocomplete="off" placeholder="例：Wayfinding / Progressive disclosure / 文脈保持" aria-label="デザイン語彙を検索" /><kbd>⌘ K</kbd></div>
+        <button id="randomTerm" type="button">Random term <span aria-hidden="true">↝</span></button>
       </div>
       <div id="vocabStats" class="vocab-stats"></div>
     </section>
@@ -32,7 +34,7 @@
     <section class="vocab-browser">
       <div class="vocab-browser-head">
         <div><p class="eyebrow">BROWSE CONCEPTS</p><h2>語彙から、設計を見る。</h2></div>
-        <p id="vocabCount"></p>
+        <p id="vocabCount" aria-live="polite"></p>
       </div>
       <div id="categoryFilters" class="vocab-category-filters" aria-label="語彙カテゴリ"></div>
       <div class="vocab-layout">
