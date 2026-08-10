@@ -21,7 +21,8 @@
   function normalize(value) { return String(value || '').toLowerCase().normalize('NFKC'); }
   function searchable(p) {
     const expert = vocabulary ? vocabulary.searchText(p) : '';
-    return normalize([p.brand,p.family,p.name,p.oneLiner,p.description,...p.tags,...p.uiParts,...p.visual,...p.useCases,p.prompt,expert].join(' '));
+    const taxonomy = [p.domain,p.medium,p.archetype,p.interactionModel,...(p.philosophy||[]),...(p.implementationTerms||[]),...(p.designTerms||[]),...(p.philosophyTerms||[])].join(' ');
+    return normalize([p.brand,p.family,p.name,p.oneLiner,p.description,...p.tags,...p.uiParts,...p.visual,...p.useCases,p.prompt,taxonomy,expert].join(' '));
   }
   function shuffle(items) {
     const arr = [...items];
