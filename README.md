@@ -13,7 +13,8 @@
 - Design Space上の **Nearest / Farthest** を計算し、どの軸が距離を作っているか比較する
 - **Opposite Reference** で、現在の設計優先順位を反転した先に近い実在パターンを提示する
 - **Design Map** で6軸から任意の2軸を選び、51件の密集・Frontier・空白方向をインタラクティブに探索する
-- 異なるブランドからランダムに3パターンを抽出し、意図的なセレンディピティを作る
+- **Random / Far Apart / Weird Combination** の3モードで、偶然・距離・異質さから3つの参照を衝突させる
+- 抽出した3件を統合するためのAI briefを自動生成・コピーする
 - AIへそのまま渡せる、専門語彙＋Design Space座標＋対極参照付きの設計指示をコピーする
 - Web/SaaSだけでなく、Game UI / OS / Physical Space / Public Service / Old Webまで同じ設計空間に置く
 
@@ -133,6 +134,40 @@ Open Space is explicitly a 2D projection heuristic, not a claim that the same re
 
 The Design Map is reachable from the global header and the top-page map entry card.
 
+## Collision Engine / Random modes
+
+The top-page discovery module has three distinct draw modes.
+
+### Random
+
+Selects three different brands by ordinary randomized sampling. This keeps serendipity as the primary mechanism rather than optimizing a score.
+
+### Far Apart
+
+Uses the full six-dimensional Design Space. It evaluates triples from different brands and applies a **maximin** rule: the minimum of the three pairwise distances is maximized first, with average distance used as additional separation pressure.
+
+This prevents a visually impressive triangle where two references are actually close together.
+
+### Weird Combination
+
+Looks for productive incompatibility rather than pure geometric distance. Candidate triples are scored using:
+
+- average six-dimensional distance
+- number of distinct Domains
+- number of distinct Mediums
+- number of distinct Archetypes
+- pairwise dissimilarity of Philosophy terms
+
+Instead of always returning one deterministic mathematical optimum, it randomly samples from a small pool of the highest-scoring triples so repeated draws remain generative.
+
+Every draw shows:
+
+- average and minimum pairwise Design Distance
+- number of Domains and Archetypes represented
+- the three selected pattern cards
+- a deterministic **「この3つを混ぜるなら？」AI brief** that assigns each reference a principle role and explicitly asks the model not to average away the contradictions
+- one-click copying of that collision brief
+
 ## Design grammar
 
 `vocabulary.js` maps patterns to specialist terms.
@@ -149,6 +184,7 @@ The Design Map is reachable from the global header and the top-page map entry ca
 - `taxonomy.js` — schema v2 and Design Space enrichment
 - `design-space.js` / `styles-design-space.css` — six-axis visualization, pairwise distance, Diversity Score and Opposite Reference
 - `map.html` / `map.js` / `styles-map.css` — interactive two-axis Design Map and sparse-zone discovery
+- `app.js` / `styles-enhancements.css` — search, filtering and three-mode collision engine
 - `ui-extra.js` / `styles-extra.css` — Japanese media mocks
 - `ui-wave1.js` / `styles-wave1.css` — mocks for the 12 extremes
 
