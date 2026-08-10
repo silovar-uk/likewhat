@@ -2,6 +2,7 @@
   const patterns = window.LIKEWHAT_PATTERNS || [];
   const { render, esc } = window.LikeWhatUI;
   const vocabulary = window.LikeWhatVocabulary;
+  const designSpace = window.LikeWhatDesignSpace;
   const input = document.getElementById('searchInput');
   const brandFilters = document.getElementById('brandFilters');
   const partFilters = document.getElementById('partFilters');
@@ -10,6 +11,8 @@
   const empty = document.getElementById('emptyState');
   const randomDraw = document.getElementById('randomDraw');
   const randomResults = document.getElementById('randomResults');
+  const randomModes = document.getElementById('randomModes');
+  let randomMode = 'random';
   let brand = 'All';
   let part = 'All';
   let query = new URLSearchParams(location.search).get('q') || '';
@@ -17,6 +20,11 @@
 
   const brands = [...new Set(patterns.map(p => p.brand))];
   const parts = ['All', 'Navigation', 'List', 'Dashboard', 'Settings', 'Editor', 'Command', 'Cards', 'Detail'];
+  const modeCopy = {
+    random:{title:'Random 3',label:'3つ引く',description:'異なるブランドから、偶然の組み合わせを3つ引く。'},
+    far:{title:'Far Apart',label:'遠い3つを引く',description:'6次元Design Spaceで、互いの最短距離が最大になる3つを選ぶ。'},
+    weird:{title:'Weird Combination',label:'変な3つを引く',description:'距離だけでなくDomain・Archetype・設計思想の不一致も加点し、異質な3つを衝突させる。'}
+  };
 
   function normalize(value) { return String(value || '').toLowerCase().normalize('NFKC'); }
   function searchable(p) {
@@ -81,24 +89,135 @@
     </section>`).join('');
   }
 
-  function drawThree() {
-    if (!randomDraw || !randomResults || patterns.length < 3) return;
+  function ordinaryTriple() {
     const selected = [];
     for (const brandName of shuffle(brands)) {
       const candidates = patterns.filter(p => p.brand === brandName);
       if (candidates.length) selected.push(candidates[Math.floor(Math.random() * candidates.length)]);
       if (selected.length === 3) break;
     }
-    if (selected.length < 3) {
-      for (const p of shuffle(patterns)) {
-        if (!selected.some(x => x.id === p.id)) selected.push(p);
-        if (selected.length === 3) break;
+    return selected;
+  }
+
+  function pairDistances(items) {
+    if (!designSpace) return [0,0,0];
+    return [
+      designSpace.distanceBetween(items[0].designSpace,items[1].designSpace),
+      designSpace.distanceBetween(items[0].designSpace,items[2].designSpace),
+      designSpace.distanceBetween(items[1].designSpace,items[2].designSpace)
+    ];
+  }
+
+  function farApartTriple() {
+    if (!designSpace) return ordinaryTriple();
+    const valid = patterns.filter(p=>p.designSpace);
+    let best = null;
+    for (let i=0;i<valid.length-2;i++) {
+      for (let j=i+1;j<valid.length-1;j++) {
+        for (let k=j+1;k<valid.length;k++) {
+          if (new Set([valid[i].brand,valid[j].brand,valid[k].brand]).size<3) continue;
+          const items=[valid[i],valid[j],valid[k]];
+          const distances=pairDistances(items);
+          const min=Math.min(...distances);
+          const avg=distances.reduce((a,b)=>a+b,0)/3;
+          const score=min*2+avg;
+          if (!best || score>best.score) best={items,distances,min,avg,score};
+        }
       }
     }
-    randomResults.innerHTML = `<div class="random-grid">${selected.map(card).join('')}</div>`;
+    return best?.items || ordinaryTriple();
+  }
+
+  function jaccardDissimilarity(a,b) {
+    const A=new Set((a||[]).map(normalize));
+    const B=new Set((b||[]).map(normalize));
+    const union=new Set([...A,...B]);
+    if (!union.size) return 1;
+    let intersection=0;
+    A.forEach(v=>{if(B.has(v))intersection++;});
+    return 1-intersection/union.size;
+  }
+
+  function weirdTriple() {
+    if (!designSpace) return ordinaryTriple();
+    const valid = patterns.filter(p=>p.designSpace);
+    const ranked=[];
+    for (let i=0;i<valid.length-2;i++) {
+      for (let j=i+1;j<valid.length-1;j++) {
+        for (let k=j+1;k<valid.length;k++) {
+          const items=[valid[i],valid[j],valid[k]];
+          if (new Set(items.map(x=>x.brand)).size<3) continue;
+          const distances=pairDistances(items);
+          const avgDistance=distances.reduce((a,b)=>a+b,0)/3;
+          const domainVariety=new Set(items.map(x=>x.domain)).size;
+          const mediumVariety=new Set(items.map(x=>x.medium)).size;
+          const archetypeVariety=new Set(items.map(x=>x.archetype)).size;
+          const philosophyGap=(
+            jaccardDissimilarity(items[0].philosophy,items[1].philosophy)+
+            jaccardDissimilarity(items[0].philosophy,items[2].philosophy)+
+            jaccardDissimilarity(items[1].philosophy,items[2].philosophy)
+          )/3;
+          const score=avgDistance+(domainVariety-1)*5+(mediumVariety-1)*2.5+(archetypeVariety-1)*4+philosophyGap*12;
+          ranked.push({items,score});
+        }
+      }
+    }
+    ranked.sort((a,b)=>b.score-a.score);
+    const pool=ranked.slice(0,Math.min(18,ranked.length));
+    return pool[Math.floor(Math.random()*pool.length)]?.items || farApartTriple();
+  }
+
+  function selectionForMode() {
+    if (randomMode==='far') return farApartTriple();
+    if (randomMode==='weird') return weirdTriple();
+    return ordinaryTriple();
+  }
+
+  function collisionPrompt(selected) {
+    const [a,b,c]=selected;
+    return `次の3つの参照を、表層的に平均化せず、役割を分けて1つのデザインへ統合してください。\n\n1. ${a.brand} / ${a.name}\n   担当する原則: ${a.philosophy?.slice(0,2).join(' / ') || a.tags.slice(0,2).join(' / ')}\n2. ${b.brand} / ${b.name}\n   担当する原則: ${b.philosophy?.slice(0,2).join(' / ') || b.tags.slice(0,2).join(' / ')}\n3. ${c.brand} / ${c.name}\n   担当する原則: ${c.philosophy?.slice(0,2).join(' / ') || c.tags.slice(0,2).join(' / ')}\n\n共通化するのは色や装飾ではなく、情報階層・操作モデル・感情強度・探索性・秩序性です。3つの矛盾を消さず、どの場面でどの参照を優先するか明示してください。`;
+  }
+
+  function randomMeta(selected) {
+    const distances=designSpace?pairDistances(selected):[];
+    const min=distances.length?Math.min(...distances):null;
+    const avg=distances.length?distances.reduce((a,b)=>a+b,0)/distances.length:null;
+    const domains=new Set(selected.map(x=>x.domain)).size;
+    const archetypes=new Set(selected.map(x=>x.archetype)).size;
+    const prompt=collisionPrompt(selected);
+    return `<div class="random-analysis">
+      <div class="random-analysis-copy">
+        <p class="eyebrow">${esc(modeCopy[randomMode].title)} / DRAW ANALYSIS</p>
+        <h3>${randomMode==='random'?'偶然を、そのまま入口にする。':randomMode==='far'?'設計空間の三角形を、できるだけ大きくする。':'矛盾を消さず、ひとつの案へ衝突させる。'}</h3>
+        <p>${esc(modeCopy[randomMode].description)}</p>
+      </div>
+      <div class="random-metrics">
+        ${avg!==null?`<span><small>AVG DISTANCE</small><b>${avg.toFixed(1)}</b></span>`:''}
+        ${min!==null?`<span><small>MIN DISTANCE</small><b>${min.toFixed(1)}</b></span>`:''}
+        <span><small>DOMAINS</small><b>${domains}</b></span>
+        <span><small>ARCHETYPES</small><b>${archetypes}</b></span>
+      </div>
+      <details class="collision-brief"><summary>この3つを混ぜるなら？ <span>AI brief</span></summary><div><pre>${esc(prompt)}</pre><button type="button" data-copy-collision>指示文をコピー</button></div></details>
+    </div>`;
+  }
+
+  function drawThree() {
+    if (!randomDraw || !randomResults || patterns.length < 3) return;
+    const selected = selectionForMode();
+    randomResults.innerHTML = `${randomMeta(selected)}<div class="random-grid">${selected.map(card).join('')}</div>`;
     randomDraw.querySelector('span').textContent = '引き直す';
-    randomDraw.querySelector('small').textContent = 'Draw again';
+    randomDraw.querySelector('small').textContent = modeCopy[randomMode].title;
     randomResults.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function setRandomMode(mode) {
+    randomMode=modeCopy[mode]?mode:'random';
+    randomModes?.querySelectorAll('[data-random-mode]').forEach(btn=>btn.classList.toggle('active',btn.dataset.randomMode===randomMode));
+    if(randomDraw){
+      randomDraw.querySelector('span').textContent=modeCopy[randomMode].label;
+      randomDraw.querySelector('small').textContent=modeCopy[randomMode].title;
+    }
+    if(randomResults) randomResults.innerHTML='';
   }
 
   function update() { renderBrandFilters(); renderPartFilters(); renderResults(); }
@@ -107,8 +226,17 @@
   partFilters.addEventListener('click', e => { const btn=e.target.closest('[data-part]'); if(!btn)return; part=btn.dataset.part; update(); });
   input.addEventListener('input', () => { query=input.value; renderResults(); });
   document.querySelector('.query-examples')?.addEventListener('click', e => { const btn=e.target.closest('[data-query]'); if(!btn)return; input.value=btn.dataset.query; query=btn.dataset.query; brand='All'; part='All'; update(); input.focus(); });
+  randomModes?.addEventListener('click',e=>{const btn=e.target.closest('[data-random-mode]');if(btn)setRandomMode(btn.dataset.randomMode);});
   randomDraw?.addEventListener('click', drawThree);
+  randomResults?.addEventListener('click',async e=>{
+    const btn=e.target.closest('[data-copy-collision]');
+    if(!btn)return;
+    const pre=btn.closest('.collision-brief')?.querySelector('pre');
+    if(!pre)return;
+    try{await navigator.clipboard.writeText(pre.textContent);btn.textContent='コピー済み';setTimeout(()=>btn.textContent='指示文をコピー',1600);}catch{btn.textContent='選択してコピー';}
+  });
   document.addEventListener('keydown', e => { if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();input.focus();input.select();} if(e.key==='Escape'&&document.activeElement===input){input.value='';query='';input.blur();update();} });
 
+  setRandomMode('random');
   update();
 })();
