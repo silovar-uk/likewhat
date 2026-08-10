@@ -201,11 +201,33 @@ Each term node provides:
 - links back to every connected pattern
 - a direct link to search the main pattern library with that concept
 
-Pattern detail pages now link specialist terms in `DESIGN GRAMMAR` directly into their Vocabulary nodes, creating the path:
+Pattern detail pages link specialist terms in `DESIGN GRAMMAR` directly into their Vocabulary nodes, creating the path:
 
 `Pattern → Vocabulary → different-world Pattern`
 
 This relationship is intentionally data-driven: as new references connect to existing vocabulary, co-occurrence and cross-world traversal improve without hand-authoring a fixed concept graph.
+
+## Phase 9 QA / Accessibility / Mobile polish
+
+`styles-qa.css` is a final shared layer loaded after page-specific styles. It intentionally changes interaction quality more than visual identity.
+
+The pass includes:
+
+- consistent **Skip to content** links and landmark navigation across main, Pattern, Design Map and Vocabulary pages
+- a shared `:focus-visible` treatment for links, buttons, inputs, selects, summaries and custom focusable elements
+- `aria-pressed` state for brand filters, pattern-type filters, Collision Engine modes, Vocabulary categories / selected terms and Design Map presets / selected map points
+- Design Map points exposed as selectable buttons rather than misleading links; Enter / Space selects and arrow keys move between plotted references
+- non-interactive Open Space records changed from fake buttons to semantic content
+- live result-count announcements for filtering and vocabulary browsing
+- minimum practical touch-target sizing for primary interactive controls
+- explicit wrapping rules for long English/Japanese specialist terminology
+- `prefers-reduced-motion` support in CSS plus non-smooth programmatic scrolling where appropriate
+- mobile global navigation that remains readable and horizontally scrollable instead of shrinking labels until they are illegible
+- hover motion suppressed on touch-first devices
+- sticky-header-aware scroll margins for in-page targets
+- consistent global navigation across Map and Vocabulary, including the GitHub link
+
+The goal is not strict certification against a particular conformance level; it is a concrete usability and accessibility hardening pass over the current static product.
 
 ## Design grammar
 
@@ -225,6 +247,7 @@ This relationship is intentionally data-driven: as new references connect to exi
 - `map.html` / `map.js` / `styles-map.css` — interactive two-axis Design Map and sparse-zone discovery
 - `vocabulary.html` / `vocabulary-page.js` / `styles-vocabulary.css` — searchable knowledge graph, co-occurrence and cross-world traversal
 - `app.js` / `styles-enhancements.css` — search, filtering and three-mode collision engine
+- `styles-qa.css` — shared focus, mobile navigation, reduced-motion and accessibility hardening layer
 - `ui-extra.js` / `styles-extra.css` — Japanese media mocks
 - `ui-wave1.js` / `styles-wave1.css` — mocks for the 12 extremes
 
