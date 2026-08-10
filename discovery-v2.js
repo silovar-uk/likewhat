@@ -186,7 +186,7 @@
 
     const section=document.createElement('section');
     section.className='detail-block next-references-block';
-    section.innerHTML=`<div class="next-references-heading"><div><p class="eyebrow">NEXT REFERENCES / EXPLAINABLE ROUTES</p><h2>次に何を見ると、この設計がもっと分かる？</h2><p>似ているもの、原則を共有する別文脈、優先順位を反転したもの。推薦理由を3種類に分け、同じ「関連」を混ぜない。</p></div><a href="compare.html?a=${encodeURIComponent(current.id)}&b=${encodeURIComponent(lanes[0].target.id)}">Contrastを開く ↗</a></div><div class="next-reference-grid">${lanes.map(laneMarkup).join('')}</div><p class="next-references-note">推薦は現在の63パターン、6軸Design Space、Vocabulary、編集上のrelated指定から計算する。SimilarityとOppositionは同じ意味ではない。</p>`;
+    section.innerHTML=`<div class="next-references-heading"><div><p class="eyebrow">NEXT REFERENCES / EXPLAINABLE ROUTES</p><h2>次に何を見ると、この設計がもっと分かる？</h2><p>似ているもの、原則を共有する別文脈、優先順位を反転したもの。推薦理由を3種類に分け、同じ「関連」を混ぜない。</p></div><a href="compare.html?a=${encodeURIComponent(current.id)}&b=${encodeURIComponent(lanes[0].target.id)}">Contrastを開く ↗</a></div><div class="next-reference-grid">${lanes.map(laneMarkup).join('')}</div><p class="next-references-note">推薦は現在の${patterns.length}パターン、6軸Design Space、Vocabulary、編集上のrelated指定から計算する。SimilarityとOppositionは同じ意味ではない。</p>`;
 
     const oldCompare=root.querySelector('.compare-route-block');
     if(oldCompare)oldCompare.replaceWith(section);
