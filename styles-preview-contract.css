@@ -1,13 +1,13 @@
-/* Shared preview contract: embedded visual samples must never escape their viewport. */
+/* Shared preview contract: every visual sample is rendered on one virtual canvas and fitted into its viewport. */
 .card-preview,
+.detail-preview,
 .distance-reference-preview,
 .opposite-reference-preview,
 .map-inspector-preview,
 .compare-preview,
 .compare-route-preview,
 .vocab-pattern-preview,
-.related-grid > a > div,
-.collision-reference .card-preview {
+.related-grid > a > div {
   position:relative;
   min-width:0;
   overflow:hidden;
@@ -15,15 +15,20 @@
   contain:layout paint;
 }
 
+/* Give every viewport a definite box before the virtual canvas is positioned absolutely. */
+.detail-preview{height:clamp(320px,44vw,520px)}
+.related-grid > a > div{height:120px}
+
+/* Fallback before JS fitting: still contain any size-specific min-height. */
 .card-preview > .mini-ui,
+.detail-preview > .mini-ui,
 .distance-reference-preview > .mini-ui,
 .opposite-reference-preview > .mini-ui,
 .map-inspector-preview > .mini-ui,
 .compare-preview > .mini-ui,
 .compare-route-preview > .mini-ui,
 .vocab-pattern-preview > .mini-ui,
-.related-grid > a > div > .mini-ui,
-.collision-reference .card-preview > .mini-ui {
+.related-grid > a > div > .mini-ui {
   width:100% !important;
   max-width:100% !important;
   height:100% !important;
@@ -33,41 +38,31 @@
   border-radius:inherit;
 }
 
-.mini-ui--card,
-.mini-ui--related {
-  min-height:0 !important;
-  max-width:100%;
+/* Once fitted, all mocks use the exact same 420×236 virtual canvas. */
+.preview-fit > .mini-ui {
+  position:absolute !important;
+  width:420px !important;
+  min-width:420px !important;
+  max-width:none !important;
+  height:236px !important;
+  min-height:236px !important;
+  max-height:none !important;
+  margin:0 !important;
+  transform:translate(-50%,-50%) scale(var(--preview-scale,1));
+  transform-origin:center center;
+  will-change:transform;
 }
 
 .mini-ui,
-.mini-ui * {
-  box-sizing:border-box;
-}
+.mini-ui *{box-sizing:border-box}
+.mini-ui > *{min-width:0;max-width:100%}
 
-.mini-ui > * {
-  min-width:0;
-  max-width:100%;
-}
+/* Embedded screens should never inherit the large-detail minimum. */
+.mini-ui--card,.mini-ui--related{min-height:0 !important;max-width:100%}
+.map-inspector-preview,.compare-preview{background:var(--surface)}
 
-/* The real Pattern hero is the only place allowed to use the large detail canvas. */
-.detail-preview > .mini-ui--detail {
-  width:100%;
-  max-width:100%;
-}
-
-/* Embedded previews use bounded canvases instead of inheriting detail minimums. */
-.map-inspector-preview,
-.compare-preview {
-  background:var(--surface);
-}
-
-.map-inspector-preview > .mini-ui,
-.compare-preview > .mini-ui {
-  min-height:0 !important;
-}
-
-/* Collision Engine: one render pass, one board, exactly three cards. */
-.random-results:not(:empty) {
+/* Collision Engine: one render pass, one analysis block, one grid containing exactly three references. */
+.random-results:not(:empty){
   display:grid;
   grid-template-columns:1fr;
   gap:0;
@@ -78,8 +73,7 @@
   background:rgba(251,250,247,.76);
   overflow:hidden;
 }
-
-.random-results:not(:empty) > .random-analysis {
+.random-results:not(:empty)>.random-analysis{
   margin:0;
   padding:2px 2px 13px;
   border:0;
@@ -87,15 +81,13 @@
   border-bottom:1px solid var(--line);
   background:transparent;
 }
-
-.random-results:not(:empty) > .random-grid {
+.random-results:not(:empty)>.random-grid{
   display:grid;
   grid-template-columns:repeat(3,minmax(0,1fr));
   gap:10px;
   padding:12px 0 0;
 }
-
-.random-results:not(:empty) > .random-grid .pattern-card {
+.random-results:not(:empty)>.random-grid .pattern-card{
   min-width:0;
   height:100%;
   display:grid;
@@ -103,63 +95,46 @@
   border-radius:16px;
   overflow:hidden;
 }
+.random-results:not(:empty)>.random-grid .card-preview{height:auto;min-height:0;padding:10px}
+.random-results:not(:empty)>.random-grid .card-body{min-width:0;display:flex;flex-direction:column;padding:13px 14px 14px}
+.random-results:not(:empty)>.random-grid .card-meta{font-size:7px}
+.random-results:not(:empty)>.random-grid h3{font-size:15px;margin:7px 0 5px;overflow-wrap:anywhere}
+.random-results:not(:empty)>.random-grid .one-liner{font-size:10px;line-height:1.55;min-height:0}
+.random-results:not(:empty)>.random-grid .tag-row{margin-top:10px}
+.random-results:not(:empty)>.random-grid .tag-row span{font-size:7px;padding:4px 6px}
+.random-results:not(:empty)>.random-grid .card-arrow{margin-top:auto;padding-top:10px}
 
-.random-results:not(:empty) > .random-grid .card-preview {
-  height:auto;
-  min-height:0;
-  padding:10px;
-}
-
-.random-results:not(:empty) > .random-grid .card-body {
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-  padding:13px 14px 14px;
-}
-
-.random-results:not(:empty) > .random-grid .card-meta {font-size:7px}
-.random-results:not(:empty) > .random-grid h3 {font-size:15px;margin:7px 0 5px;overflow-wrap:anywhere}
-.random-results:not(:empty) > .random-grid .one-liner {font-size:10px;line-height:1.55;min-height:0}
-.random-results:not(:empty) > .random-grid .tag-row {margin-top:10px}
-.random-results:not(:empty) > .random-grid .tag-row span {font-size:7px;padding:4px 6px}
-.random-results:not(:empty) > .random-grid .card-arrow {margin-top:auto;padding-top:10px}
-
-/* Legacy DOM-polish classes are neutralized if stale cached markup survives one reload. */
-.random-analysis.collision-consumed,
-.random-grid.collision-consumed {
-  display:grid !important;
-}
-.collision-board-head,
-.collision-reference-grid {
-  display:none !important;
-}
+/* Old DOM-reparenting output is explicitly suppressed. The new home no longer loads that script. */
+.collision-board-head,.collision-reference-grid{display:none !important}
+.random-analysis.collision-consumed,.random-grid.collision-consumed{display:grid !important}
 
 @media(max-width:900px){
-  .random-results:not(:empty) > .random-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .random-results:not(:empty) > .random-grid .pattern-card:last-child{grid-column:1/-1}
+  .random-results:not(:empty)>.random-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .random-results:not(:empty)>.random-grid .pattern-card:last-child{grid-column:1/-1}
 }
 
 @media(max-width:650px){
+  .detail-preview{height:clamp(260px,64vw,340px)}
+  .related-grid > a > div{height:100px}
   .random-results:not(:empty){padding:10px;border-radius:17px}
-  .random-results:not(:empty) > .random-analysis{padding-bottom:10px}
-  .random-results:not(:empty) > .random-grid{grid-template-columns:1fr;gap:8px}
-  .random-results:not(:empty) > .random-grid .pattern-card,
-  .random-results:not(:empty) > .random-grid .pattern-card:last-child{
+  .random-results:not(:empty)>.random-analysis{padding-bottom:10px}
+  .random-results:not(:empty)>.random-grid{grid-template-columns:1fr;gap:8px}
+  .random-results:not(:empty)>.random-grid .pattern-card,
+  .random-results:not(:empty)>.random-grid .pattern-card:last-child{
     grid-column:auto;
     grid-template-columns:108px minmax(0,1fr);
     grid-template-rows:none;
     min-height:148px;
   }
-  .random-results:not(:empty) > .random-grid .card-preview{
-    height:100%;
-    padding:8px;
-    border-bottom:0;
-    border-right:1px solid var(--line);
-  }
-  .random-results:not(:empty) > .random-grid .card-body{padding:11px 12px}
-  .random-results:not(:empty) > .random-grid .tag-row{display:none}
+  .random-results:not(:empty)>.random-grid .card-preview{height:100%;padding:8px;border-bottom:0;border-right:1px solid var(--line)}
+  .random-results:not(:empty)>.random-grid .card-body{padding:11px 12px}
+  .random-results:not(:empty)>.random-grid .tag-row{display:none}
 }
 
 @media(max-width:420px){
-  .random-results:not(:empty) > .random-grid .pattern-card{grid-template-columns:94px minmax(0,1fr)}
+  .random-results:not(:empty)>.random-grid .pattern-card{grid-template-columns:94px minmax(0,1fr)}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .preview-fit>.mini-ui{will-change:auto}
 }
