@@ -12,6 +12,7 @@
 - **Diversity Score** で、現在のライブラリ内にどれだけ似た参照が少ないかを測る
 - Design Space上の **Nearest / Farthest** を計算し、どの軸が距離を作っているか比較する
 - **Opposite Reference** で、現在の設計優先順位を反転した先に近い実在パターンを提示する
+- **Design Map** で6軸から任意の2軸を選び、51件の密集・Frontier・空白方向をインタラクティブに探索する
 - 異なるブランドからランダムに3パターンを抽出し、意図的なセレンディピティを作る
 - AIへそのまま渡せる、専門語彙＋Design Space座標＋対極参照付きの設計指示をコピーする
 - Web/SaaSだけでなく、Game UI / OS / Physical Space / Public Service / Old Webまで同じ設計空間に置く
@@ -111,16 +112,26 @@ Pattern detail pages show:
 - all six axes as Current → Opposite values
 - explicit distinction between geometric Farthest and editorial Opposite
 
-Examples of the language layer include:
-
-- 最短完遂と予測可能性 → 寄り道・発見・探索
-- 静かで低刺激 → 高揚・演出・感情刺激
-- 観察・読解 → 直接操作・即時反応
-- 系統性・反復 → 競合・揺らぎ・カオス
-
 A curated opposite can override the computed result by adding its pattern ID to `opposites`.
 
-These distance and opposition functions are the foundation for the global Design Map and Far Apart / Weird Combination random modes.
+## Design Map
+
+`map.html` is an interactive 2D projection of the six-dimensional Design Space. It deliberately avoids an opaque dimensionality-reduction algorithm: users choose the two axes they want to inspect, so the meaning of every point remains explainable.
+
+Features:
+
+- selectable X and Y axes across all six Design Space dimensions
+- presets such as Exploration × Order, Emotion × Density and Authority × Interaction
+- Domain filtering
+- point size / outer ring to surface high-Diversity **Frontier** patterns
+- hover detail and click-to-inspect interaction
+- selected pattern preview with Diversity, Nearest and Opposite context
+- three automatically sampled **Open Space** markers showing sparse coordinates in the current 2D projection
+- horizontal scrolling on small screens instead of compressing the map until labels become unreadable
+
+Open Space is explicitly a 2D projection heuristic, not a claim that the same region is empty in the full six-dimensional space.
+
+The Design Map is reachable from the global header and the top-page map entry card.
 
 ## Design grammar
 
@@ -137,6 +148,7 @@ These distance and opposition functions are the foundation for the global Design
 - `patterns-wave1.js` — 12 design-space extremes
 - `taxonomy.js` — schema v2 and Design Space enrichment
 - `design-space.js` / `styles-design-space.css` — six-axis visualization, pairwise distance, Diversity Score and Opposite Reference
+- `map.html` / `map.js` / `styles-map.css` — interactive two-axis Design Map and sparse-zone discovery
 - `ui-extra.js` / `styles-extra.css` — Japanese media mocks
 - `ui-wave1.js` / `styles-wave1.css` — mocks for the 12 extremes
 
