@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="styles-wave1.css" />
   <link rel="stylesheet" href="styles-wave2.css" />
   <link rel="stylesheet" href="styles-qa.css" />
+  <link rel="stylesheet" href="styles-home.css" />
 </head>
 <body>
   <a class="skip-link" href="#main-content">本文へ移動</a>
@@ -36,31 +37,31 @@
       </div>
     </section>
 
-    <section class="map-entry" aria-labelledby="mapEntryTitle">
-      <div>
-        <p class="eyebrow">EXPLORE THE DESIGN SPACE</p>
-        <h2 id="mapEntryTitle">ブランドではなく、座標から探す。</h2>
-        <p>6軸から2軸を選び、63パターンの密集地帯・Frontier・空白方向を一枚の地図で見る。</p>
+    <section class="explore-hub" aria-labelledby="exploreHubTitle">
+      <div class="explore-hub-head">
+        <div>
+          <p class="eyebrow">EXPLORE / THREE LENSES</p>
+          <h2 id="exploreHubTitle">同じライブラリを、3つの角度から。</h2>
+          <p>場所・言葉・差分。ブランド名以外の入口を、小さな道具として使い分ける。</p>
+        </div>
       </div>
-      <a href="map.html"><span>Design Mapを開く</span><small>Explore the map ↗</small></a>
-    </section>
-
-    <section class="map-entry" aria-labelledby="vocabEntryTitle">
-      <div>
-        <p class="eyebrow">EXPLORE THE DESIGN LANGUAGE</p>
-        <h2 id="vocabEntryTitle">ブランドではなく、言葉から渡る。</h2>
-        <p>Wayfinding、Progressive Disclosure、Deliberate Frictionなどの概念から、業界をまたいで同じ設計原則を持つパターンへ移動する。</p>
+      <div class="explore-tool-grid">
+        <a class="explore-tool" href="map.html">
+          <div class="explore-visual explore-map-visual" aria-hidden="true"><i></i><i></i><i></i><span class="x">ORDER →</span><span class="y">↑ DENSITY</span></div>
+          <div class="explore-tool-copy"><small>01 / DESIGN SPACE</small><strong>座標から探す</strong><span>63 references · 6 axes</span></div>
+          <em aria-hidden="true">↗</em>
+        </a>
+        <a class="explore-tool" href="vocabulary.html">
+          <div class="explore-visual explore-vocab-visual" aria-hidden="true"><b>Wayfinding</b><b>Friction</b><b>Density</b></div>
+          <div class="explore-tool-copy"><small>02 / VOCABULARY</small><strong>言葉から渡る</strong><span>concept → different world</span></div>
+          <em aria-hidden="true">↗</em>
+        </a>
+        <a class="explore-tool" href="compare.html">
+          <div class="explore-visual explore-contrast-visual" aria-hidden="true"><div></div><span>Δ</span><div></div></div>
+          <div class="explore-tool-copy"><small>03 / CONTRAST</small><strong>差分から学ぶ</strong><span>A ↔ B · priorities</span></div>
+          <em aria-hidden="true">↗</em>
+        </a>
       </div>
-      <a href="vocabulary.html"><span>Vocabularyを開く</span><small>Explore concepts ↗</small></a>
-    </section>
-
-    <section class="map-entry" aria-labelledby="contrastEntryTitle">
-      <div>
-        <p class="eyebrow">EXPLORE BY CONTRAST</p>
-        <h2 id="contrastEntryTitle">ブランドではなく、差分から学ぶ。</h2>
-        <p>「似ているのに違う」2つを並べ、Design Space・設計語彙・適合文脈の差から、どの優先順位が体験を分けるのかを見る。</p>
-      </div>
-      <a href="compare.html"><span>Contrast Pairを開く</span><small>Compare references ↗</small></a>
     </section>
 
     <section class="randomizer" aria-labelledby="randomTitle">
@@ -104,5 +105,6 @@
   <script src="ui-wave1.js"></script>
   <script src="ui-wave2.js"></script>
   <script src="app.js"></script>
+  <script src="home-polish.js"></script>
 </body>
 </html>
