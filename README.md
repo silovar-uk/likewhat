@@ -11,8 +11,9 @@
 - 各詳細ページで6軸の **Design Space** をレーダー＋両極スケールで可視化し、ライブラリ平均と比較する
 - **Diversity Score** で、現在のライブラリ内にどれだけ似た参照が少ないかを測る
 - Design Space上の **Nearest / Farthest** を計算し、どの軸が距離を作っているか比較する
+- **Opposite Reference** で、現在の設計優先順位を反転した先に近い実在パターンを提示する
 - 異なるブランドからランダムに3パターンを抽出し、意図的なセレンディピティを作る
-- AIへそのまま渡せる、専門語彙＋Design Space座標付きの設計指示をコピーする
+- AIへそのまま渡せる、専門語彙＋Design Space座標＋対極参照付きの設計指示をコピーする
 - Web/SaaSだけでなく、Game UI / OS / Physical Space / Public Service / Old Webまで同じ設計空間に置く
 
 ## Library
@@ -50,6 +51,8 @@ Each pattern can now carry:
 - `opposites`
 - `related`
 
+`opposites` can contain curated pattern IDs. When no curated opposite is supplied, Like What? computes one from Design Space.
+
 ## Design Space
 
 `design-space.js` treats every pattern as a point in a six-dimensional editorial design space. The coordinates are not quality scores; they are comparative, heuristic positions used to describe contrast between patterns.
@@ -85,9 +88,39 @@ For each pattern:
 - **Farthest** = geometrically farthest pattern in the current library
 - **Axis delta** = the three axes contributing the largest difference between two references
 
-Diversity Score is a relative library statistic, not a quality score. A high score means the pattern occupies a comparatively underrepresented region of the current reference space. `Farthest` is deliberately described as a geometric result rather than an editorial “opposite”; philosophical opposite references are a separate next phase.
+Diversity Score is a relative library statistic, not a quality score. A high score means the pattern occupies a comparatively underrepresented region of the current reference space.
 
-These distance functions are the foundation for opposite references, the global Design Map and Far Apart random selection.
+## Opposite Reference
+
+`Farthest` and `Opposite` are deliberately different concepts.
+
+- **Farthest** asks: which existing pattern is geometrically farthest from the current point?
+- **Opposite** asks: if every design priority were inverted, which existing reference is closest to that ideal inverted position?
+
+The ideal opposite vector is calculated axis by axis:
+
+`oppositeAxis = 100 - currentAxis`
+
+The computed editorial opposite is the candidate closest to that ideal vector. Small penalties are added for the same brand, domain, archetype and medium so that a useful cross-context reference is preferred when distances are similar.
+
+Pattern detail pages show:
+
+- **Opposition Fit** = closeness to the ideal inverted vector
+- current pattern and opposite reference side by side
+- the three strongest priority reversals in plain Japanese
+- all six axes as Current → Opposite values
+- explicit distinction between geometric Farthest and editorial Opposite
+
+Examples of the language layer include:
+
+- 最短完遂と予測可能性 → 寄り道・発見・探索
+- 静かで低刺激 → 高揚・演出・感情刺激
+- 観察・読解 → 直接操作・即時反応
+- 系統性・反復 → 競合・揺らぎ・カオス
+
+A curated opposite can override the computed result by adding its pattern ID to `opposites`.
+
+These distance and opposition functions are the foundation for the global Design Map and Far Apart / Weird Combination random modes.
 
 ## Design grammar
 
@@ -103,7 +136,7 @@ These distance functions are the foundation for opposite references, the global 
 - `patterns-extra.js` — オモコロ / 集英社 / Nintendo expansion
 - `patterns-wave1.js` — 12 design-space extremes
 - `taxonomy.js` — schema v2 and Design Space enrichment
-- `design-space.js` / `styles-design-space.css` — six-axis visualization, pairwise distance and Diversity Score
+- `design-space.js` / `styles-design-space.css` — six-axis visualization, pairwise distance, Diversity Score and Opposite Reference
 - `ui-extra.js` / `styles-extra.css` — Japanese media mocks
 - `ui-wave1.js` / `styles-wave1.css` — mocks for the 12 extremes
 
