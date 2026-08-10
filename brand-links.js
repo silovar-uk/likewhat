@@ -26,6 +26,14 @@
     if(candidates[0])brandSources.set(brand,candidates[0]);
   });
 
+  patterns.forEach(pattern=>{pattern.brandUrl=brandSources.get(pattern.brand)||pattern.sourceUrl||'';});
+  window.LikeWhatReferences={
+    brandUrlFor(value){const brand=typeof value==='string'?value:value?.brand;return brandSources.get(brand)||value?.sourceUrl||'';},
+    sourceUrlFor(pattern){return pattern?.sourceUrl||'';},
+    sourceLabelFor(pattern){return pattern?.sourceLabel||'Reference source';},
+    brandSources
+  };
+
   function wire(el,brand,{keyboard=false}={}){
     if(!el||!brand||el.dataset.brandExternal)return;
     const url=brandSources.get(brand);
@@ -34,10 +42,32 @@
     el.classList.add('brand-external-link');
     el.title=`${brand} — official reference`;
     el.setAttribute('aria-label',`${brand}の公式サイトを新しいタブで開く`);
-    if(keyboard){
-      el.setAttribute('role','link');
-      el.tabIndex=0;
-    }
+    if(keyboard){el.setAttribute('role','link');el.tabIndex=0;}
+  }
+
+  function sourceCard(kind,label,title,meta,url){
+    if(!url)return null;
+    const a=document.createElement('a');
+    a.className=`reference-source-card reference-source-${kind}`;
+    a.href=url;a.target='_blank';a.rel='noreferrer';
+    const small=document.createElement('small');small.textContent=label;
+    const strong=document.createElement('strong');strong.textContent=`${title} ↗`;
+    const span=document.createElement('span');span.textContent=meta||url;
+    a.append(small,strong,span);
+    return a;
+  }
+
+  function enhanceDetailSources(detail,pattern){
+    if(!detail||!pattern||detail.querySelector('.reference-source-stack'))return;
+    const source=detail.querySelector('.source-link');
+    if(!source)return;
+    const stack=document.createElement('div');
+    stack.className='reference-source-stack';
+    const brandCard=sourceCard('brand','OFFICIAL BRAND',pattern.brand,pattern.brandUrl,pattern.brandUrl);
+    const referenceCard=sourceCard('reference','REFERENCE SOURCE',pattern.sourceLabel||'Source',pattern.sourceUrl,pattern.sourceUrl);
+    if(brandCard)stack.appendChild(brandCard);
+    if(referenceCard)stack.appendChild(referenceCard);
+    source.replaceWith(stack);
   }
 
   function apply(root=document){
@@ -48,17 +78,17 @@
     const detail=document.querySelector('.detail-page');
     if(detail){
       const id=new URLSearchParams(location.search).get('id');
-      const pattern=patterns.find(p=>p.id===id);
+      const pattern=patterns.find(p=>p.id===id)||patterns[0];
       const crumbSpans=detail.querySelectorAll('.breadcrumb span');
       if(pattern&&crumbSpans[1])wire(crumbSpans[1],pattern.brand,{keyboard:true});
+      enhanceDetailSources(detail,pattern);
     }
   }
 
   function openBrand(target,event){
     const url=target?.dataset?.brandExternal;
     if(!url)return;
-    event.preventDefault();
-    event.stopPropagation();
+    event.preventDefault();event.stopPropagation();
     window.open(url,'_blank','noopener,noreferrer');
   }
 
@@ -75,9 +105,7 @@
   apply(document);
   const observer=new MutationObserver(mutations=>{
     for(const mutation of mutations){
-      for(const node of mutation.addedNodes){
-        if(node instanceof Element)apply(node);
-      }
+      for(const node of mutation.addedNodes){if(node instanceof Element)apply(node);}
     }
   });
   observer.observe(document.body,{childList:true,subtree:true});
