@@ -17,10 +17,58 @@
     '.related-grid > a > div'
   ].join(',');
 
+  const interactiveSelector='a,button,input,select,textarea,label,form,details,summary';
+  const replacementFor={
+    A:['span','mock-link'],
+    BUTTON:['span','mock-button'],
+    INPUT:['span','mock-input'],
+    SELECT:['span','mock-select'],
+    TEXTAREA:['span','mock-textarea'],
+    LABEL:['span','mock-label'],
+    FORM:['div','mock-form'],
+    DETAILS:['div','mock-details'],
+    SUMMARY:['span','mock-summary']
+  };
+  const unsafeAttributes=new Set(['href','target','rel','type','name','value','for','action','method','tabindex','role','onclick','onchange','onsubmit']);
+
+  function neutralizePreviewMarkup(html){
+    const template=document.createElement('template');
+    template.innerHTML=String(html||'').trim();
+
+    template.content.querySelectorAll(interactiveSelector).forEach(node=>{
+      const spec=replacementFor[node.tagName]||['span','mock-control'];
+      const replacement=document.createElement(spec[0]);
+      const classes=[node.getAttribute('class')||'',spec[1]].filter(Boolean).join(' ').trim();
+      if(classes)replacement.setAttribute('class',classes);
+      replacement.setAttribute('data-mock-tag',node.tagName.toLowerCase());
+
+      [...node.attributes].forEach(attr=>{
+        const name=attr.name.toLowerCase();
+        if(name==='class'||unsafeAttributes.has(name)||name.startsWith('on'))return;
+        if(name==='style'||name.startsWith('data-')||name==='title')replacement.setAttribute(attr.name,attr.value);
+      });
+
+      if(node.tagName==='INPUT'){
+        replacement.textContent=node.getAttribute('placeholder')||node.getAttribute('value')||'';
+      }else{
+        while(node.firstChild)replacement.appendChild(node.firstChild);
+      }
+      node.replaceWith(replacement);
+    });
+
+    template.content.querySelectorAll('[tabindex]').forEach(node=>node.removeAttribute('tabindex'));
+    const root=template.content.firstElementChild;
+    if(root?.classList.contains('mini-ui')){
+      root.setAttribute('aria-hidden','true');
+      root.setAttribute('data-preview-contract','inert');
+    }
+    return template.innerHTML;
+  }
+
   const onPatternDetail=()=>Boolean(document.querySelector('.detail-page'));
   function render(pattern,size='card'){
     const safeSize=(size==='detail'&&!onPatternDetail())?'card':size;
-    return baseRender(pattern,safeSize);
+    return neutralizePreviewMarkup(baseRender(pattern,safeSize));
   }
   window.LikeWhatUI={...ui,render};
 
