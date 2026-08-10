@@ -16,6 +16,7 @@
   const lex = vocabulary ? vocabulary.forPattern(p) : {implementation:[],design:[],philosophy:[]};
   const libraryMean = designSpace ? designSpace.mean(patterns) : {};
   const diversity = designSpace && p.designSpace ? designSpace.diversity(p, patterns) : null;
+  const opposite = designSpace && p.designSpace ? designSpace.editorialOpposite(p, patterns) : null;
   const related = patterns.filter(x => x.id !== p.id).map(x => ({x, score:(x.brand===p.brand?5:0)+x.tags.filter(t=>p.tags.includes(t)).length})).filter(v=>v.score>0).sort((a,b)=>b.score-a.score).slice(0,4).map(v=>v.x);
 
   function lexiconColumn(label, title, items) {
@@ -40,10 +41,25 @@
     </a>`;
   }
 
+  function oppositeReferenceCard(pattern, label, linked) {
+    const inner = `<div class="opposite-reference-preview">${render(pattern, 'related')}</div><div class="opposite-reference-copy"><small>${esc(label)}</small><strong>${esc(pattern.brand)}</strong><span>${esc(pattern.name)}</span><p>${esc(pattern.oneLiner)}</p></div>`;
+    return linked ? `<a class="opposite-reference-card" href="pattern.html?id=${encodeURIComponent(pattern.id)}">${inner}</a>` : `<div class="opposite-reference-card current">${inner}</div>`;
+  }
+
+  function oppositeAxisRows(opposition) {
+    return opposition.flips.map(flip=>`<div class="opposite-axis-row ${flip.crossed?'crossed':''}">
+      <strong>${esc(flip.name)}</strong>
+      <span class="from">${esc(flip.fromLabel)} <b>${Math.round(flip.a)}</b></span>
+      <i>→</i>
+      <span class="to">${esc(flip.toLabel)} <b>${Math.round(flip.b)}</b></span>
+    </div>`).join('');
+  }
+
   const vocabularyLine = [...lex.design,...lex.philosophy].slice(0,8).map(x=>x.term).join(' / ');
   const spaceSummary = designSpace ? designSpace.summary(p.designSpace) : '';
   const spacePrompt = p.designSpace ? `\nDesign Space上の位置は、Density ${p.designSpace.density} / Emotional Intensity ${p.designSpace.emotion} / Exploration ${p.designSpace.exploration} / Authority ${p.designSpace.authority} / Direct Manipulation ${p.designSpace.interaction} / Systematic Order ${p.designSpace.order}。この数値を装飾ではなく、情報量・感情強度・探索性・権威性・操作直接性・秩序性の設計判断として反映してください。` : '';
-  const expertPrompt = `${p.prompt}\n\n設計語彙として、${vocabularyLine} を意識してください。単にブランドの表層表現を模倣するのではなく、情報階層・密度・文脈保持・操作の開示タイミングまで設計原則として再現してください。${spacePrompt}`;
+  const oppositePrompt = opposite ? `\n対極参照は ${opposite.pattern.brand}「${opposite.pattern.name}」。特に ${opposite.flips.slice(0,3).map(f=>`${f.name}を「${f.fromLabel}」から「${f.toLabel}」へ反転させる方向`).join('、')} が対照的です。今回の設計ではこの対極側へ無自覚に寄せず、元パターンの優先順位を維持してください。` : '';
+  const expertPrompt = `${p.prompt}\n\n設計語彙として、${vocabularyLine} を意識してください。単にブランドの表層表現を模倣するのではなく、情報階層・密度・文脈保持・操作の開示タイミングまで設計原則として再現してください。${spacePrompt}${oppositePrompt}`;
 
   root.innerHTML = `
     <section class="detail-hero">
@@ -89,10 +105,30 @@
               ${distanceReference(diversity.nearest, 'NEAREST IN DESIGN SPACE', '似ている理由より、どの軸がまだ違うかを見る。')}
               ${distanceReference(diversity.farthest, 'FARTHEST IN CURRENT LIBRARY', '「対極」と断定する前の、純粋な幾何学的最遠参照。')}
             </div>
-            <p class="diversity-note">Diversity Scoreは「最寄りパターンまでの距離」のライブラリ内パーセンタイル。高いほど孤立した設計座標にいる。Farthestは6軸距離だけで計算しており、思想的な“対極”は次フェーズで別に定義する。</p>
+            <p class="diversity-note">Diversity Scoreは「最寄りパターンまでの距離」のライブラリ内パーセンタイル。高いほど孤立した設計座標にいる。Farthestは6軸距離だけで計算しており、思想的な“対極”とは区別する。</p>
           </section>` : ''}
 
-          <p class="space-method-note">※ Design Spaceの0–100は客観的な品質点ではなく、パターン同士を比較するための編集的・ヒューリスティックな座標。Diversity Scoreも現在の収録パターン構成に応じて変動する相対値。</p>
+          ${opposite ? `<section class="opposite-analysis">
+            <div class="opposite-heading">
+              <div><p class="eyebrow">OPPOSITE REFERENCE / INVERT THE PRIORITIES</p><h3>この設計を反転すると、何になる？</h3><p>現在値を6軸すべて反転した「理想上の対極」を作り、その座標に最も近い別文脈の実在パターンを探す。</p></div>
+              <div class="opposite-fit"><strong>${opposite.fit}</strong><span>/ 100</span><small>Opposition Fit</small></div>
+            </div>
+            <div class="opposite-reference-pair">
+              ${oppositeReferenceCard(p, 'CURRENT PRIORITIES', false)}
+              <div class="opposite-switch" aria-hidden="true"><span>↔</span><small>INVERT</small></div>
+              ${oppositeReferenceCard(opposite.pattern, opposite.mode==='curated'?'CURATED OPPOSITE':'EDITORIAL OPPOSITE', true)}
+            </div>
+            <div class="opposite-flip-list">
+              ${opposite.flips.slice(0,3).map((flip,i)=>`<article><span>${String(i+1).padStart(2,'0')}</span><div><small>${esc(flip.name)}</small><p>${esc(flip.fromConcept)}<b>→</b>${esc(flip.toConcept)}</p></div></article>`).join('')}
+            </div>
+            <div class="opposite-axis-matrix">
+              <div class="opposite-axis-header"><span>Axis</span><span>${esc(p.brand)}</span><i></i><span>${esc(opposite.pattern.brand)}</span></div>
+              ${oppositeAxisRows(opposite)}
+            </div>
+            <p class="opposite-note">Opposition Fitは「理想上の完全反転ベクトル」にどれだけ近いか。Farthestが“現在地から最遠”なのに対し、Oppositeは“優先順位を反転した先”を探す。${opposite.mode==='curated'?'このパターンは手動指定された対極を使用。':'同ブランド・同Domain・同Archetypeには軽いペナルティを加え、異なる文脈の参照を優先。'}</p>
+          </section>` : ''}
+
+          <p class="space-method-note">※ Design Spaceの0–100は客観的な品質点ではなく、パターン同士を比較するための編集的・ヒューリスティックな座標。Diversity ScoreとOpposition Fitも現在の収録パターン構成に依存する相対的な参照指標。</p>
         </section>` : ''}
 
         <section class="detail-block grammar-block">
@@ -119,7 +155,7 @@
 
   const btn = document.getElementById('copyPrompt');
   btn.addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(expertPrompt); btn.textContent='コピー済み'; document.getElementById('copyStatus').textContent='専門語彙とDesign Space座標を含む設計指示をコピーした。'; setTimeout(()=>btn.textContent='コピー',1800); }
+    try { await navigator.clipboard.writeText(expertPrompt); btn.textContent='コピー済み'; document.getElementById('copyStatus').textContent='専門語彙、Design Space座標、対極参照を含む設計指示をコピーした。'; setTimeout(()=>btn.textContent='コピー',1800); }
     catch { document.getElementById('copyStatus').textContent='コピーできなかったため、本文を選択してコピーしてください。'; }
   });
 })();
