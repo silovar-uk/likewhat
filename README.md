@@ -13,23 +13,7 @@
 - Wave 2: 12 neighboring / counterpoint references
 - Wave 3: 15 coverage-driven references selected from underrepresented interaction models and media
 
-Wave 3 adds:
-
-- Duolingo — motivational guided learning
-- Spotify — personalized media discovery
-- Canva — template-first creation
-- Blender — task-oriented expert workspaces
-- Ableton Live — non-linear Session Grid
-- Tesla — safety-constrained vehicle HMI
-- Transport for London — network-wide wayfinding
-- Monzo — accessible personal finance control
-- Salesforce — object-centric enterprise records
-- Discord — persistent community channels
-- Strava — spatial performance storytelling
-- Uber Driver — live dispatch operations
-- NASA Eyes — interactive scientific visualization
-- Amazon Alexa — conversational voice flow
-- Oura — calm health interpretation
+Wave 3 adds Duolingo, Spotify, Canva, Blender, Ableton Live, Tesla, Transport for London, Monzo, Salesforce, Discord, Strava, Uber Driver, NASA Eyes, Amazon Alexa and Oura.
 
 The Wave 3 selection was intentionally not “15 more famous websites.” It expands the library into new media and operational contexts: embedded touchscreen, physical + digital wayfinding, voice, wearable health, interactive 3D, expert desktop creation, real-time field operations, finance, education and community spaces.
 
@@ -47,11 +31,18 @@ The Wave 3 selection was intentionally not “15 more famous websites.” It exp
 - **Contrast Pair** comparison engine
 - **Collision Engine** with Random / Far Apart / Weird Combination
 - **Coverage Planner** for deciding what to add next
+- **Coverage Delta** for testing whether the previous expansion actually improved coverage
 - separate **Official Brand** and **Reference Source** links
 
-## Coverage Planner
+## Coverage feedback loop
 
-`coverage.html` analyzes the library itself rather than another design reference.
+The library now treats expansion as a measurable editorial cycle rather than a one-way accumulation process.
+
+`Coverage → Expansion → Delta → Next Coverage`
+
+### 1. Coverage Planner
+
+`coverage.html` analyzes the current library itself rather than another design reference.
 
 It combines four signals:
 
@@ -60,7 +51,47 @@ It combines four signals:
 3. **Context Balance** — inspect underrepresented Domain / Medium and overrepresented brands
 4. **Research Briefs** — combine Spatial 55% + Concept 25% + Context 20% into explainable next-research conditions
 
-Coverage is relative to the current library. Adding Wave 3 therefore changes the next open vectors automatically.
+### 2. Coverage-driven expansion
+
+A new reference should answer:
+
+> What can this Pattern explain that the current library cannot explain well yet?
+
+Fame alone is not an inclusion criterion.
+
+### 3. Coverage Delta
+
+The Coverage page also compares **Before Wave 3 = 63 references** with **After Wave 3 = 78 references** using the same formulas.
+
+It deliberately does **not** collapse the result into one total score. Instead it compares:
+
+- Maximum 6D open gap
+- Mean of the top six open gaps
+- Average local separation
+- Unique Domains
+- Unique Media
+- Thin Vocabulary concepts
+- Singleton Domains
+- Largest-brand share
+
+This preserves trade-offs. For example, adding new Domains may improve breadth while simultaneously creating more one-example Domains that need later reinforcement.
+
+### 4. Open-vector compression
+
+The six sparse vectors identified in the 63-reference library are re-measured against the 78-reference library at the **same coordinates**. This shows which actual Design Space gaps Wave 3 filled rather than merely comparing two separately selected lists.
+
+### 5. Wave contribution
+
+Every Wave 3 reference is compared with its nearest Pattern in the old 63-reference library. The old-neighbor Design Distance is used as an explainable novelty signal:
+
+- **Frontier Gain** — far from the old library
+- **Territory Expansion** — clearly extends an existing region
+- **Bridge** — adds an adjacent route between regions
+- **Reinforcement** — primarily thickens an existing region
+
+New Domain and new Medium contributions are also marked separately.
+
+`wave-metadata.js` keeps the set of references belonging to Wave 3 explicit so longitudinal analysis does not depend on file order or brand-name guesses.
 
 ## Design Space
 
@@ -93,13 +124,7 @@ Brand sections remain in the data but do not create separate visual rows. Patter
 
 ### URL state
 
-The main library preserves:
-
-- `q`
-- `brand`
-- `part`
-- `sort`
-- `seed`
+The main library preserves `q`, `brand`, `part`, `sort` and Random `seed`.
 
 ### NEXT REFERENCES
 
@@ -136,6 +161,7 @@ All miniature product samples are illustrations, not embedded functional interfa
 - `patterns-wave1.js` — Design Space extremes
 - `patterns-wave2.js` — neighboring contrast references
 - `patterns-wave3.js` — coverage-driven expansion
+- `wave-metadata.js` — explicit longitudinal wave membership
 - `ui-wave1.js` / `ui-wave2.js` / `ui-wave3.js` — abstract interface mocks
 - `styles-wave1.css` / `styles-wave2.css` / `styles-wave3.css` — mock styling
 - `taxonomy.js` — schema enrichment
@@ -144,6 +170,7 @@ All miniature product samples are illustrations, not embedded functional interfa
 - `app.js` — search, filters and Collision Engine
 - `discovery-v2.js` — sorting, URL state and NEXT REFERENCES
 - `coverage.html` / `coverage.js` / `styles-coverage.css` — Coverage Planner
+- `coverage-delta.js` / `styles-coverage-delta.css` — longitudinal Before / After analysis
 - `brand-links.js` — official brand / exact source separation
 - `ui-preview-contract.js` — inert preview / fitting contract
 - `map.html` / `map.js` — Design Map
@@ -158,7 +185,7 @@ Prefer a reference when it can answer:
 
 > What can this Pattern explain that the current library cannot explain well yet?
 
-The Coverage Planner is the starting point for that decision.
+Then, after adding it, use Coverage Delta to check whether it actually filled the intended gap or merely increased the count.
 
 ## Run locally
 
