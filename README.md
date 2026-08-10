@@ -13,6 +13,7 @@
 - Design Space上の **Nearest / Farthest** を計算し、どの軸が距離を作っているか比較する
 - **Opposite Reference** で、現在の設計優先順位を反転した先に近い実在パターンを提示する
 - **Design Map** で6軸から任意の2軸を選び、51件の密集・Frontier・空白方向をインタラクティブに探索する
+- **Design Vocabulary** で概念を独立した知識ノードとして探索し、別ブランド・別業界の実例へ横断する
 - **Random / Far Apart / Weird Combination** の3モードで、偶然・距離・異質さから3つの参照を衝突させる
 - 抽出した3件を統合するためのAI briefを自動生成・コピーする
 - AIへそのまま渡せる、専門語彙＋Design Space座標＋対極参照付きの設計指示をコピーする
@@ -168,12 +169,50 @@ Every draw shows:
 - a deterministic **「この3つを混ぜるなら？」AI brief** that assigns each reference a principle role and explicitly asks the model not to average away the contradictions
 - one-click copying of that collision brief
 
+## Design Vocabulary
+
+`vocabulary.html` turns specialist terms into first-class knowledge nodes instead of leaving them as tags attached to brands.
+
+The vocabulary currently combines the original cross-pattern grammar with curated concepts introduced by the wider reference worlds, including:
+
+- Wayfinding / Spatial IA / Progressive Zoom
+- Maximalism / Visual Cacophony / Dense Signage
+- Deliberate Friction / Atmospheric Interface / Scarcity of Signifiers
+- Menu Choreography / HUD / State Legibility
+- Hypertext-first / Document-centric Web / Content Addressability
+- Choice Architecture / Ritualized Interaction / Commitment Device
+- Plain Language / Error Prevention / Institutional Trust
+
+Terms are organized into five transferable categories:
+
+1. **Implementation**
+2. **Interaction Design**
+3. **Visual Design**
+4. **Information Architecture**
+5. **Cognitive / Philosophy**
+
+Each term node provides:
+
+- English term and Japanese label
+- a concise working definition
+- number of connected patterns, brands and domains
+- **Related Concepts** computed from term co-occurrence across shared patterns
+- **Cross-world Examples** that prefer different brands so the same principle can be compared outside one product family
+- links back to every connected pattern
+- a direct link to search the main pattern library with that concept
+
+Pattern detail pages now link specialist terms in `DESIGN GRAMMAR` directly into their Vocabulary nodes, creating the path:
+
+`Pattern → Vocabulary → different-world Pattern`
+
+This relationship is intentionally data-driven: as new references connect to existing vocabulary, co-occurrence and cross-world traversal improve without hand-authoring a fixed concept graph.
+
 ## Design grammar
 
-`vocabulary.js` maps patterns to specialist terms.
+`vocabulary.js` still powers the per-pattern grammar layer while also exposing the knowledge-graph functions used by `vocabulary.html`.
 
 - **Implementation**: CSS Grid, responsive composition, focus management, UI state machine, semantic grouping...
-- **Design System**: Visual hierarchy, Information Architecture, Progressive disclosure, Mini-IA, Editorial rhythm, Master–detail...
+- **Interaction / Visual / IA**: Visual hierarchy, Progressive disclosure, Mini-IA, Editorial rhythm, Master–detail, Wayfinding...
 - **Philosophy**: Recognition over recall, User agency, Cognitive-load management, Preserve context, Content-first design...
 
 ## Pattern modules
@@ -184,6 +223,7 @@ Every draw shows:
 - `taxonomy.js` — schema v2 and Design Space enrichment
 - `design-space.js` / `styles-design-space.css` — six-axis visualization, pairwise distance, Diversity Score and Opposite Reference
 - `map.html` / `map.js` / `styles-map.css` — interactive two-axis Design Map and sparse-zone discovery
+- `vocabulary.html` / `vocabulary-page.js` / `styles-vocabulary.css` — searchable knowledge graph, co-occurrence and cross-world traversal
 - `app.js` / `styles-enhancements.css` — search, filtering and three-mode collision engine
 - `ui-extra.js` / `styles-extra.css` — Japanese media mocks
 - `ui-wave1.js` / `styles-wave1.css` — mocks for the 12 extremes
