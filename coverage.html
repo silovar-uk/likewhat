@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="Like What?の78参照についてDesign Space・Vocabulary・Domain・Mediumの偏りと63→78のCoverage Deltaを分析し、次に追加すべき参照条件を考えるCoverage Planner。" />
+  <meta name="description" content="Like What?の87参照についてDesign Space・Vocabulary・Domain・Mediumの偏りを分析し、次に追加すべき参照条件を考えるCoverage Planner。" />
   <title>Coverage Planner — Like What?</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
@@ -25,7 +25,7 @@
     </section>
 
     <section class="coverage-snapshot" aria-labelledby="snapshotTitle">
-      <div class="coverage-section-head"><div><p class="eyebrow">COVERAGE SNAPSHOT</p><h2 id="snapshotTitle">いまの78件を、欠け方から見る。</h2></div><p>値は現在の収録データに依存する相対指標。品質点ではない。</p></div>
+      <div class="coverage-section-head"><div><p class="eyebrow">COVERAGE SNAPSHOT</p><h2 id="snapshotTitle">いまの87件を、欠け方から見る。</h2></div><p>値は現在の収録データに依存する相対指標。品質点ではない。</p></div>
       <div id="coverageStats" class="coverage-stats" aria-live="polite"></div>
     </section>
 
@@ -50,7 +50,7 @@
     </section>
 
     <section class="coverage-section wave3-section" aria-labelledby="wave3Title">
-      <div class="coverage-section-head"><div><p class="eyebrow">04 / NEXT RESEARCH BRIEFS</p><h2 id="wave3Title">次も「ブランド名」ではなく、条件から探す。</h2><p>Wave 3追加後のSpatial Gapを主軸に、薄いVocabularyと不足Contextを組み合わせた次回調査仕様。追加するたびに再計算される。</p></div></div>
+      <div class="coverage-section-head"><div><p class="eyebrow">04 / NEXT RESEARCH BRIEFS</p><h2 id="wave3Title">次も「ブランド名」ではなく、条件から探す。</h2><p>現在のSpatial Gapを主軸に、薄いVocabularyと不足Contextを組み合わせた次回調査仕様。追加するたびに再計算される。</p></div></div>
       <div id="wave3Briefs" class="wave3-grid"></div>
     </section>
 
@@ -58,8 +58,8 @@
       <details>
         <summary>Coverage Plannerの計算方法 <span>Method / explainability</span></summary>
         <div class="coverage-method-body">
-          <p><strong>Coverage Delta</strong>：Wave 3直前の63件と現在の78件に同じ指標を適用する。最大6D空白、上位空白、平均Local Separation、Vocabulary、Domain / Medium、ブランド集中を個別に比較し、単一の総合点にはまとめない。</p>
-          <p><strong>Spatial Gap</strong>：6軸を10 / 50 / 90の3値に離散化した729点について、既存78件への最短Design Distanceを計算。近接した候補点を間引き、異なる空白方向を残す。</p>
+          <p><strong>Coverage Delta</strong>：Wave 3直前の63件とWave 3時点の78件に同じ指標を適用した履歴比較。現在の87件はCoverage Snapshotと各Gap分析へ反映される。</p>
+          <p><strong>Spatial Gap</strong>：6軸を10 / 50 / 90の3値に離散化した729点について、現在の87件への最短Design Distanceを計算。近接した候補点を間引き、異なる空白方向を残す。</p>
           <p><strong>Thin Vocabulary</strong>：各語彙に接続するPattern数・ブランド数・Domain数を数え、実例数が少なく単一ブランド / 単一Domainに偏るほど優先度を上げる。</p>
           <p><strong>Context Balance</strong>：Domain / Medium / Brandごとの単純収録数。粒度が異なるため、異カテゴリ間の数値を直接比較しない。</p>
           <p><strong>Research Priority</strong>：Spatial 55% + Concept 25% + Context 20%。これは「追加価値」を決める絶対スコアではなく、調査順序を作るための編集的ヒューリスティック。</p>
@@ -69,6 +69,6 @@
   </main>
 
   <footer><p>Like What? — coverage before expansion, delta after expansion.</p><p>Coverage analysis is relative to the current reference library and changes as patterns are added.</p></footer>
-  <script src="patterns.js"></script><script src="patterns-extra.js"></script><script src="patterns-wave1.js"></script><script src="patterns-wave2.js"></script><script src="patterns-wave3.js"></script><script src="taxonomy.js"></script><script src="design-space.js"></script><script src="vocabulary.js"></script><script src="wave-metadata.js"></script><script src="coverage-delta.js"></script><script src="coverage.js"></script>
+  <script src="patterns.js"></script><script src="patterns-extra.js"></script><script src="patterns-wave1.js"></script><script src="patterns-wave2.js"></script><script src="patterns-wave3.js"></script><script src="patterns-wave4.js"></script><script src="taxonomy.js"></script><script src="design-space.js"></script><script src="vocabulary.js"></script><script src="wave-metadata.js"></script><script src="coverage-delta.js"></script><script src="coverage.js"></script>
 </body>
 </html>
