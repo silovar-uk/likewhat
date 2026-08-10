@@ -15,11 +15,9 @@
   contain:layout paint;
 }
 
-/* Give every viewport a definite box before the virtual canvas is positioned absolutely. */
 .detail-preview{height:clamp(320px,44vw,520px)}
 .related-grid > a > div{height:120px}
 
-/* Fallback before JS fitting: still contain any size-specific min-height. */
 .card-preview > .mini-ui,
 .detail-preview > .mini-ui,
 .distance-reference-preview > .mini-ui,
@@ -38,7 +36,6 @@
   border-radius:inherit;
 }
 
-/* Once fitted, all mocks use the exact same 420×236 virtual canvas. */
 .preview-fit > .mini-ui {
   position:absolute !important;
   width:420px !important;
@@ -56,8 +53,30 @@
 .mini-ui,
 .mini-ui *{box-sizing:border-box}
 .mini-ui > *{min-width:0;max-width:100%}
+.mini-ui[data-preview-contract="inert"]{pointer-events:none;user-select:none;-webkit-user-select:none}
+.mock-link,.mock-button,.mock-label,.mock-input,.mock-select,.mock-textarea,.mock-summary{font-style:normal}
+.mock-button{display:inline-block}
 
-/* Embedded screens should never inherit the large-detail minimum. */
+/* Preserve the visual styling of controls after semantic elements are neutralized. */
+.govuk-mock .mock-link{font-size:7px;text-decoration:underline}
+.govuk-mock .mock-label{display:flex;gap:6px;align-items:center;font-size:8px;margin:7px 0}
+.govuk-mock .mock-label i{width:12px;height:12px;border:2px solid #111;border-radius:50%}
+.govuk-mock .mock-button{background:#00703c;color:#fff;padding:7px 12px;font-size:8px;font-weight:700;margin-top:8px;box-shadow:0 2px 0 #002d18}
+.toy-card .mock-button{grid-row:1/3;grid-column:2;background:#111;color:#fff;padding:6px 9px;font-size:7px;align-self:center}
+.win95-mock footer .mock-button{font-size:7px;font-weight:700;border:2px outset #fff;background:#c0c0c0;padding:2px 5px}
+.hobo-columns .mock-link{display:block;text-decoration:underline;margin:4px 0}
+.wiki-mock aside .mock-link{display:block;font-size:6px;color:#36c;margin:5px 0}
+.wiki-mock .mock-link{color:#36c}
+
+.nhs-mock .mock-link{font-size:6px;text-decoration:underline}
+.nhs-mock .mock-label{display:flex;gap:6px;margin:7px 0;font-size:7px}
+.nhs-mock .mock-label i{width:12px;height:12px;border:2px solid #222;border-radius:50%}
+.nhs-mock .mock-button{background:#007f3b;color:#fff;padding:6px 10px;font-size:7px;font-weight:700}
+.aesop-copy .mock-link{display:block;margin-top:12px;font-size:5px;text-decoration:underline}
+.mdn-mock aside .mock-link{display:block;font-size:6px;margin:7px 0}
+.muji-mock .mock-button{margin-top:7px;background:#555;color:#fff;padding:7px 10px;font-size:6px}
+.eplus-event .mock-button{float:right;margin-top:-18px;background:#6837bd;color:#fff;padding:5px 8px;font-size:5px}
+
 .mini-ui--card,.mini-ui--related{min-height:0 !important;max-width:100%}
 .map-inspector-preview,.compare-preview{background:var(--surface)}
 
@@ -104,7 +123,6 @@
 .random-results:not(:empty)>.random-grid .tag-row span{font-size:7px;padding:4px 6px}
 .random-results:not(:empty)>.random-grid .card-arrow{margin-top:auto;padding-top:10px}
 
-/* Old DOM-reparenting output is explicitly suppressed. The new home no longer loads that script. */
 .collision-board-head,.collision-reference-grid{display:none !important}
 .random-analysis.collision-consumed,.random-grid.collision-consumed{display:grid !important}
 
