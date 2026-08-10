@@ -8,8 +8,9 @@
 - 一覧のミニモックで違いを視覚的に確認する
 - 「Visual Hierarchy」「Progressive Disclosure」「Maximalism」「Spatial IA」などの専門語でも横断検索する
 - 各パターンを **Implementation / Design System / Philosophy** の3層で言語化する
+- 各詳細ページで6軸の **Design Space** をレーダー＋両極スケールで可視化し、ライブラリ平均と比較する
 - 異なるブランドからランダムに3パターンを抽出し、意図的なセレンディピティを作る
-- AIへそのまま渡せる、専門語彙付きの設計指示をコピーする
+- AIへそのまま渡せる、専門語彙＋Design Space座標付きの設計指示をコピーする
 - Web/SaaSだけでなく、Game UI / OS / Physical Space / Public Service / Old Webまで同じ設計空間に置く
 
 ## Library
@@ -47,9 +48,11 @@ Each pattern can now carry:
 - `opposites`
 - `related`
 
-### Design Space axes
+## Design Space
 
-All patterns can be positioned on six 0–100 axes:
+`design-space.js` treats every pattern as a point in a six-dimensional editorial design space. The coordinates are not quality scores; they are comparative, heuristic positions used to describe contrast between patterns.
+
+Six 0–100 axes:
 
 - Density: Sparse ↔ Dense
 - Emotional Intensity: Calm ↔ Excitable
@@ -58,7 +61,15 @@ All patterns can be positioned on six 0–100 axes:
 - Interaction: Observation ↔ Direct Manipulation
 - Order: Chaotic ↔ Systematic
 
-These coordinates are the foundation for Diversity Score, opposite references, the future design-space map and Far Apart random selection.
+Pattern detail pages show:
+
+- six-axis radar profile
+- current Like What? library mean as a dashed baseline
+- bipolar axis bars with exact values
+- Domain / Medium / Archetype / Interaction Model
+- a short Character Profile derived from the strongest axis positions
+
+These coordinates are the foundation for the next phases: Diversity Score, opposite references, the global Design Map and Far Apart random selection.
 
 ## Design grammar
 
@@ -74,6 +85,7 @@ These coordinates are the foundation for Diversity Score, opposite references, t
 - `patterns-extra.js` — オモコロ / 集英社 / Nintendo expansion
 - `patterns-wave1.js` — 12 design-space extremes
 - `taxonomy.js` — schema v2 and Design Space enrichment
+- `design-space.js` / `styles-design-space.css` — six-axis visualization and comparison baseline
 - `ui-extra.js` / `styles-extra.css` — Japanese media mocks
 - `ui-wave1.js` / `styles-wave1.css` — mocks for the 12 extremes
 
