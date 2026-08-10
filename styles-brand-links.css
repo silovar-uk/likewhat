@@ -1,0 +1,47 @@
+/* Brand links — brand label opens the official reference, card itself keeps opening the pattern. */
+.brand-external-link{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  max-width:100%;
+  cursor:pointer;
+  text-decoration:none;
+  text-underline-offset:3px;
+  position:relative;
+  z-index:4;
+}
+.brand-external-link::after{
+  content:'↗';
+  flex:0 0 auto;
+  font-size:.88em;
+  line-height:1;
+  opacity:.52;
+  transform:translateY(-.5px);
+}
+.brand-external-link:hover{
+  color:var(--ink);
+  text-decoration:underline;
+}
+.brand-external-link:hover::after{opacity:1}
+.brand-external-link:focus-visible{
+  outline:2px solid currentColor;
+  outline-offset:3px;
+  border-radius:2px;
+}
+
+/* The card remains a single pattern link; only the small brand label branches to the official source. */
+.pattern-card .brand-external-link{
+  padding:4px 5px;
+  margin:-4px -5px;
+}
+#patternGroups .pattern-card .card-meta .brand-external-link{
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+
+/* Breadcrumb brand link on detail pages. */
+.breadcrumb .brand-external-link{
+  color:var(--ink);
+  font-weight:650;
+}
