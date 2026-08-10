@@ -12,14 +12,16 @@
   <link rel="stylesheet" href="styles-wave1.css" />
   <link rel="stylesheet" href="styles-design-space.css" />
   <link rel="stylesheet" href="styles-map.css" />
+  <link rel="stylesheet" href="styles-qa.css" />
 </head>
 <body>
+  <a class="skip-link" href="#main-content">本文へ移動</a>
   <header class="site-header">
-    <a class="brandmark" href="./"><span>Like</span> What?</a>
-    <nav><a href="./#patterns">Patterns</a><a href="map.html" aria-current="page">Design Map</a><a href="vocabulary.html">Vocabulary</a><a href="https://github.com/silovar-uk/likewhat" target="_blank" rel="noreferrer">GitHub ↗</a></nav>
+    <a class="brandmark" href="./" aria-label="Like What? ホーム"><span>Like</span> What?</a>
+    <nav aria-label="Global navigation"><a href="./#patterns">Patterns</a><a href="map.html" aria-current="page">Design Map</a><a href="vocabulary.html">Vocabulary</a><a href="https://github.com/silovar-uk/likewhat" target="_blank" rel="noreferrer">GitHub ↗</a></nav>
   </header>
 
-  <main class="map-page">
+  <main id="main-content" class="map-page">
     <section class="map-hero">
       <p class="eyebrow">DESIGN SPACE / EXPLORE THE MAP</p>
       <h1>デザインの地図を歩く。</h1>
@@ -43,10 +45,10 @@
     </section>
 
     <div class="map-presets" aria-label="おすすめの軸組み合わせ">
-      <button data-x="exploration" data-y="order">探索性 × 秩序</button>
-      <button data-x="emotion" data-y="density">情緒 × 密度</button>
-      <button data-x="authority" data-y="interaction">権威 × 操作</button>
-      <button data-x="density" data-y="exploration">密度 × 探索性</button>
+      <button type="button" data-x="exploration" data-y="order" aria-pressed="true">探索性 × 秩序</button>
+      <button type="button" data-x="emotion" data-y="density" aria-pressed="false">情緒 × 密度</button>
+      <button type="button" data-x="authority" data-y="interaction" aria-pressed="false">権威 × 操作</button>
+      <button type="button" data-x="density" data-y="exploration" aria-pressed="false">密度 × 探索性</button>
     </div>
 
     <section class="design-map-section">
@@ -56,19 +58,19 @@
           <h2 id="projectionTitle"></h2>
           <p id="projectionDescription"></p>
         </div>
-        <div class="map-stat"><strong id="visibleCount">0</strong><span>visible patterns</span></div>
+        <div class="map-stat"><strong id="visibleCount" aria-live="polite">0</strong><span>visible patterns</span></div>
       </div>
 
       <div class="map-stage-shell">
         <div id="mapStage" class="map-stage">
-          <svg id="designMap" viewBox="0 0 1000 650" role="img" aria-labelledby="projectionTitle"></svg>
-          <div id="mapTooltip" class="map-tooltip" hidden></div>
+          <svg id="designMap" viewBox="0 0 1000 650" role="group" aria-labelledby="projectionTitle"></svg>
+          <div id="mapTooltip" class="map-tooltip" hidden aria-hidden="true"></div>
         </div>
       </div>
-      <div class="map-legend">
-        <span><i class="legend-dot"></i> Pattern</span>
-        <span><i class="legend-ring"></i> Frontier / high Diversity</span>
-        <span><i class="legend-open"></i> Sparse zone in this 2D projection</span>
+      <div class="map-legend" aria-label="Design Map legend">
+        <span><i class="legend-dot" aria-hidden="true"></i> Pattern</span>
+        <span><i class="legend-ring" aria-hidden="true"></i> Frontier / high Diversity</span>
+        <span><i class="legend-open" aria-hidden="true"></i> Sparse zone in this 2D projection</span>
       </div>
     </section>
 
