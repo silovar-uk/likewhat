@@ -8,14 +8,6 @@
   if(!patterns.length)return;
 
   function normalize(value){return String(value||'').toLowerCase().normalize('NFKC');}
-  function patternIdFromHref(href){
-    try{return new URL(href,location.href).searchParams.get('id')||'';}catch{return '';}
-  }
-  function stableHash(value){
-    let h=2166136261;
-    for(const ch of String(value)){h^=ch.charCodeAt(0);h=Math.imul(h,16777619);}
-    return h>>>0;
-  }
 
   function initLibraryDiscovery(){
     const groups=document.getElementById('patternGroups');
@@ -25,8 +17,6 @@
     const filterRow=document.querySelector('.secondary-filter-row');
     if(!groups||!filterRow)return;
 
-    const originalIndex=new Map(patterns.map((p,index)=>[p.id,index]));
-    const diversityScore=new Map(patterns.map(p=>[p.id,designSpace&&p.designSpace?designSpace.diversity(p,patterns)?.score??0:0]));
     const params=new URLSearchParams(location.search);
     const validSorts=new Set(['brand','density','exploration','diversity','random']);
     let sort=validSorts.has(params.get('sort'))?params.get('sort'):'brand';
@@ -39,26 +29,8 @@
     const select=shell.querySelector('select');
     const reroll=shell.querySelector('.sort-reroll');
     select.value=sort;
-
-    function currentPatternOrder(){
-      const arr=[...patterns];
-      if(sort==='density')arr.sort((a,b)=>(b.designSpace?.density??-1)-(a.designSpace?.density??-1)||(originalIndex.get(a.id)-originalIndex.get(b.id)));
-      else if(sort==='exploration')arr.sort((a,b)=>(b.designSpace?.exploration??-1)-(a.designSpace?.exploration??-1)||(originalIndex.get(a.id)-originalIndex.get(b.id)));
-      else if(sort==='diversity')arr.sort((a,b)=>(diversityScore.get(b.id)||0)-(diversityScore.get(a.id)||0)||(originalIndex.get(a.id)-originalIndex.get(b.id)));
-      else if(sort==='random')arr.sort((a,b)=>stableHash(`${seed}:${a.id}`)-stableHash(`${seed}:${b.id}`));
-      else arr.sort((a,b)=>originalIndex.get(a.id)-originalIndex.get(b.id));
-      return new Map(arr.map((p,index)=>[p.id,index]));
-    }
-
-    function applySort(){
-      const rank=currentPatternOrder();
-      groups.querySelectorAll('.pattern-card').forEach(card=>{
-        const id=patternIdFromHref(card.getAttribute('href'));
-        card.style.order=String(rank.get(id)??9999);
-      });
-      reroll.hidden=sort!=='random';
-      shell.dataset.mode=sort;
-    }
+    reroll.hidden=sort!=='random';
+    shell.dataset.mode=sort;
 
     function activeValue(container,key){
       return container?.querySelector(`[data-${key}].active`)?.dataset[key]||'All';
@@ -86,27 +58,25 @@
 
     restoreFilter(brandFilters,'brand',params.get('brand'));
     restoreFilter(partFilters,'part',params.get('part'));
-    applySort();
     if(sort==='random'&&!params.get('seed'))syncUrl();
 
     select.addEventListener('change',()=>{
       sort=validSorts.has(select.value)?select.value:'brand';
       if(sort==='random'&&!seed)seed=String(Date.now()%1000000000);
-      applySort();
+      reroll.hidden=sort!=='random';
+      shell.dataset.mode=sort;
       syncUrl();
+      document.dispatchEvent(new CustomEvent('likewhat:sort-change',{detail:{sort,seed}}));
     });
     reroll.addEventListener('click',()=>{
       seed=String(Date.now()%1000000000);
-      applySort();
       syncUrl();
+      document.dispatchEvent(new CustomEvent('likewhat:sort-change',{detail:{sort,seed}}));
     });
-    brandFilters?.addEventListener('click',()=>setTimeout(()=>{applySort();syncUrl();},0));
-    partFilters?.addEventListener('click',()=>setTimeout(()=>{applySort();syncUrl();},0));
-    input?.addEventListener('input',()=>setTimeout(()=>{applySort();syncUrl();},0));
-    document.querySelector('.query-examples')?.addEventListener('click',()=>setTimeout(()=>{applySort();syncUrl();},0));
-
-    const observer=new MutationObserver(()=>applySort());
-    observer.observe(groups,{childList:true,subtree:true});
+    brandFilters?.addEventListener('click',()=>setTimeout(syncUrl,0));
+    partFilters?.addEventListener('click',()=>setTimeout(syncUrl,0));
+    input?.addEventListener('input',()=>setTimeout(syncUrl,0));
+    document.querySelector('.query-examples')?.addEventListener('click',()=>setTimeout(syncUrl,0));
   }
 
   function termsFor(pattern){
