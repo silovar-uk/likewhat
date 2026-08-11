@@ -22,3 +22,11 @@
   }
   window.LikeWhatUI={...window.LikeWhatUI,render,esc};
 })();
+
+(function loadIdolExpansion2(){
+  const css=document.createElement('link');
+  css.rel='stylesheet';css.href='styles-idols2.css';document.head.appendChild(css);
+  if(document.readyState==='loading'){
+    document.write('<script src="patterns-idols2.js"><\\/script><script src="ui-idols2.js"><\\/script>');
+  }
+})();
