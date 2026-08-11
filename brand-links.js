@@ -7,10 +7,16 @@
   }
 
   const brandPatterns=patterns.filter(p=>p.groupType!=='industry-cluster');
+  const byBrand=new Map();
+  brandPatterns.forEach(pattern=>{
+    if(!pattern.sourceUrl)return;
+    if(!byBrand.has(pattern.brand))byBrand.set(pattern.brand,new Set());
+    byBrand.get(pattern.brand).add(pattern.sourceUrl);
+  });
   const brandSources=new Map();
-  [...new Set(brandPatterns.map(p=>p.brand))].forEach(brand=>{
-    const candidates=brandPatterns.filter(p=>p.brand===brand&&p.sourceUrl).map(p=>p.sourceUrl).filter((url,index,all)=>all.indexOf(url)===index).sort((a,b)=>scoreSource(a)-scoreSource(b));
-    if(candidates[0])brandSources.set(brand,candidates[0]);
+  byBrand.forEach((urls,brand)=>{
+    const best=[...urls].sort((a,b)=>scoreSource(a)-scoreSource(b))[0];
+    if(best)brandSources.set(brand,best);
   });
 
   patterns.forEach(pattern=>{pattern.brandUrl=pattern.groupType==='industry-cluster'?'':(brandSources.get(pattern.brand)||pattern.sourceUrl||'');});
@@ -33,13 +39,16 @@
     const source=detail.querySelector('.source-link');if(!source)return;const stack=document.createElement('div');stack.className='reference-source-stack';const brandCard=sourceCard('brand','OFFICIAL BRAND',pattern.brand,pattern.brandUrl,pattern.brandUrl);const referenceCard=sourceCard('reference','REFERENCE SOURCE',pattern.sourceLabel||'Source',pattern.sourceUrl,pattern.sourceUrl);if(brandCard)stack.appendChild(brandCard);if(referenceCard)stack.appendChild(referenceCard);source.replaceWith(stack);
   }
   function apply(root=document){
+    if(root instanceof Element&&root.matches('.pattern-card[data-brand]'))wire(root.querySelector('.card-meta span:first-child'),root.dataset.brand);
     root.querySelectorAll?.('.pattern-card[data-brand]').forEach(card=>{wire(card.querySelector('.card-meta span:first-child'),card.dataset.brand);});
-    const detail=document.querySelector('.detail-page');
+    const detail=root instanceof Element&&root.matches('.detail-page')?root:root.querySelector?.('.detail-page');
     if(detail){const id=new URLSearchParams(location.search).get('id');const pattern=patterns.find(p=>p.id===id)||patterns[0];const crumbSpans=detail.querySelectorAll('.breadcrumb span');if(pattern&&pattern.groupType!=='industry-cluster'&&crumbSpans[1])wire(crumbSpans[1],pattern.brand,{keyboard:true});enhanceDetailSources(detail,pattern);}
   }
+  function relevant(node){return node instanceof Element&&(node.matches('.pattern-card,.detail-page')||node.querySelector('.pattern-card,.detail-page'));}
   function openBrand(target,event){const url=target?.dataset?.brandExternal;if(!url)return;event.preventDefault();event.stopPropagation();window.open(url,'_blank','noopener,noreferrer');}
   document.addEventListener('click',event=>{const target=event.target.closest?.('[data-brand-external]');if(target)openBrand(target,event);});
   document.addEventListener('keydown',event=>{if(event.key!=='Enter'&&event.key!==' ')return;const target=event.target.closest?.('[data-brand-external][role="link"]');if(target)openBrand(target,event);});
   apply(document);
-  const observer=new MutationObserver(mutations=>{for(const mutation of mutations){for(const node of mutation.addedNodes){if(node instanceof Element)apply(node);}}});observer.observe(document.body,{childList:true,subtree:true});
+  const observer=new MutationObserver(mutations=>{for(const mutation of mutations){for(const node of mutation.addedNodes){if(relevant(node))apply(node);}}});
+  observer.observe(document.body,{childList:true,subtree:true});
 })();
