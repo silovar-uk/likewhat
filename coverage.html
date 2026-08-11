@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="Like What?の99参照についてDesign Space・Vocabulary・Domain・Mediumの偏りを分析し、次に追加すべき参照条件を考えるCoverage Planner。" />
+  <meta name="description" content="Like What?の104参照についてDesign Space・Vocabulary・Domain・Mediumの偏りを分析し、次に追加すべき参照条件を考えるCoverage Planner。" />
   <title>Coverage Planner — Like What?</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
@@ -25,7 +25,7 @@
     </section>
 
     <section class="coverage-snapshot" aria-labelledby="snapshotTitle">
-      <div class="coverage-section-head"><div><p class="eyebrow">COVERAGE SNAPSHOT</p><h2 id="snapshotTitle">いまの99件を、欠け方から見る。</h2></div><p>値は現在の収録データに依存する相対指標。品質点ではない。</p></div>
+      <div class="coverage-section-head"><div><p class="eyebrow">COVERAGE SNAPSHOT</p><h2 id="snapshotTitle">いまの104件を、欠け方から見る。</h2></div><p>値は現在の収録データに依存する相対指標。品質点ではない。</p></div>
       <div id="coverageStats" class="coverage-stats" aria-live="polite"></div>
     </section>
 
@@ -58,8 +58,8 @@
       <details>
         <summary>Coverage Plannerの計算方法 <span>Method / explainability</span></summary>
         <div class="coverage-method-body">
-          <p><strong>Coverage Delta</strong>：Wave 3直前の63件とWave 3時点の78件に同じ指標を適用した履歴比較。現在の99件はCoverage Snapshotと各Gap分析へ反映される。</p>
-          <p><strong>Spatial Gap</strong>：6軸を10 / 50 / 90の3値に離散化した729点について、現在の99件への最短Design Distanceを計算。近接した候補点を間引き、異なる空白方向を残す。</p>
+          <p><strong>Coverage Delta</strong>：Wave 3直前の63件とWave 3時点の78件に同じ指標を適用した履歴比較。現在の104件はCoverage Snapshotと各Gap分析へ反映される。</p>
+          <p><strong>Spatial Gap</strong>：6軸を10 / 50 / 90の3値に離散化した729点について、現在の104件への最短Design Distanceを計算。近接した候補点を間引き、異なる空白方向を残す。</p>
           <p><strong>Brand / Era</strong>：トップ一覧ではILLITを1アーティストとして束ねるが、SUPER REAL ME / NOT CUTE ANYMORE / MAMIHLAPINATAPAIは異なる設計原則を持つため、Design Space上では別Patternとして保持する。</p>
           <p><strong>Industry Cluster</strong>：Eyewearのように同じ業界・近い設計問題を扱うブランドは、ブランド数ではなく1つのCluster referenceとしてDesign Spaceへ置く。Cluster内部の差は詳細ページで保持する。</p>
           <p><strong>Thin Vocabulary</strong>：各語彙に接続するPattern数・ブランド数・Domain数を数え、実例数が少なく単一ブランド / 単一Domainに偏るほど優先度を上げる。</p>
@@ -70,6 +70,6 @@
   </main>
 
   <footer><p>Like What? — coverage before expansion, delta after expansion.</p><p>Coverage analysis is relative to the current reference library and changes as patterns are added.</p></footer>
-  <script src="patterns.js"></script><script src="patterns-extra.js"></script><script src="patterns-wave1.js"></script><script src="patterns-wave2.js"></script><script src="patterns-wave3.js"></script><script src="taxonomy.js"></script><script src="design-space.js"></script><script src="vocabulary.js"></script><script src="wave-metadata.js"></script><script src="coverage-delta.js"></script><script src="patterns-wave4.js"></script><script src="patterns-eyewear.js"></script><script src="patterns-idols.js"></script><script src="coverage.js"></script>
+  <script src="patterns.js"></script><script src="patterns-extra.js"></script><script src="patterns-wave1.js"></script><script src="patterns-wave2.js"></script><script src="patterns-wave3.js"></script><script src="taxonomy.js"></script><script src="design-space.js"></script><script src="vocabulary.js"></script><script src="wave-metadata.js"></script><script src="coverage-delta.js"></script><script src="patterns-wave4.js"></script><script src="patterns-eyewear.js"></script><script src="patterns-idols.js"></script><script src="patterns-idols2.js"></script><script src="coverage.js"></script>
 </body>
 </html>
