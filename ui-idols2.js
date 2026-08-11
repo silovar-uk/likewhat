@@ -16,4 +16,11 @@
     return `<div class="${cls}" data-brand="${esc(pattern.brand)}">${inner}</div>`;
   }
   window.LikeWhatUI={...window.LikeWhatUI,render,esc};
+
+  function syncVisibleCounts(){
+    const count=(window.LIKEWHAT_PATTERNS||[]).length;
+    document.querySelectorAll('.explore-tool-copy span').forEach(node=>{if(/\d+\s+references/i.test(node.textContent))node.textContent=node.textContent.replace(/\d+\s+references/i,`${count} references`);});
+    document.querySelectorAll('.map-hero p').forEach(node=>{if(/\d+の参照/.test(node.textContent))node.textContent=node.textContent.replace(/\d+の参照/,`${count}の参照`);});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',syncVisibleCounts,{once:true});else syncVisibleCounts();
 })();
