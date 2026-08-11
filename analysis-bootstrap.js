@@ -59,7 +59,11 @@
     }else if(page==='coverage'){
       const history=await json('generated/history/wave3.json');
       window.LIKEWHAT_COVERAGE_DELTA=history;
+      const current=window.LIKEWHAT_PATTERNS;
+      window.LIKEWHAT_PATTERNS=history.after;
+      window.LIKEWHAT_WAVES={wave3:{ids:history.waveIds,label:history.label}};
       await script('coverage-delta.js');
+      window.LIKEWHAT_PATTERNS=current;
       await script('coverage.js');
     }else{
       throw new Error(`Unknown analysis page ${page}`);
