@@ -6,11 +6,11 @@
   const examples=document.querySelector('.query-examples');
   const resultCount=document.getElementById('resultCount');
   const groups=document.getElementById('patternGroups');
-  const catalog=window.LIKEWHAT_CATALOG||{};
+  const catalogMeta=window.LIKEWHAT_CATALOG||{};
   let loading=null;
   let pendingAction=null;
 
-  const budgets=catalog.performanceBudget||{
+  const budgets=catalogMeta.performanceBudget||{
     initialPatternDetailData:0,
     initialPreviewRendering:0,
     initialDiversityCalculations:0,
@@ -30,6 +30,12 @@
     });
   }
 
+  async function json(url){
+    const response=await fetch(url,{cache:'default'});
+    if(!response.ok)throw new Error(`${response.status} ${url}`);
+    return response.json();
+  }
+
   function stylesheet(href){
     if(document.querySelector(`link[href="${href}"]`))return Promise.resolve();
     return new Promise((resolve,reject)=>{
@@ -47,14 +53,17 @@
   }
 
   async function loadData(){
-    await script('patterns.js');
-    await Promise.all([
-      'patterns-extra.js','patterns-wave1.js','patterns-wave2.js','patterns-wave3.js','patterns-wave4.js','patterns-eyewear.js','patterns-idols.js','patterns-idols2.js'
-    ].map(src=>script(src)));
+    const catalog=await json('generated/catalog.json');
+    window.LIKEWHAT_GENERATED_CATALOG=catalog;
+    window.LIKEWHAT_PATTERNS=catalog.records.map(record=>({
+      ...record,
+      description:record.searchText||'',
+      members:(record.clusterMembers||[]).map(member=>({...member}))
+    }));
+    return catalog;
   }
 
   async function loadCore(){
-    await script('taxonomy.js');
     await script('design-space.js');
     await script('library-groups.js');
     await script('vocabulary.js');
@@ -90,8 +99,8 @@
   }
 
   function showLoading(){
-    if(resultCount)resultCount.textContent='Library data · loading only when needed';
-    if(groups&&!groups.querySelector('.library-loading-note'))groups.innerHTML='<div class="library-loading-note">Loading the reference catalog…</div>';
+    if(resultCount)resultCount.textContent='Compact catalog · loading only when needed';
+    if(groups&&!groups.querySelector('.library-loading-note'))groups.innerHTML='<div class="library-loading-note">Loading the compact reference catalog…</div>';
   }
 
   function loadLibrary(reason='viewport'){
@@ -101,12 +110,20 @@
     document.documentElement.dataset.libraryLoadReason=reason;
     const started=performance.now();
     loading=(async()=>{
-      await Promise.all([loadStyles(),loadData()]);
+      const [,catalog]=await Promise.all([loadStyles(),loadData()]);
       await loadCore();
       await loadRenderers();
       await loadControllers();
       window.LIKEWHAT_LIBRARY_READY=true;
-      window.LikeWhatLoadMetrics={reason,durationMs:Math.round(performance.now()-started),patterns:(window.LIKEWHAT_PATTERNS||[]).length,budgets};
+      window.LikeWhatLoadMetrics={
+        reason,
+        durationMs:Math.round(performance.now()-started),
+        patterns:(window.LIKEWHAT_PATTERNS||[]).length,
+        fullDetailRecords:0,
+        catalogSchema:catalog.schemaVersion,
+        runtimePatternSource:'generated/catalog.json',
+        budgets
+      };
       window.dispatchEvent(new CustomEvent('likewhat:library-ready',{detail:window.LikeWhatLoadMetrics}));
       const action=pendingAction;pendingAction=null;action?.();
     })().catch(error=>{
