@@ -277,7 +277,7 @@
       if(!entries.some(entry=>entry.isIntersecting))return;
       observer.disconnect();
       activateLibrary();
-    },{rootMargin:'700px 0px'});
+    },{rootMargin:'300px 0px'});
     observer.observe(browser);
   }else{
     activateLibrary();
