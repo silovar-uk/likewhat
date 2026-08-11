@@ -6,10 +6,11 @@
   const examples=document.querySelector('.query-examples');
   const resultCount=document.getElementById('resultCount');
   const groups=document.getElementById('patternGroups');
+  const catalog=window.LIKEWHAT_CATALOG||{};
   let loading=null;
   let pendingAction=null;
 
-  const budgets={
+  const budgets=catalog.performanceBudget||{
     initialPatternDetailData:0,
     initialPreviewRendering:0,
     initialDiversityCalculations:0,
@@ -27,6 +28,22 @@
       el.onerror=()=>reject(new Error(`Failed to load ${src}`));
       document.body.appendChild(el);
     });
+  }
+
+  function stylesheet(href){
+    if(document.querySelector(`link[href="${href}"]`))return Promise.resolve();
+    return new Promise((resolve,reject)=>{
+      const el=document.createElement('link');el.rel='stylesheet';el.href=href;
+      el.onload=()=>resolve(el);el.onerror=()=>reject(new Error(`Failed to load ${href}`));
+      document.head.appendChild(el);
+    });
+  }
+
+  async function loadStyles(){
+    await Promise.all([
+      'styles-wave1.css','styles-wave2.css','styles-wave3.css','styles-wave4.css','styles-eyewear.css','styles-idols.css','styles-idols2.css',
+      'styles-preview-contract.css','styles-group-preview.css','styles-library-grid.css','styles-brand-links.css','styles-group-official.css','styles-discovery-v2.css'
+    ].map(stylesheet));
   }
 
   async function loadData(){
@@ -57,6 +74,21 @@
     for(const src of ['cluster-brand-filter.js','brand-links.js','group-official-links.js','discovery-v2.js','group-sort.js'])await script(src);
   }
 
+  function initialBudgetSnapshot(){
+    const scripts=[...document.scripts].map(s=>s.getAttribute('src')||'').filter(Boolean);
+    const detailScripts=scripts.filter(src=>/^patterns(?:-|\.)|^ui-(?:wave|eyewear|idols)/.test(src));
+    const previews=document.querySelectorAll('.mini-ui').length;
+    const domNodes=document.getElementsByTagName('*').length;
+    const checks={
+      initialPatternDetailData:{value:detailScripts.length,limit:budgets.initialPatternDetailData,pass:detailScripts.length<=budgets.initialPatternDetailData},
+      initialPreviewRendering:{value:previews,limit:budgets.initialPreviewRendering,pass:previews<=budgets.initialPreviewRendering},
+      initialDiversityCalculations:{value:0,limit:budgets.initialDiversityCalculations,pass:true},
+      initialDomNodes:{value:domNodes,limit:budgets.initialDomNodes,pass:domNodes<=budgets.initialDomNodes}
+    };
+    window.LikeWhatInitialBudget={checkedAt:performance.now(),checks,pass:Object.values(checks).every(x=>x.pass)};
+    if(!window.LikeWhatInitialBudget.pass)console.warn('[Like What?] initial performance budget exceeded',window.LikeWhatInitialBudget);
+  }
+
   function showLoading(){
     if(resultCount)resultCount.textContent='Library data · loading only when needed';
     if(groups&&!groups.querySelector('.library-loading-note'))groups.innerHTML='<div class="library-loading-note">Loading the reference catalog…</div>';
@@ -69,7 +101,7 @@
     document.documentElement.dataset.libraryLoadReason=reason;
     const started=performance.now();
     loading=(async()=>{
-      await loadData();
+      await Promise.all([loadStyles(),loadData()]);
       await loadCore();
       await loadRenderers();
       await loadControllers();
@@ -91,6 +123,9 @@
     loadLibrary(reason);
   }
 
+  initialBudgetSnapshot();
+  requestAnimationFrame(initialBudgetSnapshot);
+
   if(new URLSearchParams(location.search).get('q'))loadLibrary('query-param');
   if(location.hash==='#patterns')loadLibrary('anchor');
 
@@ -106,9 +141,7 @@
   }
 
   input?.addEventListener('input',()=>loadLibrary('search-input'),{once:true});
-  input?.addEventListener('focus',()=>{
-    if(input.value.trim())loadLibrary('search-focus');
-  },{once:true});
+  input?.addEventListener('focus',()=>{if(input.value.trim())loadLibrary('search-focus');},{once:true});
   examples?.addEventListener('click',event=>{
     const button=event.target.closest('[data-query]');
     if(!button)return;
@@ -130,8 +163,6 @@
   },true);
 
   document.addEventListener('keydown',event=>{
-    if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'){
-      input?.focus();input?.select();
-    }
+    if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'){input?.focus();input?.select();}
   });
 })();
