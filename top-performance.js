@@ -24,8 +24,7 @@
     const pattern=byId.get(node.dataset.previewId);
     if(!pattern)return;
     node.dataset.hydrated='1';
-    const html=baseRender(pattern,node.dataset.previewSize||'related');
-    node.insertAdjacentHTML('afterend',html);
+    node.insertAdjacentHTML('afterend',baseRender(pattern,node.dataset.previewSize||'related'));
     node.remove();
   }
 
@@ -58,10 +57,10 @@
     const nodes=[];
     if(root instanceof Element&&root.matches('.lw-lazy-preview'))nodes.push(root);
     root.querySelectorAll?.('.lw-lazy-preview').forEach(node=>nodes.push(node));
-    nodes.forEach((node,index)=>{
+    nodes.forEach(node=>{
       const card=node.closest('.library-group-card');
       const rect=card?.getBoundingClientRect();
-      if(!io||index<4||(rect&&rect.top<window.innerHeight+500))queue(node);
+      if(!io||(rect&&rect.top<window.innerHeight+500&&rect.bottom>-300))queue(node);
       else io.observe(node);
     });
   }
