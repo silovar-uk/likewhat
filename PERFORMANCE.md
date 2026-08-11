@@ -1,12 +1,12 @@
 # Performance Architecture
 
-Like What? is designed to keep the top page responsive as the reference library grows.
+Like What? is designed to keep both the top page and detail pages responsive as the reference library grows.
 
 The core rule is:
 
-> Library size must not directly determine initial top-page cost.
+> Library size must not directly determine initial page cost.
 
-## Progressive loading
+## Top page progressive loading
 
 The top page has four stages.
 
@@ -53,6 +53,76 @@ Full miniature UI previews are not rendered with the card DOM.
 
 `top-performance.js` inserts lightweight placeholders and hydrates previews only near the viewport, with a per-animation-frame work limit.
 
+## Pattern detail loading
+
+Pattern detail pages no longer load every full Pattern source file.
+
+GitHub Pages runs `scripts/build-pattern-data.mjs` before deployment. The build step executes the existing Pattern source files as the editorial source of truth and generates:
+
+```text
+generated/catalog.json
+generated/patterns/<id>.json
+```
+
+`generated/catalog.json` contains compact records for every reference. A compact record keeps only the information needed for cross-library analysis and navigation, including:
+
+- id / brand / family / name
+- one-line summary
+- tags / UI parts
+- Design Space coordinates
+- domain / medium / archetype / interaction model
+- philosophy
+- related / opposite ids
+- preview renderer key
+- artist / cluster metadata
+- source URL / label
+
+Long-form fields such as full description, visual rules, use cases, avoid cases, prompts and member variation detail stay in the per-Pattern JSON.
+
+When `pattern.html?id=x` opens:
+
+1. fetch `generated/catalog.json`
+2. resolve `x`
+3. fetch exactly one `generated/patterns/x.json`
+4. replace that compact catalog record with the full record in memory
+5. run the existing Taxonomy / Design Space / Vocabulary / Opposite / NEXT REFERENCES logic against `1 full + N-1 compact` records
+
+This preserves analytical comparison without downloading all long-form detail data.
+
+Runtime diagnostics are exposed as:
+
+```js
+window.LikeWhatPatternLoadMetrics
+```
+
+Expected shape:
+
+```js
+{
+  selectedId: 'apple-ios-settings',
+  referenceCount: 104,
+  fullDetailRecords: 1,
+  compactRecords: 103,
+  durationMs: 123
+}
+```
+
+Invalid Pattern ids are rejected from the compact catalog before any detail file is requested.
+
+## Generated-data policy
+
+The generated JSON is a deploy artifact, not an editorial source of truth.
+
+Edit the existing `patterns*.js` source files. The Pages build regenerates catalog/detail output automatically.
+
+The deployment workflow verifies:
+
+- `generated/catalog.json` exists
+- exactly 104 Pattern detail JSON files are produced
+- the generated catalog reports 104 references
+
+When reference count changes, update the expected deployment count deliberately rather than allowing silent drift.
+
 ## Performance budget
 
 The current top-page budget is defined in `catalog-index.js` and checked by `top-bootstrap.js`.
@@ -63,7 +133,7 @@ The current top-page budget is defined in `catalog-index.js` and checked by `top
 - Initial DOM nodes: **≤ 1,000**
 - Compact catalog target: **< 100 KB compressed / encoded transfer**
 
-Runtime diagnostics are exposed as:
+Top runtime diagnostics:
 
 ```js
 window.LikeWhatPerformanceBudget
@@ -71,35 +141,30 @@ window.LikeWhatInitialBudget
 window.LikeWhatLoadMetrics
 ```
 
-`LikeWhatLoadMetrics.reason` records why the deferred library was loaded, such as `viewport`, `search-input`, `collision`, `query-param` or `anchor`.
+`LikeWhatLoadMetrics.reason` records why the deferred top library was loaded, such as `viewport`, `search-input`, `collision`, `query-param` or `anchor`.
 
-## Current split
-
-`catalog-index.js` is deliberately tiny. It contains only global catalog metadata, bundle membership and performance budgets.
-
-The detailed library remains in the existing Pattern source files for now, but those files are no longer part of the initial top-page request.
-
-This is the first migration step toward:
+## Current architecture
 
 ```text
-catalog index
+editorial Pattern source files
+        ↓ build
+compact catalog + per-Pattern detail JSON
+        ↓
+TOP: deferred full library bundle
+DETAIL: compact catalog + one full Pattern
+```
+
+The next migration target is Brand / Artist View.
+
+Today a Brand page still loads the complete Pattern source library. The next step is:
+
+```text
+compact catalog
     ↓
 brand / artist manifest
     ↓
-pattern detail
+only the full detail records needed by that Brand / Artist View
 ```
-
-## Next migration boundary
-
-When deferred library loading itself becomes noticeably slow, the next step is not another DOM optimization.
-
-Split Pattern source into generated outputs:
-
-- lightweight per-reference catalog records
-- Brand / Artist manifests
-- on-demand Pattern detail JSON
-
-At that point, search and sorting can run entirely from compact catalog records and a Pattern detail file will be fetched only when its detail page is opened.
 
 ## Editorial constraint
 
