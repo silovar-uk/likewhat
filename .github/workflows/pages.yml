@@ -30,6 +30,22 @@ jobs:
           test -f generated/catalog.json
           test "$(find generated/patterns -type f -name '*.json' | wc -l)" -eq 104
           node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('generated/catalog.json'));if(c.referenceCount!==104)process.exit(1);console.log('catalog references:',c.referenceCount)"
+      - name: Verify analysis catalog and history
+        run: |
+          test -f generated/history/wave3.json
+          node - <<'NODE'
+          const fs=require('fs');
+          const catalog=JSON.parse(fs.readFileSync('generated/catalog.json'));
+          const history=JSON.parse(fs.readFileSync('generated/history/wave3.json'));
+          if(catalog.schemaVersion<2)throw new Error(`catalog schema ${catalog.schemaVersion} is not analysis-ready`);
+          if(history.before.length!==63)throw new Error(`Wave 3 before snapshot ${history.before.length} != 63`);
+          if(history.after.length!==78)throw new Error(`Wave 3 after snapshot ${history.after.length} != 78`);
+          if(history.waveIds.length!==15)throw new Error(`Wave 3 ids ${history.waveIds.length} != 15`);
+          for(const record of catalog.records){
+            if(!record.id||!record.designSpace||!record.detailFile)throw new Error(`incomplete compact record ${record.id||'unknown'}`);
+          }
+          console.log('analysis catalog:',catalog.records.length,'Wave 3:',history.before.length,'→',history.after.length);
+          NODE
       - name: Verify Brand and Artist manifests
         run: |
           test -f generated/brands/index.json
