@@ -5,11 +5,18 @@
   function score(url){
     try{const u=new URL(url,location.href),path=u.pathname.replace(/\/+$/,'');let s=path.split('/').filter(Boolean).length*20+path.length;if(/help|support|docs?|manual|guideline/i.test(`${u.hostname}${path}`))s+=24;return s;}catch{return 9999;}
   }
-  const urlByBrand=new Map();
-  [...new Set(patterns.map(p=>p.brand))].forEach(brand=>{
-    const urls=[...new Set(patterns.filter(p=>p.brand===brand).map(p=>p.sourceUrl).filter(Boolean))].sort((a,b)=>score(a)-score(b));
-    if(urls[0])urlByBrand.set(brand,urls[0]);
+  const candidates=new Map();
+  patterns.forEach(p=>{
+    if(!p.sourceUrl)return;
+    if(!candidates.has(p.brand))candidates.set(p.brand,new Set());
+    candidates.get(p.brand).add(p.sourceUrl);
   });
+  const urlByBrand=new Map();
+  candidates.forEach((urls,brand)=>{
+    const best=[...urls].sort((a,b)=>score(a)-score(b))[0];
+    if(best)urlByBrand.set(brand,best);
+  });
+
   function apply(){
     root.querySelectorAll('.brand-group-card').forEach(card=>{
       if(card.querySelector('.group-official-link'))return;
@@ -19,5 +26,6 @@
       card.appendChild(link);
     });
   }
-  new MutationObserver(apply).observe(root,{childList:true,subtree:true});apply();
+  root.addEventListener('likewhat:groups-rendered',apply);
+  apply();
 })();
