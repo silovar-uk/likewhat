@@ -17,37 +17,36 @@
     });
     return out;
   }
-  function groupDiversity(items){
-    if(!ds)return 0;
-    return Math.round(average(items,p=>ds.diversity(p,patterns)?.score??0));
-  }
 
   function build(source=patterns){
-    const normal=source.filter(p=>p.groupType!=='industry-cluster');
-    const clusters=source.filter(p=>p.groupType==='industry-cluster');
-    const seen=new Set();
-    const groups=[];
+    const normal=[];
+    const clusters=[];
+    source.forEach(p=>(p.groupType==='industry-cluster'?clusters:normal).push(p));
 
-    normal.forEach((p,index)=>{
-      if(seen.has(p.brand))return;
-      seen.add(p.brand);
-      const items=normal.filter(x=>x.brand===p.brand);
+    const byBrand=new Map();
+    normal.forEach(p=>{
+      if(!byBrand.has(p.brand))byBrand.set(p.brand,[]);
+      byBrand.get(p.brand).push(p);
+    });
+
+    const groups=[];
+    let index=0;
+    byBrand.forEach((items,brand)=>{
       groups.push({
-        key:`brand:${p.brand}`,
+        key:`brand:${brand}`,
         type:'brand',
-        title:p.brand,
-        brand:p.brand,
+        title:brand,
+        brand,
         patterns:items,
         count:items.length,
-        firstIndex:index,
+        firstIndex:index++,
         centroid:centroid(items),
         range:range(items),
-        diversity:groupDiversity(items),
-        memberBrands:[p.brand]
+        memberBrands:[brand]
       });
     });
 
-    clusters.forEach((p,index)=>groups.push({
+    clusters.forEach(p=>groups.push({
       key:`cluster:${p.id}`,
       type:'industry-cluster',
       title:p.name,
@@ -55,10 +54,9 @@
       industry:p.industry,
       patterns:[p],
       count:1,
-      firstIndex:normal.length+index,
+      firstIndex:index++,
       centroid:centroid([p]),
       range:range([p]),
-      diversity:groupDiversity([p]),
       memberBrands:p.memberBrands||[],
       cluster:p
     }));
