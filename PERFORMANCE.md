@@ -1,63 +1,16 @@
 # Performance Architecture
 
-Like What? is designed to keep both the top page and deep-navigation pages responsive as the reference library grows.
+Like What? is designed so library growth does not linearly increase initial page cost.
 
 The core rule is:
 
-> Library size must not directly determine initial page cost.
-
-## Top page progressive loading
-
-The top page has four stages.
-
-### Stage 0 — shell
-
-Loaded immediately:
-
-- shared page CSS
-- home / hero CSS
-- `catalog-index.js`
-- `top-bootstrap.js`
-
-Not loaded initially:
-
-- Pattern data
-- Design Space engine
-- Vocabulary engine
-- Pattern renderers
-- Brand / Artist card renderers
-- preview mocks
-- sorting / discovery controllers
-
-### Stage 1 — library requested
-
-The full library bundle starts only when one of these occurs:
-
-- the Brand / Artist / Cluster section comes within roughly 300 px of the viewport
-- the user enters a search
-- a URL query is already present
-- the page opens with `#patterns`
-- Collision Engine is used
-
-Library-specific CSS and Pattern data are requested in parallel.
-
-### Stage 2 — grouped catalog
-
-After data and analysis engines are available, Brand / Artist / Cluster cards are created.
-
-Diversity is still not calculated unless the user selects Diversity sorting.
-
-### Stage 3 — previews
-
-Full miniature UI previews are not rendered with the card DOM.
-
-`top-performance.js` inserts lightweight placeholders and hydrates previews only near the viewport, with a per-animation-frame work limit.
+> Editorial Pattern source is build-time input. Browser pages should consume generated data matched to their task.
 
 ## Generated data
 
 GitHub Pages runs `scripts/build-pattern-data.mjs` before deployment. Existing `patterns*.js` files remain the editorial source of truth.
 
-The build executes `taxonomy.js` against source Patterns and generates analysis-ready output:
+The build executes `taxonomy.js` and generates:
 
 ```text
 generated/catalog.json
@@ -67,19 +20,94 @@ generated/brands/<manifest>.json
 generated/history/wave3.json
 ```
 
-`generated/catalog.json` contains compact but analysis-ready records for every reference, including derived implementation / design / philosophy terms. Long-form fields stay in one JSON per Pattern.
+`generated/catalog.json` is schema v3 and contains compact, analysis-ready records for all references.
 
-`generated/history/wave3.json` stores compact 63-reference and 78-reference snapshots so historical Coverage Delta does not depend on today's 104-reference library.
+In addition to Design Space / taxonomy metadata, each compact record contains:
 
-## Pattern detail loading
+- `searchText`: a precomputed normalized search corpus built from long-form source fields
+- `clusterMembers`: only brand / role summaries needed to render Industry Cluster cards
+- `detailFile`: route to the Full Detail JSON
 
-When `pattern.html?id=x` opens:
+This preserves TOP search quality without carrying description, visual rules, prompts and full Cluster member notes as separate runtime fields.
 
-1. fetch `generated/catalog.json`
-2. resolve `x`
-3. fetch exactly one `generated/patterns/x.json`
-4. replace that compact catalog record with the full record in memory
-5. run the existing Design Space / Vocabulary / Opposite / NEXT REFERENCES logic against `1 full + N-1 compact` records
+## TOP progressive loading
+
+### Stage 0 — shell
+
+Loaded immediately:
+
+- shared / home CSS
+- `catalog-index.js`
+- `top-bootstrap.js`
+
+Initial Pattern details: **0**.
+
+### Stage 1 — catalog requested
+
+The TOP library starts only when:
+
+- the Brand / Artist / Cluster section comes within roughly 300 px of the viewport
+- the user searches
+- a query parameter is already present
+- the page opens with `#patterns`
+- Collision Engine is used
+
+At that point TOP fetches:
+
+```text
+generated/catalog.json
+```
+
+It does **not** load `patterns.js`, Wave files, Eyewear source files or Idol source files.
+
+The compact records are adapted into the shape expected by the existing grouping / search / random controllers. `searchText` is exposed as the searchable description field, and `clusterMembers` supplies the lightweight Cluster card list.
+
+### Stage 2 — engines / grouping
+
+TOP then loads:
+
+```text
+design-space.js
+library-groups.js
+vocabulary.js
+```
+
+Taxonomy is not recomputed in the browser because generated catalog records are already enriched at build time.
+
+Diversity remains lazy and is calculated only when Diversity sorting is selected.
+
+### Stage 3 — previews
+
+Preview renderer code loads only after the compact catalog is requested. Full miniature UI previews are then hydrated near the viewport through `top-performance.js`, with per-frame work limits.
+
+TOP runtime diagnostics:
+
+```js
+window.LikeWhatPerformanceBudget
+window.LikeWhatInitialBudget
+window.LikeWhatLoadMetrics
+```
+
+`LikeWhatLoadMetrics` now reports:
+
+```js
+{
+  runtimePatternSource: 'generated/catalog.json',
+  fullDetailRecords: 0,
+  catalogSchema: 3
+}
+```
+
+## Pattern Detail
+
+```text
+compact catalog
++ exactly 1 Full Detail
+```
+
+`pattern.html?id=x` resolves the id from the compact catalog and fetches one `generated/patterns/x.json`.
+
+Cross-library Nearest / Opposite / NEXT REFERENCES continue to use the compact records.
 
 Runtime diagnostics:
 
@@ -87,44 +115,20 @@ Runtime diagnostics:
 window.LikeWhatPatternLoadMetrics
 ```
 
-Expected shape:
+## Brand / Artist View
 
-```js
-{
-  selectedId: 'apple-ios-settings',
-  referenceCount: 104,
-  fullDetailRecords: 1,
-  compactRecords: 103,
-  durationMs: 123
-}
+```text
+compact catalog
++ Brand / Artist manifest
++ only that collection's Full Details
 ```
-
-## Brand / Artist View loading
-
-Brand and Artist pages no longer load the full Pattern library.
-
-When `brand.html?brand=ILLIT` opens:
-
-1. fetch the compact catalog and Brand / Artist index in parallel
-2. resolve the ILLIT manifest
-3. fetch that manifest
-4. fetch only the Pattern detail JSON files listed by the manifest
-5. render the existing Brand View and Idol Lens from those Full Detail records
 
 Examples:
 
 ```text
-Apple
-→ Apple manifest
-→ only Apple UI Pattern details
-
-ILLIT
-→ ILLIT manifest
-→ 3 Era details
-
-IVE
-→ IVE manifest
-→ 1 Concept detail
+Apple → Apple Pattern details only
+ILLIT → 3 Era details only
+IVE → 1 Concept detail only
 ```
 
 Runtime diagnostics:
@@ -133,132 +137,128 @@ Runtime diagnostics:
 window.LikeWhatBrandLoadMetrics
 ```
 
-Brand View cost therefore scales with the selected collection, not total library size.
-
 ## Library-wide analysis pages
-
-Design Map, Vocabulary, Contrast and Coverage now use `analysis-bootstrap.js` and no longer load `patterns*.js` directly.
 
 ### Design Map
 
 ```text
-compact catalog
-+ Design Space engine
-+ preview renderer stack
+compact catalog + Design Space + preview renderers
 ```
 
-No Full Detail records are required. Coordinates, domain, archetype, philosophy and preview keys all live in the analysis-ready catalog.
+Full Detail: **0**.
 
 ### Vocabulary
 
 ```text
-compact catalog
-+ Vocabulary engine
-+ preview renderer stack
+compact catalog + Vocabulary + preview renderers
 ```
 
-Vocabulary co-occurrence runs from generated implementation / design / philosophy terms plus the compact Pattern metadata.
+Full Detail: **0**.
 
 ### Contrast
 
 ```text
-compact catalog
-+ selected A Full Detail
-+ selected B Full Detail
+compact catalog + selected A Full Detail + selected B Full Detail
 ```
 
-Selectors, curated pairs and Design Space comparison run from compact records. `useCases` and `avoid` are long-form decision data, so only the currently selected pair is hydrated through `LikeWhatDetailStore`. Changing one side fetches only that new Pattern and caches it.
+Only `useCases` / `avoid` and other long-form comparison fields force hydration. Changed selections are fetched one at a time and cached.
 
 ### Coverage
 
 ```text
-current compact catalog
-+ generated/history/wave3.json
+current compact catalog + generated/history/wave3.json
 ```
 
-Current Coverage Snapshot / gaps use 104 compact references. Historical Coverage Delta temporarily evaluates the generated 63 → 78 snapshot, then returns to the current catalog. No historical raw Pattern bundle is loaded.
+Full Detail: **0**.
 
-Runtime diagnostics for all four pages:
-
-```js
-window.LikeWhatAnalysisLoadMetrics
-```
-
-For Contrast, `fullDetailRecords` reports the number of pair details fetched so far. For the other analysis pages it remains zero.
+The historical 63 → 78 comparison is a generated compact snapshot, independent of the current 104-reference library.
 
 ## Deployment verification
 
-The Pages workflow verifies:
+Pages CI verifies:
 
-- `generated/catalog.json` exists and reports 104 references
-- exactly 104 Pattern detail JSON files are produced
-- compact catalog schema is analysis-ready
-- every compact record has id / Design Space / detail routing
-- `generated/history/wave3.json` exists
-- Wave 3 history remains exactly 63 → 78 with 15 added ids
-- Brand / Artist manifest count matches unique non-Cluster brands
-- manifest Pattern totals match non-Cluster references
-- every manifest file listed by the index exists
+- current reference count is 104
+- exactly 104 Full Detail JSON files are generated
+- compact catalog schema is at least v3
+- every compact record has id / Design Space / detail routing / `searchText`
+- Industry Cluster records have `clusterMembers`
+- TOP HTML does not directly load Pattern source files
+- `top-bootstrap.js` does not fall back to Pattern source files
+- TOP bootstrap explicitly loads `generated/catalog.json`
+- Wave 3 history remains 63 → 78 with 15 added ids
+- Brand / Artist manifest counts and Pattern totals are consistent
 
-When reference count changes, update expected deployment counts deliberately rather than allowing silent drift.
+This makes a regression from generated runtime data back to `patterns*.js` a deployment failure rather than a silent performance regression.
 
 ## Performance budget
 
-The current top-page budget is defined in `catalog-index.js` and checked by `top-bootstrap.js`.
+Current TOP budget:
 
 - Initial Pattern detail scripts: **0**
+- Full Detail records after opening TOP library: **0**
 - Initial full previews: **0**
 - Initial Diversity calculations: **0**
 - Initial DOM nodes: **≤ 1,000**
 - Compact catalog target: **< 100 KB compressed / encoded transfer**
 
-Top runtime diagnostics:
-
-```js
-window.LikeWhatPerformanceBudget
-window.LikeWhatInitialBudget
-window.LikeWhatLoadMetrics
-```
-
 ## Current architecture
 
 ```text
-editorial Pattern source files
-        ↓ build + taxonomy enrichment
-analysis-ready compact catalog
-per-Pattern detail JSON
-Brand / Artist manifests
-historical snapshots
+patterns*.js
+(editorial source only)
+        ↓
+build + taxonomy enrichment
+        ↓
+┌────────────────────────────────────┐
+│ generated/catalog.json             │
+│ generated/patterns/<id>.json       │
+│ generated/brands/*.json            │
+│ generated/history/wave3.json       │
+└────────────────────────────────────┘
         ↓
 TOP
-  shell → deferred library bundle
+  compact catalog, 0 Full Detail
 
 PATTERN DETAIL
-  compact catalog + 1 full Pattern
+  compact catalog + 1 Full Detail
 
-BRAND / ARTIST VIEW
-  compact catalog + manifest + collection Full Details
+BRAND / ARTIST
+  compact catalog + manifest + collection details
 
-DESIGN MAP / VOCABULARY
-  compact catalog only (+ preview renderers)
+MAP / VOCABULARY
+  compact catalog, 0 Full Detail
 
 CONTRAST
-  compact catalog + selected pair Full Details
+  compact catalog + selected pair details
 
 COVERAGE
-  compact current catalog + compact historical snapshot
+  compact current + compact history
 ```
 
 ## Next migration boundary
 
-The largest remaining architectural inconsistency is the TOP page itself: when the library is finally requested, it still falls back to the original `patterns*.js` bundle rather than the generated compact catalog.
+The major runtime architecture migration is now complete.
 
-The next step should move TOP search / grouping / sorting to `generated/catalog.json`, then hydrate Full Detail only for operations that genuinely need long-form data. After that, `patterns*.js` becomes build-time editorial input rather than a browser runtime dependency almost everywhere.
+The next likely bottleneck is the **compact catalog itself**. Because `searchText` preserves rich TOP search, catalog transfer size will grow with the editorial corpus even though Full Detail does not.
+
+When the compressed catalog approaches the performance budget, the next step should be:
+
+```text
+catalog-core.json
+  id / grouping / design-space / preview / taxonomy
+
+search-index.json
+  id → normalized search corpus
+```
+
+TOP should fetch `catalog-core.json` when the library becomes visible, and load `search-index.json` only on the first actual search. Map / Coverage would never need the search index.
+
+Do not split this prematurely: measure compressed transfer size first and introduce the second request only when the current compact catalog approaches the budget.
 
 ## Editorial constraint
 
-Performance optimizations must preserve the current information architecture:
+Performance optimizations must preserve:
 
 `Brand / Artist / Industry Cluster → Pattern / Era / Variation → Design Principle`
 
-Do not solve performance by flattening Brand / Artist grouping or deleting explanatory metadata from the editorial source library.
+Do not solve performance by flattening grouping, deleting design metadata, or reducing the explanatory source library.
