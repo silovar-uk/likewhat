@@ -57,26 +57,19 @@ Full miniature UI previews are not rendered with the card DOM.
 
 GitHub Pages runs `scripts/build-pattern-data.mjs` before deployment. Existing `patterns*.js` files remain the editorial source of truth.
 
-The build generates:
+The build executes `taxonomy.js` against source Patterns and generates analysis-ready output:
 
 ```text
 generated/catalog.json
 generated/patterns/<id>.json
 generated/brands/index.json
 generated/brands/<manifest>.json
+generated/history/wave3.json
 ```
 
-`generated/catalog.json` contains compact records for every reference. Long-form detail stays in one JSON per Pattern.
+`generated/catalog.json` contains compact but analysis-ready records for every reference, including derived implementation / design / philosophy terms. Long-form fields stay in one JSON per Pattern.
 
-Brand / Artist manifests contain only collection membership and routing metadata:
-
-- brand / artist name
-- `brand` or `artist` type
-- Pattern ids
-- Pattern detail filenames
-- Era names where applicable
-
-Manifest filenames use a filesystem-safe encoded brand name and are resolved through `generated/brands/index.json`.
+`generated/history/wave3.json` stores compact 63-reference and 78-reference snapshots so historical Coverage Delta does not depend on today's 104-reference library.
 
 ## Pattern detail loading
 
@@ -86,9 +79,7 @@ When `pattern.html?id=x` opens:
 2. resolve `x`
 3. fetch exactly one `generated/patterns/x.json`
 4. replace that compact catalog record with the full record in memory
-5. run the existing Taxonomy / Design Space / Vocabulary / Opposite / NEXT REFERENCES logic against `1 full + N-1 compact` records
-
-This preserves cross-library analysis without downloading all long-form detail data.
+5. run the existing Design Space / Vocabulary / Opposite / NEXT REFERENCES logic against `1 full + N-1 compact` records
 
 Runtime diagnostics:
 
@@ -129,13 +120,11 @@ Apple
 
 ILLIT
 → ILLIT manifest
-→ SUPER REAL ME
-→ NOT CUTE ANYMORE
-→ MAMIHLAPINATAPAI
+→ 3 Era details
 
 IVE
 → IVE manifest
-→ one Concept Pattern
+→ 1 Concept detail
 ```
 
 Runtime diagnostics:
@@ -144,34 +133,74 @@ Runtime diagnostics:
 window.LikeWhatBrandLoadMetrics
 ```
 
-Expected shape:
+Brand View cost therefore scales with the selected collection, not total library size.
 
-```js
-{
-  brand: 'ILLIT',
-  type: 'artist',
-  referenceCount: 104,
-  fullDetailRecords: 3,
-  skippedFullDetailRecords: 101,
-  durationMs: 140
-}
+## Library-wide analysis pages
+
+Design Map, Vocabulary, Contrast and Coverage now use `analysis-bootstrap.js` and no longer load `patterns*.js` directly.
+
+### Design Map
+
+```text
+compact catalog
++ Design Space engine
++ preview renderer stack
 ```
 
-This means Brand View cost scales with the size of the selected Brand / Artist, not with total library size.
+No Full Detail records are required. Coordinates, domain, archetype, philosophy and preview keys all live in the analysis-ready catalog.
+
+### Vocabulary
+
+```text
+compact catalog
++ Vocabulary engine
++ preview renderer stack
+```
+
+Vocabulary co-occurrence runs from generated implementation / design / philosophy terms plus the compact Pattern metadata.
+
+### Contrast
+
+```text
+compact catalog
++ selected A Full Detail
++ selected B Full Detail
+```
+
+Selectors, curated pairs and Design Space comparison run from compact records. `useCases` and `avoid` are long-form decision data, so only the currently selected pair is hydrated through `LikeWhatDetailStore`. Changing one side fetches only that new Pattern and caches it.
+
+### Coverage
+
+```text
+current compact catalog
++ generated/history/wave3.json
+```
+
+Current Coverage Snapshot / gaps use 104 compact references. Historical Coverage Delta temporarily evaluates the generated 63 → 78 snapshot, then returns to the current catalog. No historical raw Pattern bundle is loaded.
+
+Runtime diagnostics for all four pages:
+
+```js
+window.LikeWhatAnalysisLoadMetrics
+```
+
+For Contrast, `fullDetailRecords` reports the number of pair details fetched so far. For the other analysis pages it remains zero.
 
 ## Deployment verification
 
 The Pages workflow verifies:
 
-- `generated/catalog.json` exists
+- `generated/catalog.json` exists and reports 104 references
 - exactly 104 Pattern detail JSON files are produced
-- the generated catalog reports 104 references
-- `generated/brands/index.json` exists
-- Brand / Artist manifest count matches unique non-Cluster brands in the compact catalog
-- the sum of all manifest Pattern counts matches the number of non-Cluster references
+- compact catalog schema is analysis-ready
+- every compact record has id / Design Space / detail routing
+- `generated/history/wave3.json` exists
+- Wave 3 history remains exactly 63 → 78 with 15 added ids
+- Brand / Artist manifest count matches unique non-Cluster brands
+- manifest Pattern totals match non-Cluster references
 - every manifest file listed by the index exists
 
-When reference count changes, update the expected deployment count deliberately rather than allowing silent drift.
+When reference count changes, update expected deployment counts deliberately rather than allowing silent drift.
 
 ## Performance budget
 
@@ -195,10 +224,11 @@ window.LikeWhatLoadMetrics
 
 ```text
 editorial Pattern source files
-        ↓ build
-compact catalog
+        ↓ build + taxonomy enrichment
+analysis-ready compact catalog
 per-Pattern detail JSON
 Brand / Artist manifests
+historical snapshots
         ↓
 TOP
   shell → deferred library bundle
@@ -207,21 +237,23 @@ PATTERN DETAIL
   compact catalog + 1 full Pattern
 
 BRAND / ARTIST VIEW
-  compact catalog + manifest + selected collection Full Details
+  compact catalog + manifest + collection Full Details
+
+DESIGN MAP / VOCABULARY
+  compact catalog only (+ preview renderers)
+
+CONTRAST
+  compact catalog + selected pair Full Details
+
+COVERAGE
+  compact current catalog + compact historical snapshot
 ```
 
 ## Next migration boundary
 
-The remaining pages that still benefit from a library-wide view are:
+The largest remaining architectural inconsistency is the TOP page itself: when the library is finally requested, it still falls back to the original `patterns*.js` bundle rather than the generated compact catalog.
 
-- Design Map
-- Vocabulary
-- Contrast
-- Coverage
-
-These pages do not need every long-form Pattern field. The next optimization should migrate them from full `patterns*.js` sources to `generated/catalog.json`, loading Full Detail only when a UI surface genuinely needs it.
-
-That migration is more important than further micro-optimizing Brand View.
+The next step should move TOP search / grouping / sorting to `generated/catalog.json`, then hydrate Full Detail only for operations that genuinely need long-form data. After that, `patterns*.js` becomes build-time editorial input rather than a browser runtime dependency almost everywhere.
 
 ## Editorial constraint
 
