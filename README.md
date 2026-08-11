@@ -6,7 +6,7 @@
 
 ## Current library
 
-**99 references**
+**104 references**
 
 - Initial library: 39
 - Wave 1: 12 Design Space extremes
@@ -14,7 +14,7 @@
 - Wave 3: 15 coverage-driven references
 - Wave 4: 9 sports / club / live-event references
 - Eyewear Industry Cluster: 4 grouped references covering 10 eyewear brands
-- Idol / Artist concepts: 8 references across 6 artists
+- Idol / Artist concepts: 13 references across 11 artist / culture brands
 
 ## Information architecture v3
 
@@ -34,7 +34,7 @@ The Brand View keeps Pattern-level detail intact and displays Design Space as a 
 
 `Artist → multiple Era / Concept Patterns`
 
-An artist such as **ILLIT** also appears once in the main library, but the children are not UI screens. They are Era / Concept grammars.
+An artist such as **ILLIT** also appears once in the main library, but the children are Era / Concept grammars.
 
 Current ILLIT references:
 
@@ -42,15 +42,22 @@ Current ILLIT references:
 - **NOT CUTE ANYMORE** — Cute Refusal / Identity Reversal
 - **MAMIHLAPINATAPAI** — Self-styling in Motion
 
-The first idol expansion also includes:
+The idol / artist layer currently also includes:
 
 - **aespa** — Synthetic Myth Worldbuilding
 - **XG / AWE** — Alien Fashion Editorial
 - **FRUITS ZIPPER / NEW KAWAII** — Hyper-Kawaii Identity Coding
 - **LE SSERAFIM / IM FEARLESS** — Fearless Performance Minimalism
 - **ME:I** — Continuous Fan Relationship Interface
+- **IVE** — Self-possession Editorial
+- **Perfume** — Technology as Choreography
+- **BABYMONSTER / MONSTIEZ** — Shared Fan Identity Ecosystem
+- **CUTIE STREET / KAWAII MAKER** — Kawaii as Becoming
+- **KAWAII LAB.** — Platform for Differentiated Kawaii
 
-Artist View reuses the same Brand page architecture but changes the language to `ARTIST VIEW / ERA & CONCEPT GRAMMARS` and adds an **Idol Lens**.
+The second expansion deliberately avoids adding five more versions of “cute idol visual.” Each reference has to add a different reusable design idea: self-possession, synchronized human-machine performance, shared fan identity, identity becoming, or portfolio brand architecture.
+
+Artist View reuses the same Brand page architecture but changes the language to `ARTIST VIEW / ERA & CONCEPT GRAMMARS` and adds an **Idol Lens** when the reference is an Artist Era.
 
 ### Idol Lens
 
@@ -103,18 +110,13 @@ The hierarchy is therefore:
 
 ## Idol source / abstraction policy
 
-Idol references are grounded in official artist, label or discography pages, but the grammar names are editorial abstractions created for Like What?.
+Idol references are grounded in official artist, label, project or discography pages, but the grammar names are editorial abstractions created for Like What?.
 
-For example, official sources establish facts such as:
+Official sources establish facts such as group-name meanings, Era names, project concepts, service structures and recurring content models. Like What? then translates those facts into reusable design ideas such as `Soft Surrealism`, `Interface as Fiction`, `Collective Individuality`, `Technology as Choreography`, or `Shared Fan Identity`.
 
-- ILLIT's releases and Era names
-- aespa's Avatar / aspect / SYNK world concept
-- XG's official description of `AWE`
-- FRUITS ZIPPER's `NEW KAWAII` / Harajuku concept
-- LE SSERAFIM's `IM FEARLESS` name meaning
-- ME:I's audition origin and recurring fan-content ecosystem
+An artist is not added merely because it is famous. The editorial question is:
 
-Like What? then translates those facts into reusable design ideas such as `Soft Surrealism`, `Interface as Fiction`, `Collective Individuality`, or `Continuous Fan Relationship`.
+> What can this artist / project explain that the current library cannot explain well yet?
 
 ## Coverage policy
 
@@ -124,7 +126,7 @@ Expansion is not evaluated by card count.
 
 Industry Clusters are counted once so closely related brands do not artificially inflate coverage. Artist Eras remain separate Design Space references when they express meaningfully different design priorities; the main library still groups them under one Artist card.
 
-The historical Coverage Delta still compares **63 → 78** for Wave 3 using the same formulas. The current **99-reference** library is used by the live Coverage Snapshot and current gap analysis.
+The historical Coverage Delta still compares **63 → 78** for Wave 3 using the same formulas. The current **104-reference** library is used by the live Coverage Snapshot and current gap analysis.
 
 ## Design Space
 
@@ -146,8 +148,10 @@ Coordinates are comparative heuristics, not quality scores.
 - `patterns-eyewear.js` — four grouped Eyewear references
 - `ui-eyewear.js` / `styles-eyewear.css` — abstract Eyewear previews
 - `cluster-detail.js` / `styles-cluster-detail.css` — Common Grammar / Brand Variations
-- `patterns-idols.js` — Artist / Era concept references
-- `ui-idols.js` / `styles-idols.css` — abstract idol concept previews
+- `patterns-idols.js` — first Artist / Era concept expansion
+- `patterns-idols2.js` — second Artist / culture expansion
+- `ui-idols.js` / `styles-idols.css` — first abstract idol concept previews and expansion hook
+- `ui-idols2.js` / `styles-idols2.css` — second expansion previews
 - `brand-idol.js` / `styles-brand-idol.css` — Artist View + Idol Lens
 - `pattern-idol.js` / `styles-pattern-idol.css` — Era context on individual detail pages
 - `idol-group-enhance.js` — Artist-specific top-card language
