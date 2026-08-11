@@ -24,8 +24,12 @@
 })();
 
 (function loadIdolExpansion2(){
-  const css=document.createElement('link');
-  css.rel='stylesheet';css.href='styles-idols2.css';document.head.appendChild(css);
+  const script=document.currentScript;
+  if(script?.dataset?.loadExpansion==='false')return;
+  if(!document.querySelector('link[href="styles-idols2.css"]')){
+    const css=document.createElement('link');
+    css.rel='stylesheet';css.href='styles-idols2.css';document.head.appendChild(css);
+  }
   if(document.readyState==='loading'){
     document.write('<script src="patterns-idols2.js"></'+'script><script src="ui-idols2.js"></'+'script>');
   }
