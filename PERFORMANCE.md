@@ -1,6 +1,6 @@
 # Performance Architecture
 
-Like What? is designed to keep both the top page and detail pages responsive as the reference library grows.
+Like What? is designed to keep both the top page and deep-navigation pages responsive as the reference library grows.
 
 The core rule is:
 
@@ -53,31 +53,32 @@ Full miniature UI previews are not rendered with the card DOM.
 
 `top-performance.js` inserts lightweight placeholders and hydrates previews only near the viewport, with a per-animation-frame work limit.
 
-## Pattern detail loading
+## Generated data
 
-Pattern detail pages no longer load every full Pattern source file.
+GitHub Pages runs `scripts/build-pattern-data.mjs` before deployment. Existing `patterns*.js` files remain the editorial source of truth.
 
-GitHub Pages runs `scripts/build-pattern-data.mjs` before deployment. The build step executes the existing Pattern source files as the editorial source of truth and generates:
+The build generates:
 
 ```text
 generated/catalog.json
 generated/patterns/<id>.json
+generated/brands/index.json
+generated/brands/<manifest>.json
 ```
 
-`generated/catalog.json` contains compact records for every reference. A compact record keeps only the information needed for cross-library analysis and navigation, including:
+`generated/catalog.json` contains compact records for every reference. Long-form detail stays in one JSON per Pattern.
 
-- id / brand / family / name
-- one-line summary
-- tags / UI parts
-- Design Space coordinates
-- domain / medium / archetype / interaction model
-- philosophy
-- related / opposite ids
-- preview renderer key
-- artist / cluster metadata
-- source URL / label
+Brand / Artist manifests contain only collection membership and routing metadata:
 
-Long-form fields such as full description, visual rules, use cases, avoid cases, prompts and member variation detail stay in the per-Pattern JSON.
+- brand / artist name
+- `brand` or `artist` type
+- Pattern ids
+- Pattern detail filenames
+- Era names where applicable
+
+Manifest filenames use a filesystem-safe encoded brand name and are resolved through `generated/brands/index.json`.
+
+## Pattern detail loading
 
 When `pattern.html?id=x` opens:
 
@@ -87,9 +88,9 @@ When `pattern.html?id=x` opens:
 4. replace that compact catalog record with the full record in memory
 5. run the existing Taxonomy / Design Space / Vocabulary / Opposite / NEXT REFERENCES logic against `1 full + N-1 compact` records
 
-This preserves analytical comparison without downloading all long-form detail data.
+This preserves cross-library analysis without downloading all long-form detail data.
 
-Runtime diagnostics are exposed as:
+Runtime diagnostics:
 
 ```js
 window.LikeWhatPatternLoadMetrics
@@ -107,19 +108,68 @@ Expected shape:
 }
 ```
 
-Invalid Pattern ids are rejected from the compact catalog before any detail file is requested.
+## Brand / Artist View loading
 
-## Generated-data policy
+Brand and Artist pages no longer load the full Pattern library.
 
-The generated JSON is a deploy artifact, not an editorial source of truth.
+When `brand.html?brand=ILLIT` opens:
 
-Edit the existing `patterns*.js` source files. The Pages build regenerates catalog/detail output automatically.
+1. fetch the compact catalog and Brand / Artist index in parallel
+2. resolve the ILLIT manifest
+3. fetch that manifest
+4. fetch only the Pattern detail JSON files listed by the manifest
+5. render the existing Brand View and Idol Lens from those Full Detail records
 
-The deployment workflow verifies:
+Examples:
+
+```text
+Apple
+→ Apple manifest
+→ only Apple UI Pattern details
+
+ILLIT
+→ ILLIT manifest
+→ SUPER REAL ME
+→ NOT CUTE ANYMORE
+→ MAMIHLAPINATAPAI
+
+IVE
+→ IVE manifest
+→ one Concept Pattern
+```
+
+Runtime diagnostics:
+
+```js
+window.LikeWhatBrandLoadMetrics
+```
+
+Expected shape:
+
+```js
+{
+  brand: 'ILLIT',
+  type: 'artist',
+  referenceCount: 104,
+  fullDetailRecords: 3,
+  skippedFullDetailRecords: 101,
+  durationMs: 140
+}
+```
+
+This means Brand View cost scales with the size of the selected Brand / Artist, not with total library size.
+
+## Deployment verification
+
+The Pages workflow verifies:
 
 - `generated/catalog.json` exists
 - exactly 104 Pattern detail JSON files are produced
 - the generated catalog reports 104 references
+- `generated/brands/index.json` exists
+- Brand / Artist manifest count matches unique non-Cluster brands in the compact catalog
+- the sum of all manifest Pattern counts matches the number of non-Cluster references
+- every manifest file listed by the index exists
 
 When reference count changes, update the expected deployment count deliberately rather than allowing silent drift.
 
@@ -141,30 +191,37 @@ window.LikeWhatInitialBudget
 window.LikeWhatLoadMetrics
 ```
 
-`LikeWhatLoadMetrics.reason` records why the deferred top library was loaded, such as `viewport`, `search-input`, `collision`, `query-param` or `anchor`.
-
 ## Current architecture
 
 ```text
 editorial Pattern source files
         ↓ build
-compact catalog + per-Pattern detail JSON
-        ↓
-TOP: deferred full library bundle
-DETAIL: compact catalog + one full Pattern
-```
-
-The next migration target is Brand / Artist View.
-
-Today a Brand page still loads the complete Pattern source library. The next step is:
-
-```text
 compact catalog
-    ↓
-brand / artist manifest
-    ↓
-only the full detail records needed by that Brand / Artist View
+per-Pattern detail JSON
+Brand / Artist manifests
+        ↓
+TOP
+  shell → deferred library bundle
+
+PATTERN DETAIL
+  compact catalog + 1 full Pattern
+
+BRAND / ARTIST VIEW
+  compact catalog + manifest + selected collection Full Details
 ```
+
+## Next migration boundary
+
+The remaining pages that still benefit from a library-wide view are:
+
+- Design Map
+- Vocabulary
+- Contrast
+- Coverage
+
+These pages do not need every long-form Pattern field. The next optimization should migrate them from full `patterns*.js` sources to `generated/catalog.json`, loading Full Detail only when a UI surface genuinely needs it.
+
+That migration is more important than further micro-optimizing Brand View.
 
 ## Editorial constraint
 
@@ -172,4 +229,4 @@ Performance optimizations must preserve the current information architecture:
 
 `Brand / Artist / Industry Cluster → Pattern / Era / Variation → Design Principle`
 
-Do not solve performance by flattening Brand / Artist grouping or deleting explanatory metadata from the source library.
+Do not solve performance by flattening Brand / Artist grouping or deleting explanatory metadata from the editorial source library.
