@@ -23,6 +23,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Generate pattern data
+        run: node scripts/build-pattern-data.mjs
+      - name: Verify generated catalog
+        run: |
+          test -f generated/catalog.json
+          test "$(find generated/patterns -type f -name '*.json' | wc -l)" -eq 104
+          node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('generated/catalog.json'));if(c.referenceCount!==104)process.exit(1);console.log('catalog references:',c.referenceCount)"
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload static site
