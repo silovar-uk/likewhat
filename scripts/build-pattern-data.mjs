@@ -23,13 +23,13 @@ if(!Array.isArray(patterns)||!patterns.length)throw new Error('No patterns gener
 
 const compactKeys=[
   'id','brand','family','name','oneLiner','tags','uiParts','mock','domain','medium','archetype','interactionModel','philosophy','designSpace','related','opposites',
-  'groupType','industry','memberBrands','collectionType','era','idolLens'
+  'groupType','industry','memberBrands','collectionType','era','idolLens','sourceLabel','sourceUrl'
 ];
 const compact=p=>Object.fromEntries(compactKeys.filter(key=>p[key]!==undefined).map(key=>[key,p[key]]));
 const fileFor=id=>`${String(id).replace(/[^a-zA-Z0-9._-]/g,'_')}.json`;
 const records=patterns.map(p=>({...compact(p),detailFile:fileFor(p.id)}));
 
-await Promise.all(patterns.map(p=>fs.writeFile(path.join(detailRoot,fileFor(p.id)),JSON.stringify(p), 'utf8')));
+await Promise.all(patterns.map(p=>fs.writeFile(path.join(detailRoot,fileFor(p.id)),JSON.stringify(p),'utf8')));
 const catalog={schemaVersion:1,generatedAt:new Date().toISOString(),referenceCount:patterns.length,records};
 await fs.writeFile(path.join(outRoot,'catalog.json'),JSON.stringify(catalog),'utf8');
 
