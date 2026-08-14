@@ -1,5 +1,6 @@
 (function(){
   const browser=document.getElementById('patterns');
+  const composer=document.querySelector('.composer');
   const input=document.getElementById('searchInput');
   const randomDraw=document.getElementById('randomDraw');
   const randomModes=document.getElementById('randomModes');
@@ -48,7 +49,8 @@
 
   initialBudgetSnapshot();requestAnimationFrame(initialBudgetSnapshot);
   const params=new URLSearchParams(location.search);if([...params.keys()].some(key=>['q','kind','brand','scene','domain','medium','part','sort'].includes(key)))loadLibrary('query-param');if(location.hash==='#patterns')loadLibrary('anchor');
-  if(browser&&'IntersectionObserver'in window){const observer=new IntersectionObserver(entries=>{if(!entries.some(entry=>entry.isIntersecting))return;observer.disconnect();loadLibrary('viewport');},{rootMargin:'300px 0px'});observer.observe(browser);}else if(browser)loadLibrary('fallback');
+  const observeTargets=[composer,browser].filter(Boolean);
+  if(observeTargets.length&&'IntersectionObserver'in window){const observer=new IntersectionObserver(entries=>{const hit=entries.find(entry=>entry.isIntersecting);if(!hit)return;observer.disconnect();loadLibrary(hit.target===composer?'composer-viewport':'viewport');},{rootMargin:'300px 0px'});observeTargets.forEach(target=>observer.observe(target));}else if(browser||composer)loadLibrary('fallback');
   input?.addEventListener('input',()=>loadLibrary('search-input'),{once:true});input?.addEventListener('focus',()=>{if(input.value.trim())loadLibrary('search-focus');},{once:true});
   examples?.addEventListener('click',event=>{const button=event.target.closest('[data-query]');if(!button||window.LIKEWHAT_LIBRARY_READY)return;event.preventDefault();event.stopImmediatePropagation();const q=button.dataset.query||'';if(input){input.value=q;input.focus();}deferAction('query-example',()=>button.click());},true);
   randomDraw?.addEventListener('click',event=>{if(window.LIKEWHAT_LIBRARY_READY)return;event.preventDefault();event.stopImmediatePropagation();deferAction('collision',()=>randomDraw.click());},true);
