@@ -20,27 +20,22 @@
 
   function script(src,attrs={}){
     return new Promise((resolve,reject)=>{
-      const el=document.createElement('script');
-      el.src=src;
+      const el=document.createElement('script');el.src=src;
       Object.entries(attrs).forEach(([key,value])=>el.setAttribute(key,value));
-      el.onload=()=>resolve(el);
-      el.onerror=()=>reject(new Error(`Failed to load ${src}`));
+      el.onload=()=>resolve(el);el.onerror=()=>reject(new Error(`Failed to load ${src}`));
       document.body.appendChild(el);
     });
   }
-
   async function json(url){
     const response=await fetch(url,{cache:'default'});
     if(!response.ok)throw new Error(`${response.status} ${url}`);
     return response.json();
   }
-
   function stylesheet(href){
     if(document.querySelector(`link[href="${href}"]`))return Promise.resolve();
     return new Promise((resolve,reject)=>{
       const el=document.createElement('link');el.rel='stylesheet';el.href=href;
-      el.onload=()=>resolve(el);el.onerror=()=>reject(new Error(`Failed to load ${href}`));
-      document.head.appendChild(el);
+      el.onload=()=>resolve(el);el.onerror=()=>reject(new Error(`Failed to load ${href}`));document.head.appendChild(el);
     });
   }
 
@@ -52,22 +47,43 @@
   }
 
   async function loadData(){
-    const catalog=await json('generated/catalog.json');
+    const [meta,catalog]=await Promise.all([json('generated/meta.json'),json('generated/catalog-core.json')]);
+    window.LIKEWHAT_LIBRARY_META=meta;
     window.LIKEWHAT_GENERATED_CATALOG=catalog;
     window.LIKEWHAT_PATTERNS=catalog.records.map(record=>({
       ...record,
-      description:record.searchText||'',
+      description:'',
       members:(record.clusterMembers||[]).map(member=>({...member}))
     }));
-    return catalog;
+
+    const heroCount=document.getElementById('heroReferenceCount');
+    if(heroCount)heroCount.textContent=`${meta.referenceCount} references · ${meta.designSpaceAxes||6} axes`;
+
+    let searchPromise=null;
+    let searchMap=null;
+    window.LikeWhatSearchStore={
+      get ready(){return !!searchMap;},
+      text(id){return searchMap?.get(id)||'';},
+      ensure(){
+        if(searchMap)return Promise.resolve(searchMap);
+        if(searchPromise)return searchPromise;
+        searchPromise=json('generated/search-index.json').then(index=>{
+          searchMap=new Map((index.records||[]).map(record=>[record.id,record.text||'']));
+          window.dispatchEvent(new CustomEvent('likewhat:search-index-ready',{detail:{referenceCount:index.referenceCount}}));
+          return searchMap;
+        }).catch(error=>{searchPromise=null;throw error;});
+        return searchPromise;
+      }
+    };
+    return {meta,catalog};
   }
 
   async function loadCore(){
     await script('design-space.js');
+    await script('entry-kinds.js');
     await script('library-groups.js');
     await script('vocabulary.js');
   }
-
   async function loadRenderers(){
     await script('ui.js');
     for(const src of ['ui-extra.js','ui-wave1.js','ui-wave2.js','ui-wave3.js','ui-wave4.js','ui-wave5.js','ui-eyewear.js'])await script(src);
@@ -76,10 +92,9 @@
     await script('ui-preview-contract.js');
     await script('top-performance.js');
   }
-
   async function loadControllers(){
     await script('app.js');
-    for(const src of ['scene-filter.js','cluster-brand-filter.js','brand-links.js','group-official-links.js','discovery-v2.js','group-sort.js'])await script(src);
+    for(const src of ['cluster-brand-filter.js','brand-links.js','group-official-links.js','group-sort.js'])await script(src);
   }
 
   function initialBudgetSnapshot(){
@@ -96,32 +111,23 @@
     window.LikeWhatInitialBudget={checkedAt:performance.now(),checks,pass:Object.values(checks).every(x=>x.pass)};
     if(!window.LikeWhatInitialBudget.pass)console.warn('[Like What?] initial performance budget exceeded',window.LikeWhatInitialBudget);
   }
-
   function showLoading(){
-    if(resultCount)resultCount.textContent='Compact catalog · loading only when needed';
-    if(groups&&!groups.querySelector('.library-loading-note'))groups.innerHTML='<div class="library-loading-note">Loading the compact reference catalog…</div>';
+    if(resultCount)resultCount.textContent='Core catalog · loading only what this view needs';
+    if(groups&&!groups.querySelector('.library-loading-note'))groups.innerHTML='<div class="library-loading-note">Loading the core reference catalog…</div>';
   }
 
   function loadLibrary(reason='viewport'){
     if(window.LIKEWHAT_LIBRARY_READY)return Promise.resolve();
     if(loading)return loading;
-    showLoading();
-    document.documentElement.dataset.libraryLoadReason=reason;
+    showLoading();document.documentElement.dataset.libraryLoadReason=reason;
     const started=performance.now();
     loading=(async()=>{
-      const [,catalog]=await Promise.all([loadStyles(),loadData()]);
-      await loadCore();
-      await loadRenderers();
-      await loadControllers();
+      const [,data]=await Promise.all([loadStyles(),loadData()]);
+      await loadCore();await loadRenderers();await loadControllers();
       window.LIKEWHAT_LIBRARY_READY=true;
       window.LikeWhatLoadMetrics={
-        reason,
-        durationMs:Math.round(performance.now()-started),
-        patterns:(window.LIKEWHAT_PATTERNS||[]).length,
-        fullDetailRecords:0,
-        catalogSchema:catalog.schemaVersion,
-        runtimePatternSource:'generated/catalog.json',
-        budgets
+        reason,durationMs:Math.round(performance.now()-started),patterns:(window.LIKEWHAT_PATTERNS||[]).length,fullDetailRecords:0,
+        catalogSchema:data.catalog.schemaVersion,runtimePatternSource:'generated/catalog-core.json',searchIndexLoaded:window.LikeWhatSearchStore?.ready||false,budgets
       };
       window.dispatchEvent(new CustomEvent('likewhat:library-ready',{detail:window.LikeWhatLoadMetrics}));
       const action=pendingAction;pendingAction=null;action?.();
@@ -132,53 +138,28 @@
     });
     return loading;
   }
+  function deferAction(reason,action){if(window.LIKEWHAT_LIBRARY_READY){action();return;}pendingAction=action;loadLibrary(reason);}
 
-  function deferAction(reason,action){
-    if(window.LIKEWHAT_LIBRARY_READY){action();return;}
-    pendingAction=action;
-    loadLibrary(reason);
-  }
-
-  initialBudgetSnapshot();
-  requestAnimationFrame(initialBudgetSnapshot);
-
-  if(new URLSearchParams(location.search).get('q'))loadLibrary('query-param');
+  initialBudgetSnapshot();requestAnimationFrame(initialBudgetSnapshot);
+  const params=new URLSearchParams(location.search);
+  if([...params.keys()].some(key=>['q','kind','brand','scene','domain','medium','part','sort'].includes(key)))loadLibrary('query-param');
   if(location.hash==='#patterns')loadLibrary('anchor');
 
   if(browser&&'IntersectionObserver'in window){
-    const observer=new IntersectionObserver(entries=>{
-      if(!entries.some(entry=>entry.isIntersecting))return;
-      observer.disconnect();
-      loadLibrary('viewport');
-    },{rootMargin:'300px 0px'});
+    const observer=new IntersectionObserver(entries=>{if(!entries.some(entry=>entry.isIntersecting))return;observer.disconnect();loadLibrary('viewport');},{rootMargin:'300px 0px'});
     observer.observe(browser);
-  }else if(browser){
-    loadLibrary('fallback');
-  }
+  }else if(browser)loadLibrary('fallback');
 
   input?.addEventListener('input',()=>loadLibrary('search-input'),{once:true});
   input?.addEventListener('focus',()=>{if(input.value.trim())loadLibrary('search-focus');},{once:true});
   examples?.addEventListener('click',event=>{
-    const button=event.target.closest('[data-query]');
-    if(!button)return;
-    event.preventDefault();
-    const q=button.dataset.query||'';
-    if(input){input.value=q;input.focus();}
+    const button=event.target.closest('[data-query]');if(!button)return;
+    if(window.LIKEWHAT_LIBRARY_READY)return;
+    event.preventDefault();event.stopImmediatePropagation();
+    const q=button.dataset.query||'';if(input){input.value=q;input.focus();}
     deferAction('query-example',()=>button.click());
   },true);
-  randomDraw?.addEventListener('click',event=>{
-    if(window.LIKEWHAT_LIBRARY_READY)return;
-    event.preventDefault();event.stopImmediatePropagation();
-    deferAction('collision',()=>randomDraw.click());
-  },true);
-  randomModes?.addEventListener('click',event=>{
-    if(window.LIKEWHAT_LIBRARY_READY)return;
-    const button=event.target.closest('[data-random-mode]');if(!button)return;
-    event.preventDefault();event.stopImmediatePropagation();
-    deferAction('collision-mode',()=>button.click());
-  },true);
-
-  document.addEventListener('keydown',event=>{
-    if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'){input?.focus();input?.select();}
-  });
+  randomDraw?.addEventListener('click',event=>{if(window.LIKEWHAT_LIBRARY_READY)return;event.preventDefault();event.stopImmediatePropagation();deferAction('collision',()=>randomDraw.click());},true);
+  randomModes?.addEventListener('click',event=>{if(window.LIKEWHAT_LIBRARY_READY)return;const button=event.target.closest('[data-random-mode]');if(!button)return;event.preventDefault();event.stopImmediatePropagation();deferAction('collision-mode',()=>button.click());},true);
+  document.addEventListener('keydown',event=>{if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'){event.preventDefault();input?.focus();input?.select();}});
 })();
