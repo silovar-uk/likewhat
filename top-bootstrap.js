@@ -14,7 +14,6 @@
     initialPatternDetailData:0,
     initialPreviewRendering:0,
     initialDiversityCalculations:0,
-    catalogTargetGzipKB:100,
     initialDomNodes:1000
   };
   window.LikeWhatPerformanceBudget=budgets;
@@ -47,7 +46,7 @@
 
   async function loadStyles(){
     await Promise.all([
-      'styles-wave1.css','styles-wave2.css','styles-wave3.css','styles-wave4.css','styles-eyewear.css','styles-idols.css','styles-idols2.css',
+      'styles-wave1.css','styles-wave2.css','styles-wave3.css','styles-wave4.css','styles-wave5.css','styles-eyewear.css','styles-idols.css','styles-idols2.css',
       'styles-preview-contract.css','styles-group-preview.css','styles-library-grid.css','styles-brand-links.css','styles-group-official.css','styles-discovery-v2.css'
     ].map(stylesheet));
   }
@@ -71,7 +70,7 @@
 
   async function loadRenderers(){
     await script('ui.js');
-    for(const src of ['ui-extra.js','ui-wave1.js','ui-wave2.js','ui-wave3.js','ui-wave4.js','ui-eyewear.js'])await script(src);
+    for(const src of ['ui-extra.js','ui-wave1.js','ui-wave2.js','ui-wave3.js','ui-wave4.js','ui-wave5.js','ui-eyewear.js'])await script(src);
     await script('ui-idols.js',{'data-load-expansion':'false'});
     await script('ui-idols2.js');
     await script('ui-preview-contract.js');
@@ -80,7 +79,7 @@
 
   async function loadControllers(){
     await script('app.js');
-    for(const src of ['cluster-brand-filter.js','brand-links.js','group-official-links.js','discovery-v2.js','group-sort.js'])await script(src);
+    for(const src of ['scene-filter.js','cluster-brand-filter.js','brand-links.js','group-official-links.js','discovery-v2.js','group-sort.js'])await script(src);
   }
 
   function initialBudgetSnapshot(){
