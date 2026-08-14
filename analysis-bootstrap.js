@@ -17,7 +17,7 @@
   }
   async function loadPreviewStack(){
     await script('ui.js');
-    for(const src of ['ui-extra.js','ui-wave1.js','ui-wave2.js','ui-wave3.js','ui-wave4.js','ui-eyewear.js'])await script(src);
+    for(const src of ['ui-extra.js','ui-wave1.js','ui-wave2.js','ui-wave3.js','ui-wave4.js','ui-wave5.js','ui-eyewear.js'])await script(src);
     await script('ui-idols.js',{'data-load-expansion':'false'});
     await script('ui-idols2.js');
     await script('ui-preview-contract.js');
