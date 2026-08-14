@@ -1,93 +1,124 @@
-# Like What? — product plan
+# Like What? — Product Plan v5
 
-## 5人のプロによる設計会議
+## Product thesis
 
-### 参加者
-1. **プロダクトデザイナー** — 見た瞬間に違いが分かることを担当
-2. **情報アーキテクト** — 100〜300パターンに増えた時の分類と検索を担当
-3. **デザインシステム設計者** — 「ブランド名」から再利用可能な原則へ分解することを担当
-4. **フロントエンドアーキテクト** — 静的サイトとして壊れにくく追加しやすい実装を担当
-5. **AIプロンプト設計者** — 人間の「こんな感じ」をAIが再現しやすい指示へ翻訳することを担当
+Like What? turns a vague request such as “Apple-like”, “MUJI-like”, “university-like” or “make the 404 feel playful” into reusable design principles.
 
-## 議論
+**The library is the entrance; design principles are the exit.**
 
-### 1. プロダクトデザイナー
-ブランド名だけを並べてもPinterest的な参考集で終わる。一覧カードの時点で「iOS Settings」と「Apple.com Product Hero」が別物だと視覚で分からなければいけない。**全カードにミニモックを必須**にする。
+The product is no longer organized around Brand only. It supports five entry kinds:
 
-### 2. 情報アーキテクト
-入口はブランド中心がよい。ただし将来「静か」「高密度」「右ペイン」「Progressive Disclosure」のような言葉からも探したくなる。分類階層を深くするより、`brand / family / tags / uiParts` をデータとして持ち、横断検索で解決する。
+1. Brand
+2. Artist
+3. Institution
+4. Scene
+5. Industry Cluster
 
-### 3. デザインシステム設計者
-「Apple風」を色や角丸のコピーにしない。各パターンに「何がそう見せているか」を3〜4個の原則として持つ。**ブランドは発見の入口、原則は再利用の出口**にする。
+Hierarchy:
 
-### 4. フロントエンドアーキテクト
-初期版はフレームワーク不要。GitHub Pagesで確実に動くHTML/CSS/Vanilla JSにする。パターン追加は `patterns.js` に1オブジェクト追加するだけ。詳細ページはquery parameterで共通テンプレートを使い、30個のHTMLを複製しない。
+`Library → Entry → Pattern / Era / State Variation → Design Principle`
 
-### 5. AIプロンプト設計者
-「Appleっぽく」はAIにとって曖昧。AI向け指示文には、**構造 / 情報密度 / 階層 / 表示タイミング / 避けるもの**まで含める。詳細ページからそのままコピーできるようにする。
+## Primary jobs
 
-## 最終合意
-- Primary navigation: **Brand**
-- Secondary navigation: **Pattern type**
-- Search: `brand / family / name / tags / principles / prompt` を横断
-- Index: 初期30パターンすべてに視覚モック
-- Detail: **言語化 → 視覚原則 → 向き不向き → AI指示 → 参考リンク**
-- Mobile: フィルターをモーダル化せず横スクロール。画面を覆わない
-- Data first: 新規パターンはデータ追加中心
-- No clone policy: ブランドをそのまま再現するのではなく、特徴を抽象化した小さなモックとして表現
+### Find
+Use Facets and Search to locate a useful reference without knowing its exact brand name.
 
-## コード設計
+### Understand
+Use Pattern Detail, Vocabulary and Design Space to understand why the reference works.
 
-### File structure
-```text
-/
-  index.html          # 検索・ブランド別一覧
-  pattern.html        # 共通詳細ページ
-  styles.css          # サイト + ミニモック
-  patterns.js         # パターンデータ（Single Source of Truth）
-  ui.js               # ミニモック描画
-  app.js              # 一覧検索・filter・grouping
-  pattern.js          # 詳細描画・関連候補・prompt copy
-  docs/plan.md        # 設計判断
-```
+### Compare
+Use Contrast, Nearest, Opposite and Within-context / Across-world views to make trade-offs explicit.
 
-### Pattern schema
-```js
-{
-  id,
-  brand,
-  family,
-  name,
-  oneLiner,
-  description,
-  tags: [],
-  uiParts: [],
-  visual: [],
-  useCases: [],
-  avoid: [],
-  prompt,
-  sourceLabel,
-  sourceUrl,
-  mock
-}
-```
+### Compose
+Combine an Identity reference with a Scene such as Loading / Error / Success and produce an implementation brief.
 
-### Search v1
-初期版はAND検索。入力を空白で分割し、全語が `brand + family + name + tags + uiParts + visual + prompt` のどこかに含まれるパターンを表示する。検索結果の意外性より**予測可能性**を優先する。
+### Discover
+Use bounded Collision / Far Apart / Weird Combination modes for serendipity without blocking the main thread.
 
-### Expansion rule
-新規パターン追加時は最低限 `visual 3件 / useCases / avoid / prompt / sourceUrl / mock` を持たせる。既存mockで表現できない場合のみ `ui.js` と `styles.css` に新しいmock typeを追加する。
+## Information architecture
 
-## 初期30パターンの配分
-- Apple: 6
-- Notion: 4
-- Linear: 4
-- Arc: 2
-- GitHub: 2
-- Google: 2
-- Stripe: 2
-- Slack: 2
-- Figma: 2
-- Shopify: 2
-- Airbnb: 1
-- Vercel: 1
+Primary navigation:
+
+- Library
+- Design Map
+- Vocabulary
+- Contrast
+- Coverage
+
+TOP library state:
+
+`q / kind / brand / scene / domain / medium / part / sort / seed`
+
+All active filters are independent and shareable through the URL.
+
+## Facets
+
+Do not maintain SaaS-era Pattern categories as a fixed hand-authored list.
+
+Derive useful Facets from runtime data:
+
+- Entry kind
+- Scene
+- Domain
+- Medium
+- UI Part
+- Brand / Collection
+
+Hide a facet when it has no meaningful variation in the current result set.
+
+## Scene lifecycle
+
+Scene is organized by user time:
+
+- Before: Onboarding
+- During: Loading
+- Outcome: Empty / Success / Error
+- Recovery: 404
+
+Add future Scene patterns to coverage gaps first: Auth, Permission, Search, Upload, Processing, Offline, Retry, Undo, Maintenance and Sold Out are higher-value gaps than adding many decorative 404 variants.
+
+## Data policy
+
+Every Pattern requires:
+
+- id / entryKind
+- name / family / oneLiner / description
+- visual principles
+- useCases / avoid
+- prompt
+- sourceLabel / sourceUrl
+- Design Space values
+
+Relations are computed by default and optionally curated. Curated relation ids must resolve to real Pattern ids.
+
+## Provenance policy
+
+Generated Full Detail records expose:
+
+- sourceType
+- checkedAt
+- observed
+- editorialInference
+
+Never pretend build time is fact-check time. `checkedAt` stays null until deliberately researched.
+
+## Performance policy
+
+TOP should not load long-form Pattern details.
+
+Runtime split:
+
+- `catalog-core.json` for Library / Map / Facets
+- `search-index.json` only on first textual search
+- one Detail JSON when a Pattern is opened
+- collection Details only for multi-Pattern collection views
+
+Collision algorithms must use bounded candidate generation rather than enumerating all n³ triples.
+
+## Growth rule
+
+Expansion is evaluated by explanatory coverage, not card count.
+
+`Coverage → Expansion → Delta → Next Coverage`
+
+A new reference should improve spatial, conceptual, contextual, Scene-lifecycle or contrast coverage.
