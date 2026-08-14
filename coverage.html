@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="Like What?の104参照についてDesign Space・Vocabulary・Domain・Mediumの偏りを分析し、次に追加すべき参照条件を考えるCoverage Planner。" />
+  <meta name="description" content="Like What?の149参照についてDesign Space・Vocabulary・Domain・Mediumの偏りを分析し、次に追加すべき参照条件を考えるCoverage Planner。" />
   <title>Coverage Planner — Like What?</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
@@ -21,11 +21,11 @@
     <section class="coverage-hero">
       <p class="eyebrow">COVERAGE PLANNER / WHERE THE LIBRARY IS THIN</p>
       <h1>どこが、<br><em>まだ薄い？</em></h1>
-      <p>有名なブランドを順番に足すのではなく、現在のライブラリが<strong>何をまだ説明できていないか</strong>から次の参照を決める。同一ブランドはトップで束ねる一方、Design SpaceではUI・店舗・アイドルEraをそれぞれ「説明可能な設計原則」として置き、異分野間の距離を見る。</p>
+      <p>有名なブランドを順番に足すのではなく、現在のライブラリが<strong>何をまだ説明できていないか</strong>から次の参照を決める。同一ブランドはトップで束ねる一方、Design SpaceではUI・店舗・アーティストEra・大学・Sceneをそれぞれ「説明可能な設計原則」として置き、異分野間の距離を見る。</p>
     </section>
 
     <section class="coverage-snapshot" aria-labelledby="snapshotTitle">
-      <div class="coverage-section-head"><div><p class="eyebrow">COVERAGE SNAPSHOT</p><h2 id="snapshotTitle">いまの104件を、欠け方から見る。</h2></div><p>値は現在の収録データに依存する相対指標。品質点ではない。</p></div>
+      <div class="coverage-section-head"><div><p class="eyebrow">COVERAGE SNAPSHOT</p><h2 id="snapshotTitle">いまの149件を、欠け方から見る。</h2></div><p>値は現在の収録データに依存する相対指標。品質点ではない。</p></div>
       <div id="coverageStats" class="coverage-stats" aria-live="polite"></div>
     </section>
 
@@ -58,9 +58,11 @@
       <details>
         <summary>Coverage Plannerの計算方法 <span>Method / explainability</span></summary>
         <div class="coverage-method-body">
-          <p><strong>Coverage Delta</strong>：ビルド時に生成したWave 3直前63件／Wave 3時点78件のcompact snapshotへ同じ指標を適用する。現在の104件とは分離して履歴比較を固定する。</p>
-          <p><strong>Spatial Gap</strong>：6軸を10 / 50 / 90の3値に離散化した729点について、現在の104件への最短Design Distanceを計算。近接した候補点を間引き、異なる空白方向を残す。</p>
-          <p><strong>Brand / Era</strong>：トップ一覧ではILLITを1アーティストとして束ねるが、SUPER REAL ME / NOT CUTE ANYMORE / MAMIHLAPINATAPAIは異なる設計原則を持つため、Design Space上では別Patternとして保持する。</p>
+          <p><strong>Coverage Delta</strong>：ビルド時に生成したWave 3直前63件／Wave 3時点78件のcompact snapshotへ同じ指標を適用する。現在の149件とは分離して履歴比較を固定する。</p>
+          <p><strong>Spatial Gap</strong>：6軸を10 / 50 / 90の3値に離散化した729点について、現在の149件への最短Design Distanceを計算。近接した候補点を間引き、異なる空白方向を残す。</p>
+          <p><strong>Brand / Era</strong>：トップ一覧ではILLITやCHANMINAを1アーティストとして束ねるが、Era / Conceptは異なる設計原則を持つため、Design Space上では別Patternとして保持する。</p>
+          <p><strong>Institution</strong>：大学は校章やスクールカラーではなく、権威・研究・学生生活・公共性・未来志向などの設計配分として同じ6軸へ置く。</p>
+          <p><strong>Scene</strong>：Loading / 404 / Empty / Error / Success / Onboardingはブランド横断の状態パターンとして保持し、「何が起きているか」「どう復帰・継続するか」を比較する。</p>
           <p><strong>Industry Cluster</strong>：Eyewearのように同じ業界・近い設計問題を扱うブランドは、ブランド数ではなく1つのCluster referenceとしてDesign Spaceへ置く。Cluster内部の差は詳細ページで保持する。</p>
           <p><strong>Thin Vocabulary</strong>：各語彙に接続するPattern数・ブランド数・Domain数を数え、実例数が少なく単一ブランド / 単一Domainに偏るほど優先度を上げる。</p>
           <p><strong>Research Priority</strong>：Spatial 55% + Concept 25% + Context 20%。これは「追加価値」を決める絶対スコアではなく、調査順序を作るための編集的ヒューリスティック。</p>
