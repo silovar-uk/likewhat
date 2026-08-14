@@ -1,130 +1,91 @@
 # Like What?
 
-「Apple風」「ILLITっぽい」「Linearっぽい」のような曖昧なイメージを、具体的なUIパターン・視覚文法・世界観・実装構造・設計思想へ変換する個人用リファレンスライブラリです。
+「Apple風」「ILLITっぽい」「MITっぽい」「404をもっと遊びにしたい」のような曖昧なイメージを、具体的なUIパターン・視覚文法・世界観・実装構造・設計思想へ変換する個人用リファレンスライブラリです。
 
-**Brand is the entrance; design principles are the exit.**
+**The library is the entrance; design principles are the exit.**
 
-## Current library
+## Current model
 
-**149 references**
+Like What? is no longer a Brand-only gallery. It handles five entry kinds in one design space:
 
-- Initial library: 39
-- Wave 1: 12 Design Space extremes
-- Wave 2: 12 neighboring / counterpoint references
-- Wave 3: 15 coverage-driven references
-- Wave 4: 9 sports / club / live-event references
-- Eyewear Industry Cluster: 4 grouped references covering 10 eyewear brands
-- Idol / Artist concepts: 13 references across 11 artist / culture brands
-- Wave 5: 45 references across brand / culture, university / institution, and UI scene / state patterns
+- Brand
+- Artist
+- Institution
+- Scene
+- Industry Cluster
 
-### Wave 5 scope
+The hierarchy is:
 
-Wave 5 expands the library in three directions instead of adding one more group of visually similar brands.
+`Library → Entry → Pattern / Era / State Variation → Design Principle`
 
-1. **Brand / Culture** — Toys“R”Us, 無印良品, CHANMINA, Tiffany & Co., Marvel plus adjacent references such as LEGO, Sanrio, IKEA, Aesop, Cartier, LOEWE, Disney, Billie Eilish and DC.
-2. **Institution / University** — 東京大学, 京都大学, 早稲田大学, 慶應義塾, Oxford, Cambridge, Harvard, MIT and Stanford. Universities are read as institutional design systems: authority, publicness, research culture, student life and future orientation—not merely crest and school color.
-3. **Scene / State** — Loading, 404, Empty, Error, Success and Onboarding patterns grounded in design-system references. Scene patterns ask what the interface should communicate and enable at a specific moment, not what decorative skin to apply.
+Reference count and kind counts are generated at build time into `generated/meta.json`; they are intentionally not duplicated as hand-maintained documentation constants.
 
-## Information architecture v4
+## Library v5
 
-The top-level library is not `1 Pattern = 1 card`.
+### Faceted, shareable state
 
-It supports four complementary ways into the same reference space.
+TOP filtering is modeled as independent state rather than overloading text search:
 
-### 1. Brand / Institution View
+`q / kind / brand / scene / domain / medium / part / sort / seed`
 
-`Brand / Institution → multiple UI Patterns`
+This allows combinations such as Institution × Loading or a Brand × Error search and makes filter states shareable through the URL.
 
-A brand such as **Apple** or an institution such as **MIT** appears once in the main library. Its card previews the Pattern grammars currently held by that name, and `brand.html?brand=...` opens the collection.
+### Scene lifecycle
 
-The collection keeps Pattern-level detail intact and displays Design Space as a **range** rather than flattening the name into one averaged coordinate.
+Scene references are organized by user time:
 
-### 2. Artist View
+- Before — Onboarding
+- During — Loading
+- Outcome — Empty / Success / Error
+- Recovery — 404
 
-`Artist → multiple Era / Concept Patterns`
+The next Scene additions should fill lifecycle gaps before multiplying decorative variants.
 
-An artist such as **ILLIT** or **CHANMINA** also appears once in the main library, but the children are Era / Concept grammars.
+### Brand × Scene Composer
 
-Current ILLIT references:
+The Composer combines an Identity reference with a Scene reference and produces a role-separated design brief. It is deliberately different from the three-way Collision Engine: Composer is practical and constrained; Collision is exploratory.
 
-- **SUPER REAL ME** — Dreamy Everyday Surrealism
-- **NOT CUTE ANYMORE** — Cute Refusal / Identity Reversal
-- **MAMIHLAPINATAPAI** — Self-styling in Motion
+### Contrast
 
-The idol / artist layer also includes references such as aespa, XG, FRUITS ZIPPER, LE SSERAFIM, ME:I, IVE, Perfume, BABYMONSTER, CUTIE STREET, KAWAII LAB. and CHANMINA.
+Design Space can be used in two modes conceptually:
 
-Artist View reuses the same collection architecture but changes the language to `ARTIST VIEW / ERA & CONCEPT GRAMMARS` and adds an **Idol Lens** when the reference is an Artist Era.
+- within-context — useful comparison among similar problem spaces
+- across-worlds — deliberate cross-domain discovery
 
-### Idol Lens
+Curated `related` and `opposites` are optional overrides. Missing relations are valid because the library computes Nearest / Farthest / Opposite from Design Space.
 
-The global six-axis Design Space remains unchanged. Idol Lens is an industry-specific annotation layer:
+## Runtime architecture
 
-- Presence: Iconic ↔ Intimate
-- Reality: Everyday ↔ Worldbuilding
-- Tone: Soft ↔ Assertive
-- Identity: Individual ↔ Collective Coding
-- Relation: Editorial ↔ Participatory
-- Continuity: Stable Identity ↔ Era Transformation
+Editorial source remains `patterns*.js`, discovered automatically by the build.
 
-It is not a quality score. It exists so that an artist reference does not collapse into a color palette or one frozen campaign image.
+Generated runtime data:
 
-### 3. Industry Cluster
+```text
+generated/meta.json
+generated/catalog-core.json
+generated/search-index.json
+generated/catalog.json              # compatibility while analysis pages migrate
+generated/patterns/<id>.json
+generated/brands/*.json
+generated/history/wave3.json
+```
 
-When several brands solve essentially the same industry problem, they can be compressed into one editorial reference instead of inflating the library with near-duplicates.
+TOP loads the core catalog first and defers the long-form search index until text search.
 
-Eyewear currently uses four clusters:
-
-1. **Everyday Omnichannel Eyewear** — Zoff / JINS / OWNDAYS / 眼鏡市場
-2. **Eyewear as Identity** — Ray-Ban / EYEVAN / Gentle Monster
-3. **Engineering & Craft Provenance** — 999.9 / 金子眼鏡
-4. **Professional Fitting & Consultation** — PARIS MIKI
-
-Each cluster has one Design Space coordinate and counts as one Coverage reference. Its detail page expands into `COMMON GRAMMAR → BRAND VARIATIONS`.
-
-### 4. Scene / State Lens
-
-`Situation → multiple solutions`
-
-Loading / 404 / Empty / Error / Success / Onboarding can be filtered independently of brand. This turns Like What? into a situation library as well as a name library.
-
-Examples:
-
-- Loading: Skeleton / expressive progress / scoped inline loading / branded transition
-- 404: utility-first recovery / illustrated recovery / exploration recovery
-- Empty: guided first action / celebratory completion
-- Error: outcome → cause → recovery
-- Success: non-blocking confirmation
-- Onboarding: teach at the empty state instead of starting a separate tour
-
-The hierarchy is therefore:
-
-`Brand / Artist / Institution / Industry Cluster / Scene → UI Pattern / Era / State Variation → Design Principle`
-
-## Core exploration
-
-- Brand / Artist / Institution / Cluster grouped library
-- Scene filter for Loading / 404 / Empty / Error / Success / Onboarding
-- Multiple previews inside grouped cards
-- Collection View for all Patterns belonging to one brand or institution
-- Artist View for Era / Concept changes
-- Idol Lens for artist-specific comparison
-- Search across brand, artist, institution, scene, era, cluster member, vocabulary and philosophy
-- Brand / Density / Exploration / Diversity / seeded Random sorting
-- Separate small **Official ↗** link on cards while the main card opens the internal collection view
-- 6-axis Design Space shared by UI, retail, culture, institutions and scene states
-- Diversity Score, Nearest / Farthest and Opposite Reference
-- NEXT REFERENCES with Similar Position / Shared Principle-Different Context / Opposite Priorities
-- Design Map
-- Design Vocabulary
-- Contrast Pair
-- Collision Engine
-- Coverage Planner and historical Coverage Delta
+See `PERFORMANCE.md` and `docs/architecture-v5.md` for the full contract.
 
 ## Source / abstraction policy
 
-References are grounded in official product, artist, institution or design-system pages where possible, while Pattern names and Design Space coordinates are editorial abstractions created for Like What?.
+References are grounded in official product, artist, institution or design-system pages where possible, while Pattern names, Design Space coordinates and reusable grammar names are editorial abstractions created for Like What?.
 
-The source establishes the observable system: navigation, content hierarchy, service structure, documented component behavior, collection structure, institution information architecture or recurring identity model. Like What? translates those observations into reusable design ideas.
+Generated Full Detail records carry a provenance envelope:
+
+- `sourceType`
+- `checkedAt`
+- `observed`
+- `editorialInference`
+
+`checkedAt` remains null unless the source was deliberately researched; build time is not treated as verification time.
 
 A reference is not added merely because it is famous. The editorial question is:
 
@@ -136,9 +97,7 @@ Expansion is not evaluated by card count.
 
 `Coverage → Expansion → Delta → Next Coverage`
 
-Industry Clusters are counted once so closely related brands do not artificially inflate coverage. Artist Eras remain separate Design Space references when they express meaningfully different design priorities; the main library still groups them under one Artist card. Scene references remain separate because a Loading state and a 404 state solve different temporal problems even when they originate from the same design system.
-
-The historical Coverage Delta still compares **63 → 78** for Wave 3 using the same formulas. The current **149-reference** library is used by the live Coverage Snapshot and current gap analysis.
+A new reference should improve spatial, conceptual, contextual, Scene-lifecycle or contrast coverage.
 
 ## Design Space
 
@@ -153,22 +112,20 @@ Six editorial 0–100 axes:
 
 Coordinates are comparative heuristics, not quality scores.
 
-## Key grouping files
+## Validation
 
-- `library-groups.js` — builds Brand / Institution groups and keeps Industry Clusters standalone
-- `brand.html` / `brand.js` / `styles-brand-page.css` — collection view
-- `patterns-eyewear.js` — four grouped Eyewear references
-- `ui-eyewear.js` / `styles-eyewear.css` — abstract Eyewear previews
-- `cluster-detail.js` / `styles-cluster-detail.css` — Common Grammar / Brand Variations
-- `patterns-idols.js` / `patterns-idols2.js` — Artist / Era concept references
-- `ui-idols.js` / `styles-idols.css` and `ui-idols2.js` / `styles-idols2.css` — Artist previews
-- `brand-idol.js` / `styles-brand-idol.css` — Artist View + Idol Lens
-- `patterns-wave5-brand.js` — Wave 5 brand / culture references
-- `patterns-wave5-university.js` — domestic / overseas university references
-- `patterns-wave5-scenes.js` — Loading / 404 / Empty / Error / Success / Onboarding references
-- `ui-wave5.js` / `styles-wave5.css` — Wave 5 abstract previews
-- `scene-filter.js` — Scene-specific top filter
-- `ui-preview-contract.js` / `styles-group-preview.css` — shared preview fitting
+GitHub Pages CI runs the build and validates:
+
+- required fields
+- unique ids
+- valid entry kinds
+- Design Space ranges
+- curated relation targets
+- source URL syntax
+- split runtime catalog consistency
+- collection manifest consistency
+- historical Wave 3 snapshot
+- core catalog gzip budget
 
 ## Run locally
 
@@ -179,4 +136,4 @@ python3 -m http.server 8000
 
 ## GitHub Pages
 
-`.github/workflows/pages.yml` generates the compact catalog, verifies the current reference count and duplicate IDs, then deploys the static site on every push to `main`.
+`.github/workflows/pages.yml` builds, lints and deploys the static site on every push to `main`.
