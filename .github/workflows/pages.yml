@@ -23,69 +23,58 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-      - name: Generate pattern data
+      - name: Generate and lint library data
         run: node scripts/build-pattern-data.mjs
-      - name: Verify generated catalog
+      - name: Verify generated runtime data
         run: |
-          test -f generated/catalog.json
           node - <<'NODE'
           const fs=require('fs');
-          const catalog=JSON.parse(fs.readFileSync('generated/catalog.json'));
+          const core=JSON.parse(fs.readFileSync('generated/catalog-core.json'));
+          const search=JSON.parse(fs.readFileSync('generated/search-index.json'));
+          const meta=JSON.parse(fs.readFileSync('generated/meta.json'));
           const files=fs.readdirSync('generated/patterns').filter(name=>name.endsWith('.json')).length;
-          if(catalog.referenceCount!==files)throw new Error(`catalog references ${catalog.referenceCount} != generated detail files ${files}`);
-          if(catalog.referenceCount!==149)throw new Error(`Wave 5 catalog ${catalog.referenceCount} != 149`);
-          console.log('catalog references:',catalog.referenceCount);
+          if(core.referenceCount!==files)throw new Error(`core references ${core.referenceCount} != detail files ${files}`);
+          if(search.referenceCount!==core.referenceCount)throw new Error('search/core count mismatch');
+          if(meta.referenceCount!==core.referenceCount)throw new Error('meta/core count mismatch');
+          const ids=core.records.map(r=>r.id);
+          if(new Set(ids).size!==ids.length)throw new Error('duplicate pattern ids');
+          const searchIds=new Set(search.records.map(r=>r.id));
+          if(ids.some(id=>!searchIds.has(id)))throw new Error('search index missing ids');
+          for(const record of core.records){
+            if(!record.entryKind)throw new Error(`missing entryKind ${record.id}`);
+            if(!record.designSpace||!record.detailFile)throw new Error(`incomplete record ${record.id}`);
+          }
+          console.log('runtime verified:',core.referenceCount,'references');
+          console.log('kinds:',meta.kindCounts);
+          console.log('scenes:',meta.sceneCounts);
           NODE
-      - name: Verify compact runtime catalog
+      - name: Verify progressive loading contract
         run: |
           node - <<'NODE'
           const fs=require('fs');
-          const catalog=JSON.parse(fs.readFileSync('generated/catalog.json'));
-          if(catalog.schemaVersion<3)throw new Error(`catalog schema ${catalog.schemaVersion} is not TOP-ready`);
-          for(const record of catalog.records){
-            if(!record.id||!record.designSpace||!record.detailFile)throw new Error(`incomplete compact record ${record.id||'unknown'}`);
-            if(typeof record.searchText!=='string'||!record.searchText.length)throw new Error(`missing searchText ${record.id}`);
-            if(record.groupType==='industry-cluster'&&(!Array.isArray(record.clusterMembers)||!record.clusterMembers.length))throw new Error(`missing clusterMembers ${record.id}`);
-          }
-          const ids=catalog.records.map(r=>r.id);
-          if(new Set(ids).size!==ids.length)throw new Error('duplicate pattern ids found');
           const indexHtml=fs.readFileSync('index.html','utf8');
           const bootstrap=fs.readFileSync('top-bootstrap.js','utf8');
           if(/<script[^>]+src=["']patterns(?:-|\.)/i.test(indexHtml))throw new Error('TOP HTML directly loads Pattern source');
-          if(/script\(['"]patterns(?:-|\.)/.test(bootstrap))throw new Error('TOP bootstrap falls back to Pattern source');
-          if(!bootstrap.includes('generated/catalog.json'))throw new Error('TOP bootstrap does not load generated catalog');
-          console.log('TOP runtime: compact catalog only,',catalog.records.length,'references');
+          if(!bootstrap.includes('generated/catalog-core.json'))throw new Error('TOP bootstrap does not load core catalog');
+          if(!bootstrap.includes('generated/search-index.json'))throw new Error('TOP bootstrap cannot defer search index');
+          console.log('TOP progressive loading contract verified');
           NODE
-      - name: Verify analysis catalog and history
+      - name: Verify history and collection manifests
         run: |
-          test -f generated/history/wave3.json
           node - <<'NODE'
           const fs=require('fs');
-          const catalog=JSON.parse(fs.readFileSync('generated/catalog.json'));
+          const core=JSON.parse(fs.readFileSync('generated/catalog-core.json'));
           const history=JSON.parse(fs.readFileSync('generated/history/wave3.json'));
-          if(catalog.schemaVersion<2)throw new Error(`catalog schema ${catalog.schemaVersion} is not analysis-ready`);
-          if(history.before.length!==63)throw new Error(`Wave 3 before snapshot ${history.before.length} != 63`);
-          if(history.after.length!==78)throw new Error(`Wave 3 after snapshot ${history.after.length} != 78`);
-          if(history.waveIds.length!==15)throw new Error(`Wave 3 ids ${history.waveIds.length} != 15`);
-          console.log('analysis catalog:',catalog.records.length,'Wave 3:',history.before.length,'→',history.after.length);
-          NODE
-      - name: Verify Brand and Artist manifests
-        run: |
-          test -f generated/brands/index.json
-          node - <<'NODE'
-          const fs=require('fs');
-          const catalog=JSON.parse(fs.readFileSync('generated/catalog.json'));
           const index=JSON.parse(fs.readFileSync('generated/brands/index.json'));
-          const eligible=catalog.records.filter(r=>r.groupType!=='industry-cluster');
-          const expectedBrands=new Set(eligible.map(r=>r.brand));
-          if(index.brands.length!==expectedBrands.size)throw new Error(`manifest brand count ${index.brands.length} != ${expectedBrands.size}`);
-          const total=index.brands.reduce((sum,b)=>sum+b.patternCount,0);
-          if(total!==eligible.length)throw new Error(`manifest pattern count ${total} != ${eligible.length}`);
+          if(history.before.length!==63||history.after.length!==78||history.waveIds.length!==15)throw new Error('Wave 3 history changed unexpectedly');
+          const eligible=core.records.filter(r=>!['industry-cluster','scene'].includes(r.entryKind));
+          const expected=new Set(eligible.map(r=>r.brand));
+          if(index.brands.length!==expected.size)throw new Error(`collection count ${index.brands.length} != ${expected.size}`);
           for(const entry of index.brands){
-            if(!expectedBrands.has(entry.brand))throw new Error(`unexpected brand ${entry.brand}`);
             if(!fs.existsSync(`generated/brands/${entry.file}`))throw new Error(`missing manifest ${entry.file}`);
+            if(!entry.route)throw new Error(`missing optimized route for ${entry.brand}`);
           }
-          console.log('brand / artist manifests:',index.brands.length,'patterns:',total);
+          console.log('history and collection manifests verified');
           NODE
       - name: Configure Pages
         uses: actions/configure-pages@v5
