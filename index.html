@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="104の実在サービス・ブランド・カルチャー参照を、ブランド単位とIndustry Clusterで束ねながら、視覚文法・設計思想・Design Spaceまで分解して探せるデザイン参照ライブラリ。" />
+  <meta name="description" content="149の実在サービス・ブランド・カルチャー・大学・Scene参照を、ブランド単位とIndustry Clusterで束ねながら、視覚文法・設計思想・Design Spaceまで分解して探せるデザイン参照ライブラリ。" />
   <title>Like What? — UI reference library</title>
   <link rel="icon" type="image/png" sizes="180x180" href="/likewhat/apple-touch-icon.png?v=20260814">
   <link rel="apple-touch-icon" sizes="180x180" href="/likewhat/apple-touch-icon.png?v=20260814">
@@ -27,22 +27,22 @@
     <section class="hero">
       <p class="eyebrow">VISUAL GRAMMAR / DESIGN REFERENCE LIBRARY</p>
       <h1>「こんな感じ」を、<br><em>設計語彙に変換する。</em></h1>
-      <p class="hero-copy">Apple、Notion、Linearから、Eyewear、ILLIT、aespa、XGまで。トップでは<strong>ブランド／アーティストをひとつの入口</strong>として束ね、その中に複数のUI PatternやEra / Concept Patternを保持する。似た表層ではなく、情報アーキテクチャ、距離感、世界観、操作モデル、設計思想の差を読む。</p>
+      <p class="hero-copy">Apple、Notion、Linearから、Toys“R”Us、無印良品、CHANMINA、Tiffany、Marvel、国内外の大学、Loadingや404まで。トップでは<strong>ブランド／アーティスト／組織をひとつの入口</strong>として束ね、Sceneは状態別に横断する。似た表層ではなく、情報アーキテクチャ、距離感、世界観、操作モデル、設計思想の差を読む。</p>
 
       <div class="search-shell" role="search">
         <span aria-hidden="true">⌕</span>
-        <input id="searchInput" type="search" autocomplete="off" placeholder="例：Apple / ILLIT / Ray-Ban / Dream Logic / Spatial IA" aria-label="パターンを検索" />
+        <input id="searchInput" type="search" autocomplete="off" placeholder="例：MUJI / CHANMINA / MIT / Loading / 404 / Worldbuilding" aria-label="パターンを検索" />
         <kbd>⌘ K</kbd>
       </div>
       <div class="query-examples" aria-label="検索例">
-        <button type="button" data-query="Apple">Apple</button><button type="button" data-query="ILLIT">ILLIT</button><button type="button" data-query="Eyewear">Eyewear</button><button type="button" data-query="Worldbuilding">Worldbuilding</button><button type="button" data-query="Spatial IA">Spatial IA</button>
+        <button type="button" data-query="無印良品">無印良品</button><button type="button" data-query="CHANMINA">CHANMINA</button><button type="button" data-query="MIT">MIT</button><button type="button" data-query="Loading">Loading</button><button type="button" data-query="404">404</button>
       </div>
     </section>
 
     <section class="explore-hub" aria-labelledby="exploreHubTitle">
       <div class="explore-hub-head"><div><p class="eyebrow">EXPLORE / THREE LENSES</p><h2 id="exploreHubTitle">同じライブラリを、3つの角度から。</h2><p>場所・言葉・差分。ブランド名以外の入口を、小さな道具として使い分ける。</p></div></div>
       <div class="explore-tool-grid">
-        <a class="explore-tool" href="map.html"><div class="explore-visual explore-map-visual" aria-hidden="true"><i></i><i></i><i></i><span class="x">ORDER →</span><span class="y">↑ DENSITY</span></div><div class="explore-tool-copy"><small>01 / DESIGN SPACE</small><strong>座標から探す</strong><span>104 references · 6 axes</span></div><em aria-hidden="true">↗</em></a>
+        <a class="explore-tool" href="map.html"><div class="explore-visual explore-map-visual" aria-hidden="true"><i></i><i></i><i></i><span class="x">ORDER →</span><span class="y">↑ DENSITY</span></div><div class="explore-tool-copy"><small>01 / DESIGN SPACE</small><strong>座標から探す</strong><span>149 references · 6 axes</span></div><em aria-hidden="true">↗</em></a>
         <a class="explore-tool" href="vocabulary.html"><div class="explore-visual explore-vocab-visual" aria-hidden="true"><b>Wayfinding</b><b>Worldbuilding</b><b>Identity</b></div><div class="explore-tool-copy"><small>02 / VOCABULARY</small><strong>言葉から渡る</strong><span>concept → different world</span></div><em aria-hidden="true">↗</em></a>
         <a class="explore-tool" href="compare.html"><div class="explore-visual explore-contrast-visual" aria-hidden="true"><div></div><span>Δ</span><div></div></div><div class="explore-tool-copy"><small>03 / CONTRAST</small><strong>差分から学ぶ</strong><span>A ↔ B · priorities</span></div><em aria-hidden="true">↗</em></a>
       </div>
@@ -54,10 +54,10 @@
       <div id="randomResults" class="random-results" aria-live="polite"></div>
     </section>
 
-    <section class="browser" id="patterns"><div class="browser-head"><div><p class="eyebrow">BROWSE BY BRAND / ARTIST / CLUSTER</p><h2>名前を入口に、その中の複数Patternへ。</h2></div><p id="resultCount" class="count" aria-live="polite">104 references · detail data deferred</p></div><div id="brandFilters" class="brand-filters" aria-label="ブランドで絞り込む"></div><div class="secondary-filter-row"><span>Pattern type</span><div id="partFilters" class="part-filters" aria-label="パターン種別で絞り込む"></div></div><div id="patternGroups" class="pattern-groups"><div class="library-loading-note">Reference catalog loads when you approach this section.</div></div><div id="emptyState" class="empty-state" hidden><strong>近いパターンがまだない。</strong><p>検索語を短くするか、ブランドの絞り込みを外してみて。</p></div></section>
+    <section class="browser" id="patterns"><div class="browser-head"><div><p class="eyebrow">BROWSE BY BRAND / ARTIST / INSTITUTION / SCENE</p><h2>名前と場面を入口に、その中の複数Patternへ。</h2></div><p id="resultCount" class="count" aria-live="polite">149 references · detail data deferred</p></div><div id="brandFilters" class="brand-filters" aria-label="ブランドで絞り込む"></div><div class="secondary-filter-row"><span>Pattern type</span><div id="partFilters" class="part-filters" aria-label="パターン種別で絞り込む"></div></div><div id="patternGroups" class="pattern-groups"><div class="library-loading-note">Reference catalog loads when you approach this section.</div></div><div id="emptyState" class="empty-state" hidden><strong>近いパターンがまだない。</strong><p>検索語を短くするか、ブランドの絞り込みを外してみて。</p></div></section>
   </main>
 
-  <footer><p>Like What? — brand is the entrance; design principles are the exit.</p><p>References point to official product, artist or design-system pages where available.</p></footer>
+  <footer><p>Like What? — brand is the entrance; design principles are the exit.</p><p>References point to official product, artist, institution or design-system pages where available.</p></footer>
 
   <script src="catalog-index.js"></script>
   <script src="top-bootstrap.js"></script>
