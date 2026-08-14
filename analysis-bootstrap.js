@@ -7,7 +7,7 @@
   async function boot(){
     const catalog=await json('generated/catalog-core.json');
     window.LIKEWHAT_PATTERNS=catalog.records;window.LIKEWHAT_ANALYSIS_DATA={catalog,page};
-    await script('design-space.js');await script('entry-kinds.js');await script('vocabulary.js');
+    await script('nav-v5.js');await script('design-space.js');await script('entry-kinds.js');await script('vocabulary.js');
     if(page==='map'){
       await loadPreviewStack();await script('map.js');
     }else if(page==='vocabulary'){
