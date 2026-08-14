@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "libraryName": "Like What?",
+  "currentWave": 5,
+  "entryKinds": ["brand", "artist", "institution", "scene", "industry-cluster"],
+  "sceneOrder": ["Onboarding", "Loading", "Empty", "Success", "Error", "404"],
+  "sceneLifecycle": {
+    "Before": ["Onboarding"],
+    "During": ["Loading"],
+    "Outcome": ["Empty", "Success", "Error"],
+    "Recovery": ["404"]
+  },
+  "designSpaceAxes": 6,
+  "historicalSnapshots": {
+    "wave3": {"before": 63, "after": 78, "added": 15}
+  }
+}
