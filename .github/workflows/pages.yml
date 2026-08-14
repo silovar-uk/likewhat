@@ -32,6 +32,7 @@ jobs:
         run: |
           node scripts/build-pattern-data.mjs
           node scripts/build-share-shells.mjs
+          node scripts/stamp-static-html.mjs
       - name: Verify generated runtime data
         run: |
           node - <<'NODE'
