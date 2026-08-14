@@ -4,7 +4,8 @@ import vm from 'node:vm';
 
 const root=process.cwd();
 const allSourceFiles=[
-  'patterns.js','patterns-extra.js','patterns-wave1.js','patterns-wave2.js','patterns-wave3.js','patterns-wave4.js','patterns-eyewear.js','patterns-idols.js','patterns-idols2.js'
+  'patterns.js','patterns-extra.js','patterns-wave1.js','patterns-wave2.js','patterns-wave3.js','patterns-wave4.js','patterns-eyewear.js','patterns-idols.js','patterns-idols2.js',
+  'patterns-wave5-brand.js','patterns-wave5-university.js','patterns-wave5-scenes.js'
 ];
 const wave3BeforeFiles=['patterns.js','patterns-extra.js','patterns-wave1.js','patterns-wave2.js'];
 const wave3AfterFiles=[...wave3BeforeFiles,'patterns-wave3.js'];
@@ -37,7 +38,7 @@ const wave3Before=await loadPatterns(wave3BeforeFiles);
 const wave3After=await loadPatterns(wave3AfterFiles);
 
 const compactKeys=[
-  'id','brand','family','name','oneLiner','tags','uiParts','mock','domain','medium','archetype','interactionModel','philosophy','designSpace','related','opposites',
+  'id','brand','family','name','oneLiner','tags','uiParts','mock','domain','medium','archetype','interactionModel','philosophy','designSpace','related','opposites','scene',
   'groupType','industry','memberBrands','collectionType','era','idolLens','sourceLabel','sourceUrl',
   'implementationTerms','designTerms','philosophyTerms','schemaVersion'
 ];
@@ -45,7 +46,7 @@ const normalize=value=>String(value||'').normalize('NFKC').toLowerCase();
 function searchTextFor(p){
   const memberText=(p.members||[]).flatMap(m=>[m.brand,m.role,m.note,m.sourceLabel]).join(' ');
   return normalize([
-    p.brand,p.family,p.name,p.era,p.oneLiner,p.description,
+    p.brand,p.family,p.name,p.era,p.scene,p.oneLiner,p.description,
     ...(p.memberBrands||[]),memberText,...(p.tags||[]),...(p.uiParts||[]),...(p.visual||[]),...(p.useCases||[]),
     ...(p.avoid||[]),p.prompt,p.domain,p.medium,p.archetype,p.interactionModel,
     ...(p.philosophy||[]),...(p.implementationTerms||[]),...(p.designTerms||[]),...(p.philosophyTerms||[])
