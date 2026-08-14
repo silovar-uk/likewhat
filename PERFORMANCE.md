@@ -27,6 +27,7 @@ In addition to Design Space / taxonomy metadata, each compact record contains:
 - `searchText`: a precomputed normalized search corpus built from long-form source fields
 - `clusterMembers`: only brand / role summaries needed to render Industry Cluster cards
 - `detailFile`: route to the Full Detail JSON
+- `scene`: optional state key for Loading / 404 / Empty / Error / Success / Onboarding references
 
 This preserves TOP search quality without carrying description, visual rules, prompts and full Cluster member notes as separate runtime fields.
 
@@ -46,7 +47,7 @@ Initial Pattern details: **0**.
 
 The TOP library starts only when:
 
-- the Brand / Artist / Cluster section comes within roughly 300 px of the viewport
+- the Brand / Artist / Institution / Cluster section comes within roughly 300 px of the viewport
 - the user searches
 - a query parameter is already present
 - the page opens with `#patterns`
@@ -76,9 +77,11 @@ Taxonomy is not recomputed in the browser because generated catalog records are 
 
 Diversity remains lazy and is calculated only when Diversity sorting is selected.
 
-### Stage 3 — previews
+### Stage 3 — previews and scene controls
 
 Preview renderer code loads only after the compact catalog is requested. Full miniature UI previews are then hydrated near the viewport through `top-performance.js`, with per-frame work limits.
+
+Wave 5 adds `ui-wave5.js` / `styles-wave5.css` for brand, university and state previews. `scene-filter.js` derives its buttons from the compact catalog and reuses the existing search/filter path rather than introducing a second data model.
 
 TOP runtime diagnostics:
 
@@ -88,7 +91,7 @@ window.LikeWhatInitialBudget
 window.LikeWhatLoadMetrics
 ```
 
-`LikeWhatLoadMetrics` now reports:
+`LikeWhatLoadMetrics` reports:
 
 ```js
 {
@@ -115,11 +118,11 @@ Runtime diagnostics:
 window.LikeWhatPatternLoadMetrics
 ```
 
-## Brand / Artist View
+## Brand / Artist / Institution View
 
 ```text
 compact catalog
-+ Brand / Artist manifest
++ collection manifest
 + only that collection's Full Details
 ```
 
@@ -128,7 +131,8 @@ Examples:
 ```text
 Apple → Apple Pattern details only
 ILLIT → 3 Era details only
-IVE → 1 Concept detail only
+CHANMINA → 3 Era / Concept details only
+MIT → MIT Institution detail only
 ```
 
 Runtime diagnostics:
@@ -171,14 +175,15 @@ current compact catalog + generated/history/wave3.json
 
 Full Detail: **0**.
 
-The historical 63 → 78 comparison is a generated compact snapshot, independent of the current 104-reference library.
+The historical 63 → 78 comparison is a generated compact snapshot, independent of the current 149-reference library.
 
 ## Deployment verification
 
 Pages CI verifies:
 
-- current reference count is 104
-- exactly 104 Full Detail JSON files are generated
+- current reference count is **149**
+- generated Full Detail JSON file count exactly matches the catalog count
+- all Pattern ids are unique
 - compact catalog schema is at least v3
 - every compact record has id / Design Space / detail routing / `searchText`
 - Industry Cluster records have `clusterMembers`
@@ -186,7 +191,7 @@ Pages CI verifies:
 - `top-bootstrap.js` does not fall back to Pattern source files
 - TOP bootstrap explicitly loads `generated/catalog.json`
 - Wave 3 history remains 63 → 78 with 15 added ids
-- Brand / Artist manifest counts and Pattern totals are consistent
+- Brand / Artist / Institution manifest counts and Pattern totals are consistent
 
 This makes a regression from generated runtime data back to `patterns*.js` a deployment failure rather than a silent performance regression.
 
@@ -200,6 +205,8 @@ Current TOP budget:
 - Initial Diversity calculations: **0**
 - Initial DOM nodes: **≤ 1,000**
 - Compact catalog target: **< 100 KB compressed / encoded transfer**
+
+The Wave 5 CI build reports **353.4 KB raw** for the 149-reference compact catalog. Raw size is intentionally not treated as transfer size; the split threshold should be evaluated against compressed network transfer before introducing another request.
 
 ## Current architecture
 
@@ -222,8 +229,11 @@ TOP
 PATTERN DETAIL
   compact catalog + 1 Full Detail
 
-BRAND / ARTIST
+BRAND / ARTIST / INSTITUTION
   compact catalog + manifest + collection details
+
+SCENE
+  compact catalog + scene filter; no extra dataset
 
 MAP / VOCABULARY
   compact catalog, 0 Full Detail
@@ -259,6 +269,6 @@ Do not split this prematurely: measure compressed transfer size first and introd
 
 Performance optimizations must preserve:
 
-`Brand / Artist / Industry Cluster → Pattern / Era / Variation → Design Principle`
+`Brand / Artist / Institution / Industry Cluster / Scene → Pattern / Era / State Variation → Design Principle`
 
 Do not solve performance by flattening grouping, deleting design metadata, or reducing the explanatory source library.
