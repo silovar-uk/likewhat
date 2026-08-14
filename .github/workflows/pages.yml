@@ -23,8 +23,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+      - name: Verify JavaScript syntax
+        run: |
+          for f in *.js scripts/*.mjs; do
+            node --check "$f"
+          done
       - name: Generate and lint library data
-        run: node scripts/build-pattern-data.mjs
+        run: |
+          node scripts/build-pattern-data.mjs
+          node scripts/build-share-shells.mjs
       - name: Verify generated runtime data
         run: |
           node - <<'NODE'
@@ -32,10 +39,12 @@ jobs:
           const core=JSON.parse(fs.readFileSync('generated/catalog-core.json'));
           const search=JSON.parse(fs.readFileSync('generated/search-index.json'));
           const meta=JSON.parse(fs.readFileSync('generated/meta.json'));
+          const share=JSON.parse(fs.readFileSync('generated/share-index.json'));
           const files=fs.readdirSync('generated/patterns').filter(name=>name.endsWith('.json')).length;
           if(core.referenceCount!==files)throw new Error(`core references ${core.referenceCount} != detail files ${files}`);
           if(search.referenceCount!==core.referenceCount)throw new Error('search/core count mismatch');
           if(meta.referenceCount!==core.referenceCount)throw new Error('meta/core count mismatch');
+          if(share.count!==core.referenceCount)throw new Error('share/core count mismatch');
           const ids=core.records.map(r=>r.id);
           if(new Set(ids).size!==ids.length)throw new Error('duplicate pattern ids');
           const searchIds=new Set(search.records.map(r=>r.id));
@@ -44,9 +53,13 @@ jobs:
             if(!record.entryKind)throw new Error(`missing entryKind ${record.id}`);
             if(!record.designSpace||!record.detailFile)throw new Error(`incomplete record ${record.id}`);
           }
+          for(const entry of share.entries){
+            if(!fs.existsSync(`${entry.path}/index.html`))throw new Error(`missing share shell ${entry.id}`);
+          }
           console.log('runtime verified:',core.referenceCount,'references');
           console.log('kinds:',meta.kindCounts);
           console.log('scenes:',meta.sceneCounts);
+          console.log('share shells:',share.count);
           NODE
       - name: Verify progressive loading contract
         run: |
@@ -54,10 +67,14 @@ jobs:
           const fs=require('fs');
           const indexHtml=fs.readFileSync('index.html','utf8');
           const bootstrap=fs.readFileSync('top-bootstrap.js','utf8');
+          const patternBootstrap=fs.readFileSync('pattern-bootstrap.js','utf8');
+          const analysisBootstrap=fs.readFileSync('analysis-bootstrap.js','utf8');
           if(/<script[^>]+src=["']patterns(?:-|\.)/i.test(indexHtml))throw new Error('TOP HTML directly loads Pattern source');
           if(!bootstrap.includes('generated/catalog-core.json'))throw new Error('TOP bootstrap does not load core catalog');
           if(!bootstrap.includes('generated/search-index.json'))throw new Error('TOP bootstrap cannot defer search index');
-          console.log('TOP progressive loading contract verified');
+          if(!patternBootstrap.includes('generated/catalog-core.json'))throw new Error('Pattern Detail is not on core catalog');
+          if(!analysisBootstrap.includes('generated/catalog-core.json'))throw new Error('Analysis pages are not on core catalog');
+          console.log('progressive loading contract verified');
           NODE
       - name: Verify history and collection manifests
         run: |
