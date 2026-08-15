@@ -145,6 +145,10 @@ main :where(p, li) > a:not([class]):not(.mini-ui *):hover,
   font-size: 11px;
 }
 
+.composer-controls > span {
+  font-size: 18px;
+}
+
 .composer-controls select,
 .composer-controls button {
   min-height: 44px;
@@ -238,6 +242,27 @@ main :where(p, li) > a:not([class]):not(.mini-ui *):hover,
 }
 
 .library-group-main.is-direct::after {
+  font-size: 9px;
+}
+
+.brand-group-card .library-group-main > header {
+  padding-right: 100px;
+}
+
+.group-official-link {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 10px;
+  font-size: 10px;
+}
+
+.group-preview-tile > span {
+  font-size: 8px;
+}
+
+.group-preview-more,
+.lw-lazy-preview span {
   font-size: 9px;
 }
 
@@ -777,6 +802,10 @@ main :where(p, li) > a:not([class]):not(.mini-ui *):hover,
   .brand-pattern-card {
     min-height: 230px;
     height: auto;
+  }
+
+  .brand-group-card .library-group-main > header {
+    padding-right: 96px;
   }
 }
 

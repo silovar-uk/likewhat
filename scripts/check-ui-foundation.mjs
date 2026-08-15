@@ -15,6 +15,7 @@ const core=fs.readFileSync('styles.css','utf8');
 const polish=fs.readFileSync('styles-ui-polish.css','utf8');
 const index=fs.readFileSync('index.html','utf8');
 const map=fs.readFileSync('map.js','utf8');
+const topBootstrap=fs.readFileSync('top-bootstrap.js','utf8');
 const failures=[];
 
 function assert(condition,message){
@@ -40,6 +41,7 @@ assert(polish.includes(':focus-visible'), 'visible keyboard focus guard is missi
 assert(polish.includes('--control-height: 40px'), 'shared interactive target floor is missing');
 assert(index.includes('<wbr><span>×「どの場面？」</span>'), 'Composer heading lacks a semantic wrap opportunity');
 assert(map.includes('class="map-point-hit"'), 'Design Map points lack their enlarged invisible hit area');
+assert(topBootstrap.includes('document.head.appendChild(polish)'), 'deferred TOP styles can override the final polish layer');
 
 if(failures.length){
   console.error('UI foundation check failed:');
