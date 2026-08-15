@@ -1,6 +1,6 @@
 # Like What?
 
-「Apple風」「ILLITっぽい」「MITっぽい」「404をもっと遊びにしたい」のような曖昧なイメージを、具体的なUIパターン・視覚文法・世界観・実装構造・設計思想へ変換する個人用リファレンスライブラリです。
+「Apple風」「ILLITっぽい」「MITっぽい」「404をもっと遊びにしたい」「星野リゾートのように体験を分けたい」のような曖昧なイメージを、具体的なUIパターン・視覚文法・世界観・実装構造・設計思想へ変換する個人用リファレンスライブラリです。
 
 **The library is the entrance; design principles are the exit.**
 
@@ -53,6 +53,32 @@ Design Space can be used in two modes conceptually:
 - across-worlds — deliberate cross-domain discovery
 
 Curated `related` and `opposites` are optional overrides. Missing relations are valid because the library computes Nearest / Farthest / Opposite from Design Space.
+
+## Wave 6 — Hospitality / Stay Experience
+
+Hospitality is treated as a **domain and industry comparison space**, not a new `entryKind`. Individual companies and sub-brands remain `brand`; the cross-brand comparison is an `industry-cluster`.
+
+Wave 6 adds a `Hospitality / Stay Experience` domain and compares what each stay service actually treats as the center of the experience:
+
+- 星野リゾート — portfolio architecture by travel intent
+- 星のや / Aman — place-specific immersion
+- 界 — repeatable grammar for local culture
+- リゾナーレ — seasonal experience programming
+- OMO — neighborhood as an extension of the hotel interface
+- BEB — permissioned looseness and social commons
+- LUCY — barrier reduction for first-time mountain stays
+- Ace Hotel — hotel as cultural commons
+- Six Senses — wellness as an operating system
+- 1 Hotels — sustainability made tangible through operations
+- Marriott Bonvoy — cross-brand loyalty as a travel operating system
+- NOT A HOTEL — ownership-to-stay network
+- Airbnb — distributed inventory / marketplace comparison inside the cluster
+
+The editorial rule is to avoid a simple luxury / budget taxonomy. The cluster instead asks:
+
+> What is this hospitality service actually designing beyond the room?
+
+Possible answers include place, local culture, city exploration, social permission, wellness, sustainability, ongoing loyalty, and ownership.
 
 ## Runtime architecture
 
