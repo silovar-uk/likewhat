@@ -28,6 +28,8 @@ jobs:
           for f in *.js scripts/*.mjs; do
             node --check "$f"
           done
+      - name: Verify shared UI foundation
+        run: node scripts/check-ui-foundation.mjs
       - name: Generate and lint library data
         run: |
           node scripts/build-pattern-data.mjs

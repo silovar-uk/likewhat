@@ -79,6 +79,7 @@
     const frontier=(stat?.score||0)>=75;
     const selected=p.id===selectedId;
     return `<g class="map-point ${frontier?'frontier':''} ${selected?'selected':''}" data-id="${esc(p.id)}" tabindex="0" role="button" aria-pressed="${selected}" aria-label="${esc(p.brand)}、${esc(p.name)}。${esc(ds.axisNames[xKey])} ${Math.round(p.designSpace[xKey])}、${esc(ds.axisNames[yKey])} ${Math.round(p.designSpace[yKey])}">
+      <circle class="map-point-hit" cx="${x}" cy="${y}" r="${Math.max(12,r+7)}"/>
       ${frontier?`<circle class="map-point-ring" cx="${x}" cy="${y}" r="${r+5}"/>`:''}
       <circle class="map-point-dot" cx="${x}" cy="${y}" r="${r}"/>
       ${(frontier||selected)?`<text class="map-point-label" x="${x+12}" y="${y-10}">${esc(p.brand)}</text>`:''}

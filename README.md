@@ -116,6 +116,8 @@ Coordinates are comparative heuristics, not quality scores.
 
 GitHub Pages CI runs the build and validates:
 
+- shared UI foundation, required design tokens and final polish layer
+- semantic heading reflow, visible focus guardrails and map hit areas
 - required fields
 - unique ids
 - valid entry kinds
