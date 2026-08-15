@@ -30,8 +30,8 @@ for(const token of requiredTokens){
 for(const page of publicPages){
   const html=fs.readFileSync(page,'utf8');
   const sheets=[...html.matchAll(/<link\s+rel=["']stylesheet["']\s+href=["']([^"']+)["']/g)].map(match=>match[1]);
-  assert(sheets.includes('styles.css'),`${page} does not load styles.css`);
-  assert(sheets.at(-1)==='styles-ui-polish.css',`${page} must load styles-ui-polish.css last`);
+  assert(sheets.some(sheet=>sheet.startsWith('styles.css?v=')),`${page} does not load a versioned styles.css`);
+  assert(sheets.at(-1)?.startsWith('styles-ui-polish.css?v='),`${page} must load a versioned styles-ui-polish.css last`);
 }
 
 assert(polish.includes('var(--ink, #171716)'), 'critical dark backgrounds need a hard-coded token fallback');
@@ -42,6 +42,7 @@ assert(polish.includes('--control-height: 40px'), 'shared interactive target flo
 assert(index.includes('<wbr><span>×「どの場面？」</span>'), 'Composer heading lacks a semantic wrap opportunity');
 assert(map.includes('class="map-point-hit"'), 'Design Map points lack their enlarged invisible hit area');
 assert(topBootstrap.includes('document.head.appendChild(polish)'), 'deferred TOP styles can override the final polish layer');
+assert(index.includes('top-bootstrap.js?v='), 'TOP bootstrap must be cache-busted with UI releases');
 
 if(failures.length){
   console.error('UI foundation check failed:');
