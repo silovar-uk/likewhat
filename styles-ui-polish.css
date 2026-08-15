@@ -1,0 +1,800 @@
+/*
+ * UI polish guardrails
+ *
+ * This file is loaded last on every public page. It protects readable type,
+ * visible interaction states and reflow without enlarging the miniature UI
+ * artwork used inside .mini-ui previews.
+ */
+
+:root {
+  --focus-ink: var(--ink, #171716);
+  --readable-muted: #625f58;
+  --control-height: 40px;
+}
+
+html {
+  text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-width: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+:where(a, button, input, select, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--focus-ink);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 5px var(--bg, #f4f2ed);
+}
+
+.skip-link {
+  background: var(--ink, #171716);
+  color: #fff;
+}
+
+:where(button, select, input, summary):not(.mini-ui *) {
+  min-height: var(--control-height);
+}
+
+:where(button, select, input):not(.mini-ui *) {
+  font-size: max(13px, 0.8125rem);
+}
+
+main :where(p, li) > a:not([class]):not(.mini-ui *),
+.breadcrumb a,
+.source-link,
+.reference-source-card,
+.coverage-section-head > a,
+.next-references-heading > a {
+  text-decoration-line: underline;
+  text-decoration-color: #aaa59b;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+}
+
+main :where(p, li) > a:not([class]):not(.mini-ui *):hover,
+.breadcrumb a:hover,
+.source-link:hover,
+.reference-source-card:hover,
+.coverage-section-head > a:hover,
+.next-references-heading > a:hover {
+  text-decoration-color: currentColor;
+}
+
+.site-header nav a,
+.pattern-card,
+.library-group-main,
+.explore-tool,
+.term-card,
+.curated-pairs button,
+.brand-pattern-card,
+.context-neighbor,
+.next-reference-lane a {
+  text-decoration: none;
+}
+
+@media (min-width: 761px) {
+  .site-header nav a {
+    border-bottom: 1px solid transparent;
+    padding: 8px 0 7px;
+  }
+
+  .site-header nav a:hover,
+  .site-header nav a[aria-current="page"] {
+    border-bottom-color: currentColor;
+  }
+}
+
+/* Home: make the tools readable without changing their miniature diagrams. */
+.explore-hub-head > div > p:last-child,
+.composer-copy > p:last-child,
+.map-entry > div > p:last-child,
+.random-analysis-copy > p:last-child,
+.grammar-intro {
+  font-size: 14px;
+  line-height: 1.75;
+  color: var(--readable-muted);
+}
+
+.explore-tool-copy small {
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.explore-tool-copy span {
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.query-examples button,
+.part-chip,
+.active-filter {
+  min-height: var(--control-height);
+  padding: 9px 13px;
+  font-size: 12px;
+}
+
+.facet-row > span,
+.brand-filter-disclosure summary,
+.library-sort label {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.part-chip small,
+.active-filter,
+.sort-facet-row select,
+.library-sort select {
+  font-size: 11px;
+}
+
+.composer-copy h2 {
+  max-width: 15ch;
+  text-wrap: balance;
+  line-height: 1.08;
+}
+
+.composer-copy h2 span {
+  display: inline-block;
+}
+
+.composer-controls label {
+  font-size: 11px;
+}
+
+.composer-controls select,
+.composer-controls button {
+  min-height: 44px;
+  font-size: 14px;
+}
+
+.composer-brief small,
+.composer-brief p,
+.composer-brief pre,
+.composer-copy-button {
+  font-size: 12px;
+}
+
+.composer-brief strong {
+  font-size: 16px;
+}
+
+.random-modes button {
+  min-height: 48px;
+  padding: 10px 13px;
+}
+
+.random-modes strong {
+  font-size: 13px;
+}
+
+.random-modes span {
+  margin-top: 3px;
+  font-size: 11px;
+}
+
+.random-modes button.active,
+.random-draw-button,
+.composer-controls button,
+.composer-copy-button,
+.collision-brief button {
+  border-color: var(--ink, #171716) !important;
+  background: var(--ink, #171716) !important;
+  color: #fff !important;
+}
+
+.random-draw-button > small,
+.random-draw-button::after {
+  font-size: 11px !important;
+  color: #d0d0cc !important;
+}
+
+.random-analysis-copy > p:last-child,
+.collision-brief summary,
+.collision-brief pre,
+.collision-brief button,
+.random-metrics small {
+  font-size: 12px;
+}
+
+.random-metrics span {
+  min-height: 64px;
+}
+
+/* Library: preview remains visual; names and metadata become scannable. */
+.library-group-main > header small {
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.library-group-main > header h3 {
+  font-size: 21px;
+}
+
+.group-pattern-list strong {
+  font-size: 12px;
+}
+
+.group-pattern-list span,
+.group-pattern-list p {
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.library-group-main > footer {
+  font-size: 11px;
+}
+
+.library-group-main > footer b {
+  font-size: 12px;
+}
+
+.library-loading-note {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.library-group-main.is-direct::after {
+  font-size: 9px;
+}
+
+/* Design Map */
+.axis-control label,
+.map-stat span,
+.map-inspector-metrics small,
+.map-inspector-context small {
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.axis-control select {
+  min-height: 44px;
+  font-size: 14px;
+}
+
+.map-control-button,
+.map-presets button,
+.map-inspector-head > a {
+  min-height: var(--control-height);
+  font-size: 12px;
+}
+
+.map-section-head > div:first-child > p:last-child,
+.map-inspector-head p:last-child,
+.map-inspector-summary,
+.open-space-panel > p:nth-of-type(2) {
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.map-legend {
+  font-size: 11px;
+}
+
+.map-tooltip strong {
+  font-size: 12px;
+}
+
+.map-tooltip span,
+.map-tooltip small {
+  font-size: 11px;
+}
+
+.map-inspector-metrics span,
+.map-inspector-context strong,
+.open-space-item > span,
+.open-space-item strong,
+.open-space-item small {
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.map-point-hit {
+  fill: transparent;
+  pointer-events: all;
+}
+
+.map-stage-shell {
+  overscroll-behavior-inline: contain;
+}
+
+/* Vocabulary */
+.vocab-stats span,
+.vocab-browser-head > p,
+.term-category,
+.term-card > div,
+.term-inspector-metrics span {
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.vocab-category-filters button,
+.vocab-category-filters button small,
+.related-term-list span,
+.related-term-list small,
+.all-pattern-links summary,
+.all-pattern-links a span,
+.all-pattern-links a strong,
+.term-search-link {
+  font-size: 11px;
+}
+
+.term-card > em,
+.term-card > p,
+.term-inspector-empty > p:last-child,
+.muted-copy,
+.term-inspector-head > p:last-child {
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.term-card > strong {
+  font-size: 19px;
+}
+
+.related-term-list button,
+.term-search-link {
+  min-height: var(--control-height);
+}
+
+.vocab-pattern small {
+  font-size: 10px;
+}
+
+.vocab-pattern strong {
+  font-size: 12px;
+}
+
+.vocab-pattern p {
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* Contrast: trade one column of density for readable comparison. */
+.pair-control label,
+.curated-pair-head > p,
+.curated-pairs button > span,
+.compare-score span,
+.compare-score small,
+.compare-pattern-head small,
+.compare-pattern-head p,
+.compare-context small,
+.compare-metrics span,
+.axis-compare-title span,
+.axis-compare-values,
+.axis-compare-poles,
+.vocab-delta-grid small,
+.decision-grid > article > small,
+.decision-grid .avoid b {
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.pair-control select {
+  min-height: 44px;
+  font-size: 14px;
+}
+
+.curated-pairs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.curated-pairs button {
+  min-height: 66px;
+  padding: 12px 13px;
+}
+
+.curated-pairs strong {
+  font-size: 12px;
+}
+
+.curated-pairs small,
+.compare-pattern-head a,
+.compare-context b,
+.compare-chips a,
+.empty-chip,
+.decision-grid li,
+.compare-brief button {
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.compare-liner,
+.compare-section-head > p:last-child {
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.compare-brief pre {
+  font-size: 12px;
+}
+
+/* Coverage: analytical density should come from grouping, not 5–8px text. */
+.coverage-section-head > div > p:last-child,
+.coverage-section-head > p,
+.coverage-section-head > a,
+.delta-head > div:first-child > p:last-child,
+.delta-subhead > p {
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.coverage-stats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.coverage-stats article {
+  border-bottom: 1px solid var(--line);
+}
+
+.coverage-stats article:nth-child(3n) {
+  border-right: 0;
+}
+
+.coverage-stats article:nth-last-child(-n + 3) {
+  border-bottom: 0;
+}
+
+.coverage-stats small,
+.coverage-stats span,
+.spatial-gap-head > span,
+.spatial-gap-head small,
+.gap-axis span,
+.gap-axis b,
+.spatial-nearest > small,
+.thin-term small,
+.thin-term > div:first-child > span,
+.thin-term-metrics span,
+.context-block-head small,
+.context-block-head span,
+.context-row strong,
+.context-row span,
+.wave3-score span,
+.wave3-score small,
+.wave3-components small,
+.wave3-targets span,
+.delta-count small,
+.delta-count span,
+.delta-verdict small,
+.delta-observations span,
+.delta-metric > small,
+.delta-metric > div i,
+.delta-metric > b,
+.gap-compression-head > span,
+.gap-compression-head small,
+.compression-bars span,
+.compression-bars b,
+.impact-index,
+.impact-main small,
+.impact-badges span,
+.impact-badges b,
+.impact-nearest small,
+.impact-distance small {
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.spatial-nearest a strong,
+.spatial-nearest a span,
+.thin-term strong,
+.wave3-copy > p:last-child,
+.wave3-card summary,
+.wave3-card pre,
+.wave3-card > button,
+.coverage-method summary,
+.coverage-method-body p,
+.coverage-method-note,
+.delta-observations p,
+.delta-metric p,
+.gap-compression-head strong,
+.gap-compression-grid article > p,
+.impact-main strong,
+.impact-main p,
+.impact-nearest a,
+.impact-nearest p,
+.delta-method-note {
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.spatial-gap-grid,
+.wave3-grid,
+.gap-compression-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.wave3-card > button,
+.coverage-method summary {
+  min-height: var(--control-height);
+}
+
+.delta-metrics {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.delta-metric > small {
+  min-height: 0;
+}
+
+/* Brand and cluster pages */
+.brand-hero .breadcrumb,
+.brand-official small,
+.brand-official span,
+.brand-summary-strip small,
+.brand-range > div:first-child > p:last-child,
+.brand-range-row strong,
+.brand-range-row span,
+.brand-patterns-head > p,
+.brand-pattern-copy > span,
+.brand-pattern-copy > p,
+.brand-pattern-copy > div b,
+.brand-pattern-copy > div i,
+.brand-pattern-copy em,
+.idol-lens-head > div > p:last-child,
+.idol-lens-head > span,
+.idol-lens-grid small,
+.idol-lens-grid strong,
+.idol-lens-grid article > div:first-child > span,
+.idol-era-mini span,
+.cluster-member-count span,
+.cluster-common > small,
+.cluster-common > div span,
+.cluster-member-index,
+.cluster-member-body small,
+.cluster-member-body p,
+.cluster-member-card > a span,
+.cluster-member-card > a strong,
+.cluster-reading p {
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.brand-hero-grid > div > p:last-child,
+.cluster-variations-head > div:first-child > p:last-child,
+.cluster-common > p {
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.brand-pattern-copy > p,
+.brand-pattern-copy em,
+.cluster-member-body p,
+.cluster-member-card > a strong,
+.cluster-reading p {
+  font-size: 11px;
+}
+
+.brand-pattern-copy > div b,
+.brand-pattern-copy > div i,
+.cluster-common > div span {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  padding-inline: 9px;
+}
+
+/* Pattern detail and discovery */
+.detail-page,
+.detail-main,
+.detail-block,
+.prompt-block,
+.prompt-block pre {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.prompt-block pre,
+.compare-brief pre,
+.collision-brief pre,
+.wave3-card pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.prompt-block pre {
+  overflow-x: auto;
+  font-size: 15px;
+}
+
+.pattern-utility-bar button,
+.memory-tabs button,
+.memory-compare-action,
+.prompt-head button {
+  min-height: var(--control-height);
+  font-size: 12px;
+}
+
+.source-link,
+.reference-source-card strong,
+.reference-source-card span,
+.context-neighbors-head p:last-child,
+.context-neighbor-copy span,
+.context-neighbor-copy p,
+.provenance-grid strong,
+.provenance-block p,
+.memory-items strong,
+.memory-items span,
+.next-references-heading > a,
+.next-reference-head strong,
+.next-reference-copy > p:not(.next-reference-brand),
+.next-reference-actions a,
+.next-references-note {
+  font-size: 12px !important;
+  line-height: 1.55;
+}
+
+.reference-source-card small,
+.context-neighbor-copy small,
+.context-neighbor-diffs b,
+.provenance-grid small,
+.memory-tabs small,
+.memory-items small,
+.next-reference-head > span,
+.next-reference-head small,
+.next-reference-brand,
+.next-reference-evidence span {
+  font-size: 10px !important;
+  line-height: 1.35;
+}
+
+.reference-source-card {
+  min-height: 72px;
+}
+
+.detail-tags a,
+.detail-tags span,
+.related-grid p,
+.related-grid strong,
+.principle-list li span,
+.copy-status {
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.detail-tags a,
+.detail-tags span {
+  min-height: 30px;
+  display: inline-flex;
+  align-items: center;
+  padding-inline: 10px;
+}
+
+.next-reference-actions a {
+  min-height: var(--control-height);
+  display: grid;
+  place-items: center;
+}
+
+/* Design Space detail modules */
+.space-radar-labels text,
+.space-scale-labels,
+.space-meta small,
+.space-mini-row,
+.space-mini-row b,
+.diversity-score > span,
+.diversity-score small,
+.diversity-metrics small,
+.diversity-metrics span,
+.distance-reference-head small,
+.distance-diffs span,
+.opposite-fit > span,
+.opposite-fit small,
+.opposite-reference-copy small,
+.opposite-switch small,
+.opposite-flip-list article > span,
+.opposite-flip-list small,
+.opposite-axis-header,
+.opposite-axis-row {
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.space-legend,
+.space-axis-head span,
+.space-meta strong,
+.distance-reference-head strong,
+.distance-reference-head span,
+.opposite-reference-copy span,
+.opposite-reference-copy p,
+.opposite-flip-list p,
+.opposite-note,
+.space-method-note,
+.diversity-note {
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.space-summary {
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+@media (max-width: 1000px) {
+  .curated-pairs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .site-header nav a:first-child {
+    display: inline-flex;
+  }
+
+  .site-header nav a {
+    min-height: var(--control-height);
+    align-items: center;
+    font-size: 12px !important;
+  }
+
+  .composer-copy h2 {
+    max-width: 13ch;
+  }
+
+  .explore-hub-head > div > p:last-child,
+  .composer-copy > p:last-child {
+    font-size: 13px;
+  }
+
+  .explore-tool-copy span {
+    font-size: 11px;
+  }
+
+  .curated-pairs {
+    display: flex;
+  }
+
+  .coverage-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .coverage-stats article:nth-child(3n) {
+    border-right: 1px solid var(--line);
+  }
+
+  .coverage-stats article:nth-child(even) {
+    border-right: 0;
+  }
+
+  .coverage-stats article:nth-last-child(-n + 3) {
+    border-bottom: 1px solid var(--line);
+  }
+
+  .coverage-stats article:nth-last-child(-n + 2) {
+    border-bottom: 0;
+  }
+
+  .spatial-gap-grid,
+  .wave3-grid,
+  .gap-compression-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-pattern-card {
+    min-height: 230px;
+    height: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1,
+  .vocab-hero h1,
+  .map-hero h1,
+  .compare-hero h1,
+  .coverage-hero h1 {
+    font-size: clamp(38px, 11vw, 46px) !important;
+    line-height: 1;
+  }
+
+  .reference-source-stack {
+    grid-template-columns: 1fr;
+  }
+
+  .delta-metrics {
+    grid-template-columns: 1fr;
+  }
+}
