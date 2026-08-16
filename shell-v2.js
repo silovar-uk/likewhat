@@ -5,33 +5,66 @@
 
   header.dataset.shellV2 = 'ready';
   body.classList.add('lw-shell-ready');
-  if (/\/(?:index\.html)?$/.test(location.pathname) || location.pathname.endsWith('/likewhat/')) {
-    body.classList.add('lw-home');
-  }
+
+  const currentPath = location.pathname.split('/').pop() || 'index.html';
+  const isHome = /^(?:index\.html)?$/.test(currentPath) || location.pathname.endsWith('/likewhat/');
+  if (isHome) body.classList.add('lw-home');
 
   const brand = header.querySelector('.brandmark');
   const nav = header.querySelector('nav');
   if (!brand || !nav) return;
 
-  const currentPath = location.pathname.split('/').pop() || 'index.html';
-  if (body.classList.contains('lw-home') || /^(brand|pattern)\.html$/.test(currentPath)) {
-    nav.querySelector('a')?.setAttribute('aria-current', 'page');
-  }
+  // The navigation is owned by the shared shell, not by individual pages.
+  // This intentionally replaces any stale per-page markup so every view stays in sync.
+  const activeKey = currentPath === 'map.html'
+    ? 'map'
+    : currentPath === 'vocabulary.html'
+      ? 'vocabulary'
+      : currentPath === 'compare.html'
+        ? 'compare'
+        : currentPath === 'coverage.html'
+          ? 'coverage'
+          : 'library';
+
+  const navItems = [
+    { key: 'library', label: 'ライブラリ', href: './#patterns' },
+    { key: 'map', label: 'デザインマップ', href: 'map.html' },
+    { key: 'vocabulary', label: 'デザイン語彙', href: 'vocabulary.html' },
+    { key: 'compare', label: '比較', href: 'compare.html' },
+    { key: 'coverage', label: '分析', href: 'coverage.html' }
+  ];
+
+  nav.setAttribute('aria-label', 'グローバルナビゲーション');
+  nav.innerHTML = [
+    ...navItems.map(item => `<a href="${item.href}" data-lw-nav="${item.key}"${item.key === activeKey ? ' aria-current="page"' : ''}>${item.label}</a>`),
+    '<button type="button" class="lw-nav-random" data-lw-nav="random" aria-label="全ライブラリからランダムに3件引く">Random 3</button>',
+    '<a href="https://github.com/silovar-uk/likewhat" target="_blank" rel="noreferrer" data-lw-nav="github">GitHub ↗</a>'
+  ].join('');
 
   const kicker = document.createElement('span');
   kicker.className = 'lw-brand-kicker';
   kicker.textContent = 'Design reference library';
   brand.appendChild(kicker);
 
-  [...nav.querySelectorAll('a')].forEach((link, index) => {
-    if (!link.querySelector('.lw-nav-index')) {
-      const number = document.createElement('span');
-      number.className = 'lw-nav-index';
-      number.setAttribute('aria-hidden', 'true');
-      number.textContent = String(index + 1).padStart(2, '0');
-      link.prepend(number);
+  [...nav.querySelectorAll('a, button')].forEach((item, index) => {
+    const number = document.createElement('span');
+    number.className = 'lw-nav-index';
+    number.setAttribute('aria-hidden', 'true');
+    number.textContent = String(index + 1).padStart(2, '0');
+    item.prepend(number);
+    if (item instanceof HTMLAnchorElement && item.target === '_blank') item.classList.add('lw-external');
+  });
+
+  const randomNav = nav.querySelector('.lw-nav-random');
+  randomNav?.addEventListener('click', () => {
+    if (!isHome) {
+      location.href = './?random3=1#randomizer';
+      return;
     }
-    if (link.target === '_blank') link.classList.add('lw-external');
+    document.querySelector('[data-random-mode="random"]')?.click();
+    const draw = document.getElementById('randomDraw');
+    if (draw) draw.click();
+    else location.href = './?random3=1#randomizer';
   });
 
   const railFooter = document.createElement('div');
@@ -57,13 +90,13 @@
     body.classList.toggle('lw-nav-open', open);
     menuButton.setAttribute('aria-expanded', String(open));
     menuButton.setAttribute('aria-label', open ? 'メニューを閉じる' : 'メニューを開く');
-    if (open) nav.querySelector('a')?.focus();
+    if (open) nav.querySelector('a, button')?.focus();
   }
 
   menuButton.addEventListener('click', () => setNav(!body.classList.contains('lw-nav-open')));
   navScrim.addEventListener('click', () => setNav(false));
   nav.addEventListener('click', event => {
-    if (event.target.closest('a')) setNav(false);
+    if (event.target.closest('a, button')) setNav(false);
   });
 
   let closeLibraryFilters = null;
