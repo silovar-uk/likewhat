@@ -14,7 +14,7 @@
     const details=await Promise.all(manifest.detailFiles.map(file=>json(`generated/patterns/${encodeURIComponent(file)}`)));
     window.LIKEWHAT_PATTERNS=details;window.LIKEWHAT_BRAND_DATA={catalog,manifest,details};
     await script('taxonomy.js');await script('design-space.js');await script('entry-kinds.js');await script('vocabulary.js');await script('ui.js');
-    for(const src of ['ui-extra.js','ui-wave1.js','ui-wave2.js','ui-wave3.js','ui-wave4.js','ui-wave5.js','ui-wave6.js','ui-eyewear.js'])await script(src);
+    for(const src of ['ui-extra.js','ui-wave1.js','ui-wave2.js','ui-wave3.js','ui-wave4.js','ui-wave5.js','ui-wave6.js','ui-tv.js','ui-eyewear.js'])await script(src);
     await script('ui-idols.js',{'data-load-expansion':'false'});await script('ui-idols2.js');await script('ui-preview-contract.js');await script('brand.js');await script('brand-idol.js');
     window.LikeWhatBrandLoadMetrics={brand,type:manifest.type,referenceCount:catalog.referenceCount,fullDetailRecords:details.length,skippedFullDetailRecords:Math.max(0,catalog.referenceCount-details.length),durationMs:Math.round(performance.now()-started),runtimeCatalog:'generated/catalog-core.json'};
     window.dispatchEvent(new CustomEvent('likewhat:brand-ready',{detail:window.LikeWhatBrandLoadMetrics}));
