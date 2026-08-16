@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "libraryName": "Like What?",
   "currentWave": 6,
-  "entryKinds": ["brand", "artist", "institution", "scene", "industry-cluster"],
+  "entryKinds": ["brand", "artist", "institution", "program", "scene", "industry-cluster"],
   "sceneOrder": ["Onboarding", "Loading", "Empty", "Success", "Error", "404"],
   "sceneLifecycle": {
     "Before": ["Onboarding"],
