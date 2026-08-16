@@ -69,7 +69,7 @@
     return {meta,catalog};
   }
   async function loadCore(){await script('design-space.js');await script('entry-kinds.js');await script('library-groups.js');await script('vocabulary.js');}
-  async function loadRenderers(){await script('ui.js');for(const src of ['ui-extra.js','ui-wave1.js','ui-wave2.js','ui-wave3.js','ui-wave4.js','ui-wave5.js','ui-wave6.js','ui-eyewear.js'])await script(src);await script('ui-idols.js',{'data-load-expansion':'false'});await script('ui-idols2.js');await script('ui-preview-contract.js');await script('top-performance.js');}
+  async function loadRenderers(){await script('ui.js');for(const src of ['ui-extra.js','ui-wave1.js','ui-wave2.js','ui-wave3.js','ui-wave4.js','ui-wave5.js','ui-wave6.js','ui-tv.js','ui-eyewear.js'])await script(src);await script('ui-idols.js',{'data-load-expansion':'false'});await script('ui-idols2.js');await script('ui-preview-contract.js');await script('top-performance.js');}
   async function loadControllers(){await script('app.js');for(const src of ['brand-links.js','group-official-links.js','group-sort.js','library-memory.js'])await script(src);}
 
   function initialBudgetSnapshot(){
