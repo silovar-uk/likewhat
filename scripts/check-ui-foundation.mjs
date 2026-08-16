@@ -47,8 +47,10 @@ assert(polish.includes(':focus-visible'), 'visible keyboard focus guard is missi
 assert(polish.includes('--control-height: 40px'), 'shared interactive target floor is missing');
 assert(index.includes('<wbr><span>×「どの場面？」</span>'), 'Composer heading lacks a semantic wrap opportunity');
 assert(map.includes('class="map-point-hit"'), 'Design Map points lack their enlarged invisible hit area');
-assert(topBootstrap.includes('document.head.appendChild(shell)'), 'deferred TOP styles can override the responsive shell');
-assert(topBootstrap.includes('document.head.appendChild(polish)'), 'deferred TOP styles can override the final polish layer');
+assert(topBootstrap.includes('beforeNode.parentNode.insertBefore(el,beforeNode)'), 'deferred TOP styles must be inserted before the responsive shell');
+assert(topBootstrap.includes('map(href=>stylesheet(href,shell))'), 'deferred TOP styles are not anchored before the responsive shell');
+assert(!topBootstrap.includes('document.head.appendChild(shell)'), 'TOP bootstrap must not reorder the responsive shell during scroll-triggered loading');
+assert(!topBootstrap.includes('document.head.appendChild(polish)'), 'TOP bootstrap must not reorder the final polish layer during scroll-triggered loading');
 assert(index.includes('top-bootstrap.js?v='), 'TOP bootstrap must be cache-busted with UI releases');
 
 if(failures.length){
