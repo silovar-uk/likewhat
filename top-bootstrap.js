@@ -9,6 +9,8 @@
   const groups=document.getElementById('patternGroups');
   const railNav=document.querySelector('.site-header nav');
   const catalogMeta=window.LIKEWHAT_CATALOG||{};
+  const bootstrapVersion=(()=>{try{return new URL(document.currentScript?.src||location.href).searchParams.get('v')||'';}catch{return '';}})();
+  const versioned=url=>bootstrapVersion&&!/[?]/.test(url)?`${url}?v=${encodeURIComponent(bootstrapVersion)}`:url;
   let loading=null;
   let pendingAction=null;
 
@@ -51,9 +53,9 @@
     });
   }
 
-  function script(src,attrs={}){return new Promise((resolve,reject)=>{const el=document.createElement('script');el.src=src;Object.entries(attrs).forEach(([key,value])=>el.setAttribute(key,value));el.onload=()=>resolve(el);el.onerror=()=>reject(new Error(`Failed to load ${src}`));document.body.appendChild(el);});}
-  async function json(url){const response=await fetch(url,{cache:'default'});if(!response.ok)throw new Error(`${response.status} ${url}`);return response.json();}
-  function stylesheet(href,beforeNode=null){if(document.querySelector(`link[href="${href}"]`))return Promise.resolve();return new Promise((resolve,reject)=>{const el=document.createElement('link');el.rel='stylesheet';el.href=href;el.onload=()=>resolve(el);el.onerror=()=>reject(new Error(`Failed to load ${href}`));if(beforeNode?.parentNode)beforeNode.parentNode.insertBefore(el,beforeNode);else document.head.appendChild(el);});}
+  function script(src,attrs={}){return new Promise((resolve,reject)=>{const el=document.createElement('script');el.src=versioned(src);Object.entries(attrs).forEach(([key,value])=>el.setAttribute(key,value));el.onload=()=>resolve(el);el.onerror=()=>reject(new Error(`Failed to load ${src}`));document.body.appendChild(el);});}
+  async function json(url){const response=await fetch(versioned(url),{cache:'default'});if(!response.ok)throw new Error(`${response.status} ${url}`);return response.json();}
+  function stylesheet(href,beforeNode=null){const target=versioned(href);if(document.querySelector(`link[href="${target}"]`)||document.querySelector(`link[href="${href}"]`))return Promise.resolve();return new Promise((resolve,reject)=>{const el=document.createElement('link');el.rel='stylesheet';el.href=target;el.onload=()=>resolve(el);el.onerror=()=>reject(new Error(`Failed to load ${href}`));if(beforeNode?.parentNode)beforeNode.parentNode.insertBefore(el,beforeNode);else document.head.appendChild(el);});}
   async function loadStyles(){const shell=document.querySelector('link[href^="styles-shell-v2.css"]');await Promise.all(['styles-wave1.css','styles-wave2.css','styles-wave3.css','styles-wave4.css','styles-wave5.css','styles-wave6.css','styles-eyewear.css','styles-idols.css','styles-idols2.css','styles-preview-contract.css','styles-group-preview.css','styles-library-grid.css','styles-brand-links.css','styles-group-official.css','styles-discovery-v2.css'].map(href=>stylesheet(href,shell)));if(!document.querySelector('link[href^="styles-ui-polish.css"]'))await stylesheet('styles-ui-polish.css?v=20260815-ui3');}
 
   async function loadData(){
