@@ -16,6 +16,18 @@
   const syncRecent=()=>{const item=itemFrom(pattern);const list=(()=>{try{const v=JSON.parse(localStorage.getItem(WB.recent)||'[]');return Array.isArray(v)?v:[];}catch{return[];}})().filter(x=>x.id!==pattern.id);write(WB.recent,[item,...list].slice(0,8));};
   const syncSaved=active=>{const projects=readObject(WB.projects);let list=Array.isArray(projects['今回の参考'])?projects['今回の参考']:[];list=list.filter(x=>x.id!==pattern.id);if(active)list.unshift(itemFrom(pattern));projects['今回の参考']=list.slice(0,24);write(WB.projects,projects);let names=read(WB.projectNames);if(!names.includes('今回の参考'))names=['今回の参考',...names];write(WB.projectNames,names);};
   const syncCompare=ids=>write(WB.compare,ids.slice(-2).map(itemForId));
+  const migrateLegacy=()=>{
+    const projects=readObject(WB.projects);
+    let saved=Array.isArray(projects['今回の参考'])?projects['今回の参考']:[];
+    read(KEY.saved).forEach(id=>{if(!saved.some(item=>item.id===id))saved.push(itemForId(id));});
+    projects['今回の参考']=saved.slice(0,24);write(WB.projects,projects);
+    let names=read(WB.projectNames);if(!names.includes('今回の参考'))names=['今回の参考',...names];write(WB.projectNames,names);
+    let recentItems=(()=>{try{const v=JSON.parse(localStorage.getItem(WB.recent)||'[]');return Array.isArray(v)?v:[];}catch{return[];}})();
+    read(KEY.recent).forEach(id=>{if(!recentItems.some(item=>item.id===id))recentItems.push(itemForId(id));});
+    write(WB.recent,recentItems.slice(0,8));
+    if(!(()=>{try{const v=JSON.parse(localStorage.getItem(WB.compare)||'[]');return Array.isArray(v)&&v.length;}catch{return false;}})())syncCompare(read(KEY.compare));
+  };
+  migrateLegacy();
   const shareDir=String(pattern.id).replace(/[^a-zA-Z0-9._-]/g,'_');
   const shareUrl=new URL(`generated/share/${encodeURIComponent(shareDir)}/`,new URL('./',location.href)).href;
 
