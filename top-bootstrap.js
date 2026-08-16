@@ -7,6 +7,7 @@
   const examples=document.querySelector('.query-examples');
   const resultCount=document.getElementById('resultCount');
   const groups=document.getElementById('patternGroups');
+  const railNav=document.querySelector('.site-header nav');
   const catalogMeta=window.LIKEWHAT_CATALOG||{};
   let loading=null;
   let pendingAction=null;
@@ -14,10 +15,46 @@
   const budgets=catalogMeta.performanceBudget||{initialPatternDetailData:0,initialPreviewRendering:0,initialDiversityCalculations:0,initialDomNodes:1000};
   window.LikeWhatPerformanceBudget=budgets;
 
+  function setupRandomRailButton(){
+    if(!railNav||railNav.querySelector('.lw-nav-random')||!randomDraw)return;
+    const button=document.createElement('button');
+    button.type='button';
+    button.className='lw-nav-random';
+    button.setAttribute('aria-label','全ライブラリからランダムに3件引く');
+    button.innerHTML='<span class="lw-nav-index" aria-hidden="true"></span><span>Random 3</span>';
+    const external=[...railNav.querySelectorAll('a')].find(link=>link.target==='_blank'||link.classList.contains('lw-external'));
+    railNav.insertBefore(button,external||null);
+    [...railNav.querySelectorAll('a, .lw-nav-random')].forEach((item,index)=>{
+      let number=item.querySelector('.lw-nav-index');
+      if(!number){number=document.createElement('span');number.className='lw-nav-index';number.setAttribute('aria-hidden','true');item.prepend(number);}
+      number.textContent=String(index+1).padStart(2,'0');
+    });
+    if(!document.getElementById('lw-random-rail-style')){
+      const style=document.createElement('style');
+      style.id='lw-random-rail-style';
+      style.textContent=`
+        .site-header nav .lw-nav-random{appearance:none;font:inherit;text-align:left;cursor:pointer}
+        @media (min-width:1024px){
+          .site-header.site-header nav .lw-nav-random{display:flex;align-items:center;min-height:46px;padding:10px 12px;border:1px solid rgb(215 255 73 / 24%);border-radius:10px;background:rgb(215 255 73 / 7%);color:#e8ff91;font-size:13px;font-weight:650;transition:background .16s ease,color .16s ease,transform .16s ease}
+          .site-header.site-header nav .lw-nav-random:hover{background:rgb(215 255 73 / 14%);color:#f3ffbd;transform:translateX(2px)}
+          .site-header.site-header nav .lw-nav-random .lw-nav-index{color:#a7b85d}
+        }
+        @media (max-width:1023px){
+          .site-header.site-header nav .lw-nav-random{display:flex;width:100%;align-items:center;min-height:48px;padding:11px 14px;border:1px solid rgb(215 255 73 / 24%);border-radius:10px;background:rgb(215 255 73 / 8%);color:inherit;font-size:13px;font-weight:700}
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    button.addEventListener('click',()=>{
+      if(window.LIKEWHAT_LIBRARY_READY)document.querySelector('[data-random-mode="random"]')?.click();
+      randomDraw.click();
+    });
+  }
+
   function script(src,attrs={}){return new Promise((resolve,reject)=>{const el=document.createElement('script');el.src=src;Object.entries(attrs).forEach(([key,value])=>el.setAttribute(key,value));el.onload=()=>resolve(el);el.onerror=()=>reject(new Error(`Failed to load ${src}`));document.body.appendChild(el);});}
   async function json(url){const response=await fetch(url,{cache:'default'});if(!response.ok)throw new Error(`${response.status} ${url}`);return response.json();}
-  function stylesheet(href){if(document.querySelector(`link[href="${href}"]`))return Promise.resolve();return new Promise((resolve,reject)=>{const el=document.createElement('link');el.rel='stylesheet';el.href=href;el.onload=()=>resolve(el);el.onerror=()=>reject(new Error(`Failed to load ${href}`));document.head.appendChild(el);});}
-  async function loadStyles(){await Promise.all(['styles-wave1.css','styles-wave2.css','styles-wave3.css','styles-wave4.css','styles-wave5.css','styles-wave6.css','styles-eyewear.css','styles-idols.css','styles-idols2.css','styles-preview-contract.css','styles-group-preview.css','styles-library-grid.css','styles-brand-links.css','styles-group-official.css','styles-discovery-v2.css'].map(stylesheet));const shell=document.querySelector('link[href^="styles-shell-v2.css"]');if(shell)document.head.appendChild(shell);const polish=document.querySelector('link[href^="styles-ui-polish.css"]');if(polish)document.head.appendChild(polish);else await stylesheet('styles-ui-polish.css?v=20260815-ui3');}
+  function stylesheet(href,beforeNode=null){if(document.querySelector(`link[href="${href}"]`))return Promise.resolve();return new Promise((resolve,reject)=>{const el=document.createElement('link');el.rel='stylesheet';el.href=href;el.onload=()=>resolve(el);el.onerror=()=>reject(new Error(`Failed to load ${href}`));if(beforeNode?.parentNode)beforeNode.parentNode.insertBefore(el,beforeNode);else document.head.appendChild(el);});}
+  async function loadStyles(){const shell=document.querySelector('link[href^="styles-shell-v2.css"]');await Promise.all(['styles-wave1.css','styles-wave2.css','styles-wave3.css','styles-wave4.css','styles-wave5.css','styles-wave6.css','styles-eyewear.css','styles-idols.css','styles-idols2.css','styles-preview-contract.css','styles-group-preview.css','styles-library-grid.css','styles-brand-links.css','styles-group-official.css','styles-discovery-v2.css'].map(href=>stylesheet(href,shell)));if(!document.querySelector('link[href^="styles-ui-polish.css"]'))await stylesheet('styles-ui-polish.css?v=20260815-ui3');}
 
   async function loadData(){
     const [meta,catalog]=await Promise.all([json('generated/meta.json'),json('generated/catalog-core.json')]);
@@ -47,6 +84,7 @@
   }
   function deferAction(reason,action){if(window.LIKEWHAT_LIBRARY_READY){action();return;}pendingAction=action;loadLibrary(reason);}
 
+  setupRandomRailButton();
   initialBudgetSnapshot();requestAnimationFrame(initialBudgetSnapshot);
   const params=new URLSearchParams(location.search);if([...params.keys()].some(key=>['q','kind','brand','scene','domain','medium','part','sort'].includes(key)))loadLibrary('query-param');if(location.hash==='#patterns')loadLibrary('anchor');
   const observeTargets=[composer,browser].filter(Boolean);
