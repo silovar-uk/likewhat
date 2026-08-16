@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="実在するブランド・サービス・カルチャーのデザインを、見る・言葉にする・比べる・使うの順で学び、実装へ持ち帰るデザイン参照ライブラリ。" />
-  <title>Like What? — デザインを言葉にして学ぶ</title>
+  <meta name="description" content="実在するブランド・サービス・カルチャーのデザインを、案件の課題から探し、比較し、参考として残し、設計判断へ変えるデザイン参照ワークベンチ。" />
+  <title>Like What? — デザイン判断を速くする参照ワークベンチ</title>
   <link rel="icon" type="image/png" sizes="180x180" href="/likewhat/apple-touch-icon.png?v=20260815">
   <link rel="apple-touch-icon" sizes="180x180" href="/likewhat/apple-touch-icon.png?v=20260815">
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="styles-shell-v2.css?v=20260816" />
   <link rel="stylesheet" href="styles-ui-polish.css?v=20260815-ui3" />
   <link rel="stylesheet" href="styles-learning.css?v=20260816-learn1" />
+  <link rel="stylesheet" href="styles-workbench.css?v=20260816-wb1" />
 </head>
 <body>
   <a class="skip-link" href="#main-content">本文へ移動</a>
@@ -29,9 +30,9 @@
 
   <main id="main-content">
     <section class="hero">
-      <p class="eyebrow">デザインを「見る」で終わらせない</p>
-      <h1>「こんな感じ」を、<br><em>説明できる力に変える。</em></h1>
-      <p class="hero-copy">Like What? は、見た目を集めるギャラリーではなく、デザインを観察し、言葉にし、比べ、実務へ持ち帰るための学習ライブラリ。ブランド名を覚えるのではなく、「なぜそう見えるのか」「どこで使えるのか」を考えるための道具です。</p>
+      <p class="eyebrow">DESIGN DECISION WORKBENCH</p>
+      <h1>「何を参考にするか」を、<br><em>早く決める。</em></h1>
+      <p class="hero-copy">Like What? は、デザインを眺めて終わるギャラリーではありません。いま抱えている課題から事例を探し、違いを見て、使えそうなものを案件ごとに残し、自分の設計方針へ変えるための参照ワークベンチです。</p>
 
       <div class="search-shell" role="search">
         <span aria-hidden="true">⌕</span>
@@ -43,39 +44,54 @@
       </div>
     </section>
 
-    <section class="learning-path" aria-labelledby="learningPathTitle">
-      <div class="learning-path-head">
-        <div><p class="eyebrow">LEARNING PATH / 学び方</p><h2 id="learningPathTitle">見る → 言う → 比べる → 使う。</h2></div>
-        <p>全部の機能を覚える必要はありません。まず事例を見つけ、気になった違いに名前をつけ、比較して判断軸をつくり、最後に自分の実装へ変換する。この4段階を行き来するほど、参照が「知識」に変わります。</p>
+    <section class="decision-workbench" id="workbench" aria-labelledby="workbenchTitle">
+      <div class="wb-head">
+        <div><p class="eyebrow">START FROM THE PROBLEM</p><h2 id="workbenchTitle">いま、何を良くしたい？</h2></div>
+        <p>ブランド名が思い浮かばなくても大丈夫。まず案件側の悩みを選ぶと、課題に近い参照を出します。見つけたものは「参考」に残し、2件なら即比較、複数なら設計方針へまとめられます。</p>
       </div>
-      <ol class="learning-steps">
-        <li class="learning-step" data-tone="discover"><span>01</span><strong>見つける</strong><p>ブランド名や場面から事例を探し、まず「何が気になるか」を見つける。</p><a href="#patterns">ライブラリを見る</a></li>
-        <li class="learning-step" data-tone="name"><span>02</span><strong>言葉にする</strong><p>WorldbuildingやWayfindingなど、感覚に名前を与えて再利用できる知識にする。</p><a href="vocabulary.html">語彙で確かめる</a></li>
-        <li class="learning-step" data-tone="compare"><span>03</span><strong>比べる</strong><p>似ているもの・遠いものを並べ、「何を優先すると違いが生まれるか」を読む。</p><a href="compare.html">違いを比べる</a></li>
-        <li class="learning-step" data-tone="apply"><span>04</span><strong>使う</strong><p>理解した特徴を、色の模倣ではなく情報階層や操作の条件として実装へ持ち帰る。</p><a href="#composerTitle">Briefを作る</a></li>
-      </ol>
-    </section>
 
-    <section class="explore-hub" aria-labelledby="exploreHubTitle">
-      <div class="explore-hub-head"><div><p class="eyebrow">3つの見方 / EXPLORE</p><h2 id="exploreHubTitle">迷ったら、知りたいことから選ぶ。</h2><p>機能名を覚えるより、「全体像を見たい」「言葉を増やしたい」「違いを判断したい」から入口を選ぶ。</p></div></div>
-      <div class="explore-tool-grid">
-        <a class="explore-tool" href="map.html"><div class="explore-visual explore-map-visual" aria-hidden="true"><i></i><i></i><i></i><span class="x">ORDER →</span><span class="y">↑ DENSITY</span></div><div class="explore-tool-copy"><small>01 / DESIGN SPACE</small><strong>全体像をつかむ</strong><span id="heroReferenceCount">参照を6軸の距離で見る</span></div><em aria-hidden="true">↗</em></a>
-        <a class="explore-tool" href="vocabulary.html"><div class="explore-visual explore-vocab-visual" aria-hidden="true"><b>Wayfinding</b><b>Worldbuilding</b><b>Identity</b></div><div class="explore-tool-copy"><small>02 / VOCABULARY</small><strong>言葉を増やす</strong><span>感覚 → 概念 → 別の実例へ</span></div><em aria-hidden="true">↗</em></a>
-        <a class="explore-tool" href="compare.html"><div class="explore-visual explore-contrast-visual" aria-hidden="true"><div></div><span>Δ</span><div></div></div><div class="explore-tool-copy"><small>03 / CONTRAST</small><strong>判断軸をつくる</strong><span>似た事例の「違う理由」を読む</span></div><em aria-hidden="true">↗</em></a>
+      <div id="workbenchGoals" class="wb-goals" aria-label="改善したいことから探す"></div>
+
+      <div class="wb-layout">
+        <section id="goalResult" class="wb-panel wb-goal-result" aria-live="polite">
+          <div class="wb-goal-empty"><div><strong>課題をひとつ選ぶ。</strong><p>「情報を整理したい」「スマホ操作を改善したい」など、作っているもの側の困りごとから参照を引きます。</p></div></div>
+        </section>
+
+        <section class="wb-panel wb-recent" aria-labelledby="recentTitle">
+          <div class="wb-panel-head"><div><small>RESUME</small><h3 id="recentTitle">前回の続き</h3></div><button id="clearRecent" type="button">履歴を消す</button></div>
+          <div id="recentRefs" class="wb-list"></div>
+        </section>
+
+        <section class="wb-panel wb-board" aria-labelledby="boardTitle">
+          <div class="wb-panel-head"><div><small>REFERENCE BOARD</small><h3 id="boardTitle">案件ごとの参考</h3></div></div>
+          <div class="wb-project-tools"><select id="projectSelect" aria-label="参考を保存するプロジェクト"></select><button id="newProjectToggle" type="button">＋ 新規</button></div>
+          <div id="newProjectForm" class="wb-new-project" hidden><input id="newProjectName" type="text" maxlength="40" placeholder="プロジェクト名" aria-label="新しいプロジェクト名"><button id="addProject" type="button">追加</button></div>
+          <div id="savedRefs" class="wb-list"></div>
+          <div class="wb-board-actions"><button id="buildDecision" type="button" disabled>2件以上で設計方針を作る</button></div>
+        </section>
       </div>
+
+      <section id="decisionOutput" class="wb-decision-output" hidden aria-labelledby="decisionOutputTitle">
+        <div class="wb-decision-head"><div><small>DECISION BRIEF</small><strong id="decisionOutputTitle">参照を、自分の設計条件へ変える</strong></div><button id="copyDecision" type="button">設計方針をコピー</button></div>
+        <pre id="decisionText"></pre>
+      </section>
     </section>
 
-    <section class="composer" aria-labelledby="composerTitle">
-      <div class="composer-copy"><p class="eyebrow">実務に持ち帰る / COMPOSE</p><h2 id="composerTitle"><span>「何っぽく」</span><wbr><span>×「どの場面？」</span></h2><p>2つの参照を色で平均するのではなく、情報階層・距離感・操作・感情強度を組み合わせ、実装できる条件へ変換する。</p></div>
-      <div class="composer-controls"><label>何っぽく<select id="composerIdentity"></select></label><span>×</span><label>どの場面<select id="composerScene"></select></label><button id="composerBuild" type="button">実装Briefを作る</button></div>
-      <div id="composerResult" class="composer-result" aria-live="polite"></div>
-    </section>
-
-    <section class="randomizer" aria-labelledby="randomTitle">
-      <div class="randomizer-copy"><p class="eyebrow">発想を広げる / SERENDIPITY</p><h2 id="randomTitle">意図的に、文脈を外す。</h2><p>いつもの好みだけを見続けないための寄り道。偶然、距離、異質さの3通りで参照を引き、知らない判断軸に出会う。</p><div id="randomModes" class="random-modes" aria-label="ランダム抽出モード"><button type="button" class="active" data-random-mode="random" aria-pressed="true"><strong>ランダム</strong><span>偶然に任せる</span></button><button type="button" data-random-mode="far" aria-pressed="false"><strong>遠いもの同士</strong><span>設計空間で離して選ぶ</span></button><button type="button" data-random-mode="weird" aria-pressed="false"><strong>異質な組合せ</strong><span>違う思想をぶつける</span></button></div></div>
-      <button id="randomDraw" class="random-draw-button" type="button"><span>3件を引く</span><small>知らない方向へ寄り道する</small></button>
-      <div id="randomResults" class="random-results" aria-live="polite"></div>
-    </section>
+    <details class="learning-path learning-path-compact" id="learningPathDetails">
+      <summary>このサイトの使い方 <span>見る → 言う → 比べる → 使う</span></summary>
+      <div class="learning-path-body">
+        <div class="learning-path-head">
+          <div><p class="eyebrow">LEARNING PATH / 学び方</p><h2>参照を、判断できる知識にする。</h2></div>
+          <p>初回だけ少し丁寧に。事例を見つけ、気になった違いに名前をつけ、比較して判断軸をつくり、最後に自分の実装へ変換する。再訪時は、この説明を畳んで作業から始められます。</p>
+        </div>
+        <ol class="learning-steps">
+          <li class="learning-step" data-tone="discover"><span>01</span><strong>見つける</strong><p>ブランド名や場面から事例を探し、「何が気になるか」を見つける。</p><a href="#patterns">ライブラリを見る</a></li>
+          <li class="learning-step" data-tone="name"><span>02</span><strong>言葉にする</strong><p>WorldbuildingやWayfindingなど、感覚に名前を与えて再利用できる知識にする。</p><a href="vocabulary.html">語彙で確かめる</a></li>
+          <li class="learning-step" data-tone="compare"><span>03</span><strong>比べる</strong><p>似ているもの・遠いものを並べ、「何を優先すると違いが生まれるか」を読む。</p><a href="compare.html">違いを比べる</a></li>
+          <li class="learning-step" data-tone="apply"><span>04</span><strong>使う</strong><p>理解した特徴を、色の模倣ではなく情報階層や操作の条件として持ち帰る。</p><a href="#workbench">参考を束ねる</a></li>
+        </ol>
+      </div>
+    </details>
 
     <section class="browser" id="patterns">
       <div class="browser-head"><div><p class="eyebrow">参照ライブラリ / LIBRARY</p><h2>デザインを、条件から探す。</h2></div><p id="resultCount" class="count" aria-live="polite">ライブラリは近づくと読み込みます。</p></div>
@@ -91,6 +107,27 @@
       <div id="patternGroups" class="pattern-groups"><div class="library-loading-note">この位置に近づくと参照データを読み込みます。</div></div>
       <div id="emptyState" class="empty-state" hidden><strong>近いパターンがまだない。</strong><p>条件を1つ外すか、検索語を短くしてみて。</p></div>
     </section>
+
+    <section class="composer" aria-labelledby="composerTitle">
+      <div class="composer-copy"><p class="eyebrow">実務に持ち帰る / COMPOSE</p><h2 id="composerTitle"><span>「何っぽく」</span><wbr><span>×「どの場面？」</span></h2><p>単体の参照から考えたいときはこちら。2つの参照を色で平均するのではなく、情報階層・距離感・操作・感情強度を組み合わせ、実装できる条件へ変換する。</p></div>
+      <div class="composer-controls"><label>何っぽく<select id="composerIdentity"></select></label><span>×</span><label>どの場面<select id="composerScene"></select></label><button id="composerBuild" type="button">実装Briefを作る</button></div>
+      <div id="composerResult" class="composer-result" aria-live="polite"></div>
+    </section>
+
+    <section class="randomizer" aria-labelledby="randomTitle">
+      <div class="randomizer-copy"><p class="eyebrow">発想を広げる / SERENDIPITY</p><h2 id="randomTitle">意図的に、文脈を外す。</h2><p>いつもの好みだけを見続けないための寄り道。偶然、距離、異質さの3通りで参照を引き、知らない判断軸に出会う。</p><div id="randomModes" class="random-modes" aria-label="ランダム抽出モード"><button type="button" class="active" data-random-mode="random" aria-pressed="true"><strong>ランダム</strong><span>偶然に任せる</span></button><button type="button" data-random-mode="far" aria-pressed="false"><strong>遠いもの同士</strong><span>設計空間で離して選ぶ</span></button><button type="button" data-random-mode="weird" aria-pressed="false"><strong>異質な組合せ</strong><span>違う思想をぶつける</span></button></div></div>
+      <button id="randomDraw" class="random-draw-button" type="button"><span>3件を引く</span><small>知らない方向へ寄り道する</small></button>
+      <div id="randomResults" class="random-results" aria-live="polite"></div>
+    </section>
+
+    <section class="explore-hub" aria-labelledby="exploreHubTitle">
+      <div class="explore-hub-head"><div><p class="eyebrow">深掘りしたくなったら / EXPLORE</p><h2 id="exploreHubTitle">調べる機能は、あとから使う。</h2><p>普段は課題→参照→判断で十分。全体像、語彙、差分をもっと深く見たくなったときだけ、分析ツールへ入る。</p></div></div>
+      <div class="explore-tool-grid">
+        <a class="explore-tool" href="map.html"><div class="explore-visual explore-map-visual" aria-hidden="true"><i></i><i></i><i></i><span class="x">ORDER →</span><span class="y">↑ DENSITY</span></div><div class="explore-tool-copy"><small>01 / DESIGN SPACE</small><strong>全体像をつかむ</strong><span id="heroReferenceCount">参照を6軸の距離で見る</span></div><em aria-hidden="true">↗</em></a>
+        <a class="explore-tool" href="vocabulary.html"><div class="explore-visual explore-vocab-visual" aria-hidden="true"><b>Wayfinding</b><b>Worldbuilding</b><b>Identity</b></div><div class="explore-tool-copy"><small>02 / VOCABULARY</small><strong>言葉を増やす</strong><span>感覚 → 概念 → 別の実例へ</span></div><em aria-hidden="true">↗</em></a>
+        <a class="explore-tool" href="compare.html"><div class="explore-visual explore-contrast-visual" aria-hidden="true"><div></div><span>Δ</span><div></div></div><div class="explore-tool-copy"><small>03 / CONTRAST</small><strong>判断軸をつくる</strong><span>似た事例の「違う理由」を読む</span></div><em aria-hidden="true">↗</em></a>
+      </div>
+    </section>
   </main>
 
   <footer><p>Like What? — 見た目ではなく、設計の理由を持ち帰る。</p><p>参照元は、確認できる範囲で公式ページへ接続しています。</p></footer>
@@ -99,5 +136,6 @@
   <script src="shell-v2.js?v=20260816"></script>
   <script src="top-bootstrap.js?v=20260815-ui3"></script>
   <script src="learning-ui.js?v=20260816-learn1"></script>
+  <script src="workbench.js?v=20260816-wb1"></script>
 </body>
 </html>
