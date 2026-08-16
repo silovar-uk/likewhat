@@ -1,7 +1,14 @@
 /*
  * Stable light navigation rail.
- * Keeps the desktop shell visually identical before and after deferred library loading.
+ * Shared by every public page so the shell is identical before/after page transitions.
  */
+.site-header nav .lw-nav-random {
+  appearance: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
 @media (min-width: 1024px) {
   body.lw-shell-ready .site-header.site-header {
     border-right-color: #d2cec5;
@@ -22,7 +29,8 @@
     color: #625f58;
   }
 
-  body.lw-shell-ready .site-header.site-header nav a {
+  body.lw-shell-ready .site-header.site-header nav a,
+  body.lw-shell-ready .site-header.site-header nav .lw-nav-random {
     color: inherit;
   }
 
@@ -31,14 +39,12 @@
     color: var(--ink, #171716);
   }
 
-  body.lw-shell-ready .site-header.site-header nav a[aria-current='page'],
-  body.lw-shell-ready.lw-home .site-header.site-header nav a:first-child {
+  body.lw-shell-ready .site-header.site-header nav a[aria-current='page'] {
     background: var(--ink, #171716);
     color: #fff;
   }
 
-  body.lw-shell-ready .site-header.site-header nav a[aria-current='page'] .lw-nav-index,
-  body.lw-shell-ready.lw-home .site-header.site-header nav a:first-child .lw-nav-index {
+  body.lw-shell-ready .site-header.site-header nav a[aria-current='page'] .lw-nav-index {
     color: #b9b6ae;
   }
 
@@ -60,17 +66,47 @@
   }
 
   body.lw-shell-ready .site-header.site-header nav .lw-nav-random {
-    border-color: #becf57;
+    display: flex;
+    align-items: center;
+    min-height: 46px;
+    padding: 10px 12px;
+    border: 1px solid #becf57;
+    border-radius: 10px;
     background: #e9f6a7;
     color: #252810;
+    font-size: 13px;
+    font-weight: 650;
+    transition: background .16s ease, color .16s ease, transform .16s ease;
   }
 
   body.lw-shell-ready .site-header.site-header nav .lw-nav-random:hover {
     background: #deed8e;
     color: #17190b;
+    transform: translateX(2px);
   }
 
   body.lw-shell-ready .site-header.site-header nav .lw-nav-random .lw-nav-index {
     color: #6d762f;
+  }
+}
+
+@media (max-width: 1023px) {
+  .site-header.site-header nav .lw-nav-random {
+    display: flex;
+    width: 100%;
+    min-height: 50px;
+    flex: 0 0 auto;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid #6d762f;
+    border-radius: 10px;
+    background: #dbe986;
+    color: #17190b;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .site-header.site-header nav .lw-nav-random .lw-nav-index {
+    color: #5d6428;
   }
 }
