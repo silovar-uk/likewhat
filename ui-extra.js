@@ -24,4 +24,49 @@
     return `<div class="${cls}" data-brand="${esc(pattern.brand)}">${inner}</div>`;
   }
   window.LikeWhatUI={render,esc};
+
+  function setupRandomizerPolish(){
+    const randomizer=document.getElementById('randomizer');
+    const results=document.getElementById('randomResults');
+    const draw=document.getElementById('randomDraw');
+    const modes=document.getElementById('randomModes');
+    if(!randomizer||!results||!draw||!modes)return;
+
+    const modeLabels={random:['Random','偶然に任せる'],far:['Far Apart','設計空間で遠くする'],weird:['Weird','異質な思想をぶつける']};
+    modes.querySelectorAll('[data-random-mode]').forEach(button=>{
+      const [label,description]=modeLabels[button.dataset.randomMode]||[];
+      if(!label)return;
+      const strong=button.querySelector('strong');
+      const span=button.querySelector('span');
+      if(strong)strong.textContent=label;
+      if(span)span.textContent=description;
+      button.title=description;
+      button.setAttribute('aria-label',`${label}：${description}`);
+    });
+
+    const sync=()=>{
+      const copy=results.querySelector('.random-analysis-copy');
+      const hasResults=!!results.querySelector('.random-grid');
+      randomizer.classList.toggle('has-results',hasResults);
+      if(!copy||copy.querySelector('.random-reroll-inline'))return;
+      const heading=copy.querySelector('h3');
+      if(!heading)return;
+      const reroll=document.createElement('button');
+      reroll.type='button';
+      reroll.className='random-reroll-inline';
+      reroll.setAttribute('aria-label','ランダム3件を引き直す');
+      reroll.innerHTML='<span aria-hidden="true">↻</span><span>引き直す</span>';
+      heading.insertAdjacentElement('afterend',reroll);
+    };
+
+    new MutationObserver(sync).observe(results,{childList:true,subtree:true});
+    results.addEventListener('click',event=>{
+      const reroll=event.target.closest('.random-reroll-inline');
+      if(!reroll)return;
+      draw.click();
+    });
+    sync();
+  }
+
+  setupRandomizerPolish();
 })();
