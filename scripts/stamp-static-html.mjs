@@ -2,7 +2,9 @@ import fs from 'node:fs/promises';
 
 const meta=JSON.parse(await fs.readFile('generated/meta.json','utf8'));
 const count=meta.referenceCount;
-const files=['map.html','vocabulary.html','compare.html','coverage.html'];
+const buildStamp=String(meta.generatedAt||Date.now()).replace(/\D/g,'').slice(0,14)||String(Date.now());
+const files=['index.html','map.html','vocabulary.html','compare.html','coverage.html','brand.html','pattern.html'];
+const bootstrapNames=['top-bootstrap.js','analysis-bootstrap.js','pattern-bootstrap.js','brand-bootstrap.js'];
 
 for(const file of files){
   let html=await fs.readFile(file,'utf8');
@@ -15,6 +17,10 @@ for(const file of files){
     .replace(/いまの\d+件/g,`いまの${count}件`)
     .replace(/現在の\d+件/g,`現在の${count}件`)
     .replace(/current \d+-reference library/gi,`current ${count}-reference library`);
+  for(const name of bootstrapNames){
+    const escaped=name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    html=html.replace(new RegExp(`${escaped}(?:\\?v=[^"']+)?`,'g'),`${name}?v=${buildStamp}`);
+  }
   await fs.writeFile(file,html,'utf8');
 }
-console.log(`Stamped ${count} references into ${files.length} static analysis pages`);
+console.log(`Stamped ${count} references and bootstrap cache version ${buildStamp} into ${files.length} public pages`);
