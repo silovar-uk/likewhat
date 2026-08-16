@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="実在サービス・ブランド・カルチャー・大学・Scene参照を、Libraryとして横断し、視覚文法・設計思想・Design Spaceまで分解して探せるデザイン参照ライブラリ。" />
-  <title>Like What? — Design reference library</title>
+  <meta name="description" content="実在するブランド・サービス・カルチャーのデザインを、見る・言葉にする・比べる・使うの順で学び、実装へ持ち帰るデザイン参照ライブラリ。" />
+  <title>Like What? — デザインを言葉にして学ぶ</title>
   <link rel="icon" type="image/png" sizes="180x180" href="/likewhat/apple-touch-icon.png?v=20260815">
   <link rel="apple-touch-icon" sizes="180x180" href="/likewhat/apple-touch-icon.png?v=20260815">
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
@@ -18,23 +18,24 @@
   <link rel="stylesheet" href="styles-pattern-v5.css" />
   <link rel="stylesheet" href="styles-shell-v2.css?v=20260816" />
   <link rel="stylesheet" href="styles-ui-polish.css?v=20260815-ui3" />
+  <link rel="stylesheet" href="styles-learning.css?v=20260816-learn1" />
 </head>
 <body>
   <a class="skip-link" href="#main-content">本文へ移動</a>
   <header class="site-header">
     <a class="brandmark" href="./" aria-label="Like What? ホーム"><span>Like</span> What?</a>
-    <nav aria-label="Global navigation"><a href="#patterns">Library</a><a href="map.html">Design Map</a><a href="vocabulary.html">Vocabulary</a><a href="compare.html">Contrast</a><a href="coverage.html">Coverage</a><a href="https://github.com/silovar-uk/likewhat" target="_blank" rel="noreferrer">GitHub ↗</a></nav>
+    <nav aria-label="グローバルナビゲーション"><a href="#patterns">ライブラリ</a><a href="map.html">デザインマップ</a><a href="vocabulary.html">デザイン語彙</a><a href="compare.html">比較</a><a href="coverage.html">分析</a><a href="https://github.com/silovar-uk/likewhat" target="_blank" rel="noreferrer">GitHub ↗</a></nav>
   </header>
 
   <main id="main-content">
     <section class="hero">
-      <p class="eyebrow">VISUAL GRAMMAR / DESIGN REFERENCE LIBRARY</p>
-      <h1>「こんな感じ」を、<br><em>設計語彙に変換する。</em></h1>
-      <p class="hero-copy">ブランド／アーティスト／大学／Sceneを同じLibraryで扱う。似た表層ではなく、情報アーキテクチャ、距離感、世界観、操作モデル、設計思想の差を読み、実装へ持ち運べる原則に変換する。</p>
+      <p class="eyebrow">デザインを「見る」で終わらせない</p>
+      <h1>「こんな感じ」を、<br><em>説明できる力に変える。</em></h1>
+      <p class="hero-copy">Like What? は、見た目を集めるギャラリーではなく、デザインを観察し、言葉にし、比べ、実務へ持ち帰るための学習ライブラリ。ブランド名を覚えるのではなく、「なぜそう見えるのか」「どこで使えるのか」を考えるための道具です。</p>
 
       <div class="search-shell" role="search">
         <span aria-hidden="true">⌕</span>
-        <input id="searchInput" type="search" autocomplete="off" placeholder="ブランド・場面・デザイン語彙を検索" aria-label="ライブラリを検索" />
+        <input id="searchInput" type="search" autocomplete="off" placeholder="ブランド・場面・考え方から探す" aria-label="ライブラリを検索" />
         <kbd>⌘ K</kbd>
       </div>
       <div class="query-examples" aria-label="検索例">
@@ -42,47 +43,61 @@
       </div>
     </section>
 
+    <section class="learning-path" aria-labelledby="learningPathTitle">
+      <div class="learning-path-head">
+        <div><p class="eyebrow">LEARNING PATH / 学び方</p><h2 id="learningPathTitle">見る → 言う → 比べる → 使う。</h2></div>
+        <p>全部の機能を覚える必要はありません。まず事例を見つけ、気になった違いに名前をつけ、比較して判断軸をつくり、最後に自分の実装へ変換する。この4段階を行き来するほど、参照が「知識」に変わります。</p>
+      </div>
+      <ol class="learning-steps">
+        <li class="learning-step" data-tone="discover"><span>01</span><strong>見つける</strong><p>ブランド名や場面から事例を探し、まず「何が気になるか」を見つける。</p><a href="#patterns">ライブラリを見る</a></li>
+        <li class="learning-step" data-tone="name"><span>02</span><strong>言葉にする</strong><p>WorldbuildingやWayfindingなど、感覚に名前を与えて再利用できる知識にする。</p><a href="vocabulary.html">語彙で確かめる</a></li>
+        <li class="learning-step" data-tone="compare"><span>03</span><strong>比べる</strong><p>似ているもの・遠いものを並べ、「何を優先すると違いが生まれるか」を読む。</p><a href="compare.html">違いを比べる</a></li>
+        <li class="learning-step" data-tone="apply"><span>04</span><strong>使う</strong><p>理解した特徴を、色の模倣ではなく情報階層や操作の条件として実装へ持ち帰る。</p><a href="#composerTitle">Briefを作る</a></li>
+      </ol>
+    </section>
+
     <section class="explore-hub" aria-labelledby="exploreHubTitle">
-      <div class="explore-hub-head"><div><p class="eyebrow">EXPLORE / THREE LENSES</p><h2 id="exploreHubTitle">同じLibraryを、3つの角度から。</h2><p>場所・言葉・差分。名前以外の入口を、小さな道具として使い分ける。</p></div></div>
+      <div class="explore-hub-head"><div><p class="eyebrow">3つの見方 / EXPLORE</p><h2 id="exploreHubTitle">迷ったら、知りたいことから選ぶ。</h2><p>機能名を覚えるより、「全体像を見たい」「言葉を増やしたい」「違いを判断したい」から入口を選ぶ。</p></div></div>
       <div class="explore-tool-grid">
-        <a class="explore-tool" href="map.html"><div class="explore-visual explore-map-visual" aria-hidden="true"><i></i><i></i><i></i><span class="x">ORDER →</span><span class="y">↑ DENSITY</span></div><div class="explore-tool-copy"><small>01 / DESIGN SPACE</small><strong>座標から探す</strong><span id="heroReferenceCount">references · 6 axes</span></div><em aria-hidden="true">↗</em></a>
-        <a class="explore-tool" href="vocabulary.html"><div class="explore-visual explore-vocab-visual" aria-hidden="true"><b>Wayfinding</b><b>Worldbuilding</b><b>Identity</b></div><div class="explore-tool-copy"><small>02 / VOCABULARY</small><strong>言葉から渡る</strong><span>concept → different world</span></div><em aria-hidden="true">↗</em></a>
-        <a class="explore-tool" href="compare.html"><div class="explore-visual explore-contrast-visual" aria-hidden="true"><div></div><span>Δ</span><div></div></div><div class="explore-tool-copy"><small>03 / CONTRAST</small><strong>差分から学ぶ</strong><span>A ↔ B · priorities</span></div><em aria-hidden="true">↗</em></a>
+        <a class="explore-tool" href="map.html"><div class="explore-visual explore-map-visual" aria-hidden="true"><i></i><i></i><i></i><span class="x">ORDER →</span><span class="y">↑ DENSITY</span></div><div class="explore-tool-copy"><small>01 / DESIGN SPACE</small><strong>全体像をつかむ</strong><span id="heroReferenceCount">参照を6軸の距離で見る</span></div><em aria-hidden="true">↗</em></a>
+        <a class="explore-tool" href="vocabulary.html"><div class="explore-visual explore-vocab-visual" aria-hidden="true"><b>Wayfinding</b><b>Worldbuilding</b><b>Identity</b></div><div class="explore-tool-copy"><small>02 / VOCABULARY</small><strong>言葉を増やす</strong><span>感覚 → 概念 → 別の実例へ</span></div><em aria-hidden="true">↗</em></a>
+        <a class="explore-tool" href="compare.html"><div class="explore-visual explore-contrast-visual" aria-hidden="true"><div></div><span>Δ</span><div></div></div><div class="explore-tool-copy"><small>03 / CONTRAST</small><strong>判断軸をつくる</strong><span>似た事例の「違う理由」を読む</span></div><em aria-hidden="true">↗</em></a>
       </div>
     </section>
 
     <section class="composer" aria-labelledby="composerTitle">
-      <div class="composer-copy"><p class="eyebrow">COMPOSE / IDENTITY × SCENE</p><h2 id="composerTitle"><span>「何っぽく」</span><wbr><span>×「どの場面？」</span></h2><p>IdentityとSituationを役割分担して混ぜる。色を平均するのではなく、情報階層・距離感・操作・感情強度を組み合わせた実装Briefを作る。</p></div>
-      <div class="composer-controls"><label>Identity<select id="composerIdentity"></select></label><span>×</span><label>Scene<select id="composerScene"></select></label><button id="composerBuild" type="button">Briefを作る</button></div>
+      <div class="composer-copy"><p class="eyebrow">実務に持ち帰る / COMPOSE</p><h2 id="composerTitle"><span>「何っぽく」</span><wbr><span>×「どの場面？」</span></h2><p>2つの参照を色で平均するのではなく、情報階層・距離感・操作・感情強度を組み合わせ、実装できる条件へ変換する。</p></div>
+      <div class="composer-controls"><label>何っぽく<select id="composerIdentity"></select></label><span>×</span><label>どの場面<select id="composerScene"></select></label><button id="composerBuild" type="button">実装Briefを作る</button></div>
       <div id="composerResult" class="composer-result" aria-live="polite"></div>
     </section>
 
     <section class="randomizer" aria-labelledby="randomTitle">
-      <div class="randomizer-copy"><p class="eyebrow">SERENDIPITY / COLLISION ENGINE</p><h2 id="randomTitle">意図的に、文脈を外す。</h2><p>偶然に任せる、設計空間で遠くへ飛ぶ、異質な思想を衝突させる。実務用Composerとは分け、ここでは意外性をつくる。</p><div id="randomModes" class="random-modes" aria-label="ランダム抽出モード"><button type="button" class="active" data-random-mode="random" aria-pressed="true"><strong>Random</strong><span>偶然に任せる</span></button><button type="button" data-random-mode="far" aria-pressed="false"><strong>Far Apart</strong><span>最も遠くへ</span></button><button type="button" data-random-mode="weird" aria-pressed="false"><strong>Weird Combination</strong><span>異質さを衝突</span></button></div></div>
-      <button id="randomDraw" class="random-draw-button" type="button"><span>3つ引く</span><small>Random 3</small></button>
+      <div class="randomizer-copy"><p class="eyebrow">発想を広げる / SERENDIPITY</p><h2 id="randomTitle">意図的に、文脈を外す。</h2><p>いつもの好みだけを見続けないための寄り道。偶然、距離、異質さの3通りで参照を引き、知らない判断軸に出会う。</p><div id="randomModes" class="random-modes" aria-label="ランダム抽出モード"><button type="button" class="active" data-random-mode="random" aria-pressed="true"><strong>ランダム</strong><span>偶然に任せる</span></button><button type="button" data-random-mode="far" aria-pressed="false"><strong>遠いもの同士</strong><span>設計空間で離して選ぶ</span></button><button type="button" data-random-mode="weird" aria-pressed="false"><strong>異質な組合せ</strong><span>違う思想をぶつける</span></button></div></div>
+      <button id="randomDraw" class="random-draw-button" type="button"><span>3件を引く</span><small>知らない方向へ寄り道する</small></button>
       <div id="randomResults" class="random-results" aria-live="polite"></div>
     </section>
 
     <section class="browser" id="patterns">
-      <div class="browser-head"><div><p class="eyebrow">LIBRARY / FACETED BROWSE</p><h2>名前と場面を、別々の軸で絞る。</h2></div><p id="resultCount" class="count" aria-live="polite">Reference catalog loads on approach.</p></div>
+      <div class="browser-head"><div><p class="eyebrow">参照ライブラリ / LIBRARY</p><h2>デザインを、条件から探す。</h2></div><p id="resultCount" class="count" aria-live="polite">ライブラリは近づくと読み込みます。</p></div>
       <div id="activeFilters" class="active-filters" aria-live="polite"></div>
       <div id="facetPanel" class="facet-panel" aria-label="ライブラリ絞り込み">
-        <div class="facet-row"><span>Kind</span><div id="kindFilters" class="part-filters"></div></div>
-        <div class="facet-row"><span>Scene</span><div id="sceneFilters" class="part-filters"></div></div>
-        <div class="facet-row"><span>Domain</span><div id="domainFilters" class="part-filters"></div></div>
-        <div class="facet-row"><span>Medium</span><div id="mediumFilters" class="part-filters"></div></div>
-        <div class="facet-row"><span>UI Part</span><div id="partFilters" class="part-filters"></div></div>
+        <div class="facet-row"><span>種類</span><div id="kindFilters" class="part-filters"></div></div>
+        <div class="facet-row"><span>場面</span><div id="sceneFilters" class="part-filters"></div></div>
+        <div class="facet-row"><span>領域</span><div id="domainFilters" class="part-filters"></div></div>
+        <div class="facet-row"><span>媒体</span><div id="mediumFilters" class="part-filters"></div></div>
+        <div class="facet-row"><span>UI要素</span><div id="partFilters" class="part-filters"></div></div>
       </div>
-      <details class="brand-filter-disclosure"><summary>Brand / Collection <span id="brandFilterSummary">All</span></summary><div id="brandFilters" class="brand-filters" aria-label="ブランド・コレクションで絞り込む"></div></details>
-      <div id="patternGroups" class="pattern-groups"><div class="library-loading-note">Reference catalog loads when you approach this section.</div></div>
+      <details class="brand-filter-disclosure"><summary>ブランド / コレクション <span id="brandFilterSummary">すべて</span></summary><div id="brandFilters" class="brand-filters" aria-label="ブランド・コレクションで絞り込む"></div></details>
+      <div id="patternGroups" class="pattern-groups"><div class="library-loading-note">この位置に近づくと参照データを読み込みます。</div></div>
       <div id="emptyState" class="empty-state" hidden><strong>近いパターンがまだない。</strong><p>条件を1つ外すか、検索語を短くしてみて。</p></div>
     </section>
   </main>
 
-  <footer><p>Like What? — the library is the entrance; design principles are the exit.</p><p>References point to official product, artist, institution or design-system pages where available.</p></footer>
+  <footer><p>Like What? — 見た目ではなく、設計の理由を持ち帰る。</p><p>参照元は、確認できる範囲で公式ページへ接続しています。</p></footer>
 
   <script src="catalog-index.js"></script>
   <script src="shell-v2.js?v=20260816"></script>
   <script src="top-bootstrap.js?v=20260815-ui3"></script>
+  <script src="learning-ui.js?v=20260816-learn1"></script>
 </body>
 </html>
