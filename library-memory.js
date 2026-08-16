@@ -1,4 +1,7 @@
 (function(){
+  /* The home page now exposes Saved / Recent / Compare through the decision workbench.
+     Keep the legacy memory UI available only on surfaces that do not have that workbench. */
+  if(document.getElementById('workbench'))return;
   const patterns=window.LIKEWHAT_PATTERNS||[];
   const browser=document.getElementById('patterns');
   if(!browser||!patterns.length)return;
