@@ -1,0 +1,76 @@
+/*
+ * Stable light navigation rail.
+ * Keeps the desktop shell visually identical before and after deferred library loading.
+ */
+@media (min-width: 1024px) {
+  body.lw-shell-ready .site-header.site-header {
+    border-right-color: #d2cec5;
+    background: var(--lw-paper, #f4f2ed);
+    color: var(--ink, #171716);
+  }
+
+  body.lw-shell-ready .site-header .brandmark {
+    border-bottom-color: #d7d3ca;
+    color: var(--ink, #171716);
+  }
+
+  body.lw-shell-ready .site-header .lw-brand-kicker {
+    color: #77736b;
+  }
+
+  body.lw-shell-ready .site-header.site-header nav {
+    color: #625f58;
+  }
+
+  body.lw-shell-ready .site-header.site-header nav a {
+    color: inherit;
+  }
+
+  body.lw-shell-ready .site-header.site-header nav a:hover {
+    background: #e8e5dd;
+    color: var(--ink, #171716);
+  }
+
+  body.lw-shell-ready .site-header.site-header nav a[aria-current='page'],
+  body.lw-shell-ready.lw-home .site-header.site-header nav a:first-child {
+    background: var(--ink, #171716);
+    color: #fff;
+  }
+
+  body.lw-shell-ready .site-header.site-header nav a[aria-current='page'] .lw-nav-index,
+  body.lw-shell-ready.lw-home .site-header.site-header nav a:first-child .lw-nav-index {
+    color: #b9b6ae;
+  }
+
+  body.lw-shell-ready .site-header.site-header nav a .lw-nav-index {
+    color: #8b877e;
+  }
+
+  body.lw-shell-ready .site-header.site-header nav a.lw-external {
+    border-top-color: #d7d3ca;
+  }
+
+  body.lw-shell-ready .site-header .lw-rail-footer {
+    border-top-color: #d7d3ca;
+    color: #77736b;
+  }
+
+  body.lw-shell-ready .site-header .lw-rail-footer strong {
+    color: var(--ink, #171716);
+  }
+
+  body.lw-shell-ready .site-header.site-header nav .lw-nav-random {
+    border-color: #becf57;
+    background: #e9f6a7;
+    color: #252810;
+  }
+
+  body.lw-shell-ready .site-header.site-header nav .lw-nav-random:hover {
+    background: #deed8e;
+    color: #17190b;
+  }
+
+  body.lw-shell-ready .site-header.site-header nav .lw-nav-random .lw-nav-index {
+    color: #6d762f;
+  }
+}
