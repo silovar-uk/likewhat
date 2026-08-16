@@ -162,6 +162,8 @@ node scripts/build-pattern-data.mjs
 python3 -m http.server 8000
 ```
 
+2026-08-16のレスポンシブUI更新については、[`REDESIGN.md`](REDESIGN.md)を参照してください。
+
 ## GitHub Pages
 
 `.github/workflows/pages.yml` builds, lints and deploys the static site on every push to `main`.
