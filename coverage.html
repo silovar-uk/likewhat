@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="description" content="Like What?の149参照についてDesign Space・Vocabulary・Domain・Mediumの偏りを分析し、次に追加すべき参照条件を考えるCoverage Planner。" />
+  <meta name="description" content="Like What?の163参照についてDesign Space・Vocabulary・Domain・Mediumの偏りを分析し、次に追加すべき参照条件を考えるCoverage Planner。" />
   <title>Coverage Planner — Like What?</title>
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css?v=20260815-core" />
@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="styles-qa.css" />
   <link rel="stylesheet" href="styles-coverage.css" />
   <link rel="stylesheet" href="styles-coverage-delta.css" />
+  <link rel="stylesheet" href="styles-shell-v2.css?v=20260816" />
   <link rel="stylesheet" href="styles-ui-polish.css?v=20260815-ui3" />
 </head>
 <body data-analysis-page="coverage">
@@ -26,7 +27,7 @@
     </section>
 
     <section class="coverage-snapshot" aria-labelledby="snapshotTitle">
-      <div class="coverage-section-head"><div><p class="eyebrow">COVERAGE SNAPSHOT</p><h2 id="snapshotTitle">いまの149件を、欠け方から見る。</h2></div><p>値は現在の収録データに依存する相対指標。品質点ではない。</p></div>
+      <div class="coverage-section-head"><div><p class="eyebrow">COVERAGE SNAPSHOT</p><h2 id="snapshotTitle">いまの163件を、欠け方から見る。</h2></div><p>値は現在の収録データに依存する相対指標。品質点ではない。</p></div>
       <div id="coverageStats" class="coverage-stats" aria-live="polite"></div>
     </section>
 
@@ -59,8 +60,8 @@
       <details>
         <summary>Coverage Plannerの計算方法 <span>Method / explainability</span></summary>
         <div class="coverage-method-body">
-          <p><strong>Coverage Delta</strong>：ビルド時に生成したWave 3直前63件／Wave 3時点78件のcompact snapshotへ同じ指標を適用する。現在の149件とは分離して履歴比較を固定する。</p>
-          <p><strong>Spatial Gap</strong>：6軸を10 / 50 / 90の3値に離散化した729点について、現在の149件への最短Design Distanceを計算。近接した候補点を間引き、異なる空白方向を残す。</p>
+          <p><strong>Coverage Delta</strong>：ビルド時に生成したWave 3直前63件／Wave 3時点78件のcompact snapshotへ同じ指標を適用する。現在の163件とは分離して履歴比較を固定する。</p>
+          <p><strong>Spatial Gap</strong>：6軸を10 / 50 / 90の3値に離散化した729点について、現在の163件への最短Design Distanceを計算。近接した候補点を間引き、異なる空白方向を残す。</p>
           <p><strong>Brand / Era</strong>：トップ一覧ではILLITやCHANMINAを1アーティストとして束ねるが、Era / Conceptは異なる設計原則を持つため、Design Space上では別Patternとして保持する。</p>
           <p><strong>Institution</strong>：大学は校章やスクールカラーではなく、権威・研究・学生生活・公共性・未来志向などの設計配分として同じ6軸へ置く。</p>
           <p><strong>Scene</strong>：Loading / 404 / Empty / Error / Success / Onboardingはブランド横断の状態パターンとして保持し、「何が起きているか」「どう復帰・継続するか」を比較する。</p>
@@ -73,6 +74,6 @@
   </main>
 
   <footer><p>Like What? — coverage before expansion, delta after expansion.</p><p>Coverage analysis is relative to the current reference library and changes as patterns are added.</p></footer>
-  <script src="analysis-bootstrap.js"></script>
+  <script src="shell-v2.js?v=20260816"></script><script src="analysis-bootstrap.js"></script>
 </body>
 </html>
