@@ -35,8 +35,15 @@
     if(!url)return null;const a=document.createElement('a');a.className=`reference-source-card reference-source-${kind}`;a.href=url;a.target='_blank';a.rel='noreferrer';const small=document.createElement('small');small.textContent=label;const strong=document.createElement('strong');strong.textContent=`${title} ↗`;const span=document.createElement('span');span.textContent=meta||url;a.append(small,strong,span);return a;
   }
   function enhanceDetailSources(detail,pattern){
-    if(!detail||!pattern||pattern.groupType==='industry-cluster'||detail.querySelector('.reference-source-stack'))return;
-    const source=detail.querySelector('.source-link');if(!source)return;const stack=document.createElement('div');stack.className='reference-source-stack';const brandCard=sourceCard('brand','OFFICIAL BRAND',pattern.brand,pattern.brandUrl,pattern.brandUrl);const referenceCard=sourceCard('reference','REFERENCE SOURCE',pattern.sourceLabel||'Source',pattern.sourceUrl,pattern.sourceUrl);if(brandCard)stack.appendChild(brandCard);if(referenceCard)stack.appendChild(referenceCard);source.replaceWith(stack);
+    if(!detail||!pattern||pattern.groupType==='industry-cluster'||detail.querySelector('.reference-source-dock'))return;
+    const source=detail.querySelector('.source-link');if(!source)return;
+    const stack=document.createElement('div');stack.className='reference-source-stack';
+    const brandCard=sourceCard('brand','OFFICIAL BRAND',pattern.brand,pattern.brandUrl,pattern.brandUrl);
+    const referenceCard=sourceCard('reference','REFERENCE SOURCE',pattern.sourceLabel||'Source',pattern.sourceUrl,pattern.sourceUrl);
+    if(brandCard)stack.appendChild(brandCard);if(referenceCard)stack.appendChild(referenceCard);
+    if(!stack.children.length)return;
+    const dock=document.createElement('div');dock.className='reference-source-dock';dock.setAttribute('aria-label','Official brand and reference source');dock.appendChild(stack);
+    source.remove();detail.prepend(dock);
   }
   function apply(root=document){
     if(root instanceof Element&&root.matches('.pattern-card[data-brand]'))wire(root.querySelector('.card-meta span:first-child'),root.dataset.brand);
