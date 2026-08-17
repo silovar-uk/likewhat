@@ -3,6 +3,7 @@
   const { render, esc } = window.LikeWhatUI;
   const vocabulary = window.LikeWhatVocabulary;
   const designSpace = window.LikeWhatDesignSpace;
+  const microDetails = window.LikeWhatMicroDetails;
   const root = document.getElementById('patternPage');
   const id = new URLSearchParams(location.search).get('id');
   const p = patterns.find(item => item.id === id) || patterns[0];
@@ -46,6 +47,7 @@
       copy:'6軸の優先順位を反転した先に近い参照。元の設計が「何を選ばなかったか」まで見える。'
     } : null
   ].filter(Boolean);
+  const microTrace = microDetails ? microDetails.forPattern(p) : null;
 
   function lexiconColumn(label, title, items) {
     return `<section class="lexicon-column"><p class="eyebrow">${esc(label)}</p><h3>${esc(title)}</h3><div class="lexicon-items">${items.map(item=>`<article class="lexicon-item"><a class="lexicon-term-link" href="vocabulary.html?term=${encodeURIComponent(item.term)}"><strong>${esc(item.term)}</strong><span>${esc(item.ja)}</span></a><p>${esc(item.note)}</p></article>`).join('')}</div></section>`;
@@ -105,7 +107,8 @@
   const spaceSummary = designSpace ? designSpace.summary(p.designSpace) : '';
   const spacePrompt = p.designSpace ? `\nDesign Space上の位置は、Density ${p.designSpace.density} / Emotional Intensity ${p.designSpace.emotion} / Exploration ${p.designSpace.exploration} / Authority ${p.designSpace.authority} / Direct Manipulation ${p.designSpace.interaction} / Systematic Order ${p.designSpace.order}。この数値を装飾ではなく、情報量・感情強度・探索性・権威性・操作直接性・秩序性の設計判断として反映してください。` : '';
   const oppositePrompt = opposite ? `\n対極参照は ${opposite.pattern.brand}「${opposite.pattern.name}」。特に ${opposite.flips.slice(0,3).map(f=>`${f.name}を「${f.fromLabel}」から「${f.toLabel}」へ反転させる方向`).join('、')} が対照的です。今回の設計ではこの対極側へ無自覚に寄せず、元パターンの優先順位を維持してください。` : '';
-  const expertPrompt = `${p.prompt}\n\n設計語彙として、${vocabularyLine} を意識してください。単にブランドの表層表現を模倣するのではなく、情報階層・密度・文脈保持・操作の開示タイミングまで設計原則として再現してください。${spacePrompt}${oppositePrompt}`;
+  const microPrompt = microDetails && microTrace ? microDetails.prompt(microTrace) : '';
+  const expertPrompt = `${p.prompt}\n\n設計語彙として、${vocabularyLine} を意識してください。単にブランドの表層表現を模倣するのではなく、情報階層・密度・文脈保持・操作の開示タイミングまで設計原則として再現してください。${spacePrompt}${oppositePrompt}${microPrompt}`;
 
   root.innerHTML = `
     <section class="detail-hero">
@@ -196,6 +199,7 @@
           </div>
         </section>
 
+        ${microDetails && microTrace ? microDetails.render(microTrace, esc) : ''}
         <section class="detail-block"><p class="eyebrow">VISUAL / INTERACTION PRINCIPLES</p><h2>パターンを成立させる設計原則</h2><ol class="principle-list">${p.visual.map((v,i)=>`<li><span>${String(i+1).padStart(2,'0')}</span><p>${esc(v)}</p></li>`).join('')}</ol></section>
         <section class="detail-block two-up"><div><p class="eyebrow">GOOD FIT</p><h2>適合しやすい文脈</h2><ul>${p.useCases.map(v=>`<li>${esc(v)}</li>`).join('')}</ul></div><div><p class="eyebrow">TRADE-OFF / RISK</p><h2>相性が悪い文脈</h2><ul>${p.avoid.map(v=>`<li>${esc(v)}</li>`).join('')}</ul></div></section>
         <section class="detail-block prompt-block"><div class="prompt-head"><div><p class="eyebrow">IMPLEMENTATION BRIEF FOR AI</p><h2>AIへ渡す設計指示</h2></div><button id="copyPrompt">コピー</button></div><pre id="promptText">${esc(expertPrompt)}</pre><p id="copyStatus" class="copy-status" aria-live="polite"></p></section>
@@ -210,7 +214,7 @@
 
   const btn = document.getElementById('copyPrompt');
   btn.addEventListener('click', async () => {
-    try { await navigator.clipboard.writeText(expertPrompt); btn.textContent='コピー済み'; document.getElementById('copyStatus').textContent='専門語彙、Design Space座標、対極参照を含む設計指示をコピーした。'; setTimeout(()=>btn.textContent='コピー',1800); }
+    try { await navigator.clipboard.writeText(expertPrompt); btn.textContent='コピー済み'; document.getElementById('copyStatus').textContent='専門語彙、Design Space座標、対極参照、細部トレースを含む設計指示をコピーした。'; setTimeout(()=>btn.textContent='コピー',1800); }
     catch { document.getElementById('copyStatus').textContent='コピーできなかったため、本文を選択してコピーしてください。'; }
   });
 })();
