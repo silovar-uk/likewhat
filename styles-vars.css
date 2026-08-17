@@ -1,0 +1,97 @@
+/*
+ * Like What? design tokens (v1)
+ * 値の定義のみ。セレクタは持たない。既存CSS 41本はどれもこのファイルの
+ * 変数をまだ参照していないため、読み込んでも見た目は一切変わらない。
+ * 以降のPhaseで、触るセレクタから順にこのトークン参照へ移行していく。
+ * 命名は既存の --lw-* (shell-v2) と衝突しないよう --lwt- で統一。
+ */
+
+:root {
+  /* Typography */
+  --lwt-text-display: clamp(32px, 4vw, 40px);
+  --lwt-leading-display: 1.25;
+  --lwt-tracking-display: -0.01em;
+
+  --lwt-text-heading: clamp(20px, 2.5vw, 24px);
+  --lwt-leading-heading: 1.4;
+
+  --lwt-text-body: clamp(16px, 1.2vw, 17px);
+  --lwt-leading-body: 1.75;
+
+  --lwt-text-body-en: clamp(15px, 1vw, 16px);
+  --lwt-leading-body-en: 1.6;
+
+  --lwt-text-label: 14px;
+  --lwt-leading-label: 1.5;
+
+  --lwt-text-meta: 13px;
+  --lwt-leading-meta: 1.5;
+  --lwt-tracking-meta: 0.01em;
+
+  --lwt-text-eyebrow: 11px;
+  --lwt-leading-eyebrow: 1.4;
+  --lwt-tracking-eyebrow: 0.12em;
+
+  --lwt-text-number: clamp(16px, 1.5vw, 20px);
+  --lwt-leading-number: 1.2;
+  --lwt-numeric: tabular-nums;
+
+  --lwt-measure: 640px; /* 全角40文字相当の行長上限 */
+
+  /* Spacing: 機能ごとにリズムを変える(探索・読解・比較・入口) */
+  --lwt-space-explore-unit: 4px;
+  --lwt-space-explore-section: 40px;
+  --lwt-space-explore-gap: 12px;
+
+  --lwt-space-read-unit: 8px;
+  --lwt-space-read-section: 72px;
+  --lwt-space-read-gap: 24px;
+
+  --lwt-space-compare-unit: 4px;
+  --lwt-space-compare-section: 32px;
+  --lwt-space-compare-gap: 8px;
+
+  --lwt-space-entry-unit: 8px;
+  --lwt-space-entry-section: 56px;
+  --lwt-space-entry-gap: 16px;
+
+  /* Color: 機能で定義。既存の --ink/--bg/--lw-accent を土台に流用 */
+  --lwt-color-fg: var(--ink, #171716);
+  --lwt-color-bg: var(--bg, #f4f2ed);
+  --lwt-color-accent-explore: var(--lw-accent, #d7ff49);
+  --lwt-color-select: #2f6fed;
+  --lwt-color-diff-hi: #c0392b;
+  --lwt-color-diff-lo: #8a8f98;
+  --lwt-color-evidence-measured: #1f7a4d;
+  --lwt-color-evidence-observed: #8a6d1f;
+  --lwt-color-evidence-curated: var(--muted, #55544f);
+  --lwt-color-evidence-none: #9a9890;
+  --lwt-color-warn: #b3541e;
+
+  /* Radius / Line */
+  --lwt-radius-sm: 6px;
+  --lwt-radius-md: 10px;
+  --lwt-radius-lg: 16px;
+  --lwt-line: 1px;
+  --lwt-line-strong: 2px;
+  --lwt-line-dashed: 1px dashed;
+
+  /* Motion */
+  --lwt-motion-lens: 320ms;
+  --lwt-motion-explore: 480ms;
+  --lwt-motion-hover: 140ms;
+  --lwt-motion-collapse: 200ms;
+  --lwt-motion-filter: 180ms;
+  --lwt-ease-out: ease-out;
+  --lwt-ease-inout: ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --lwt-motion-lens: 0ms;
+    --lwt-motion-explore: 0ms;
+    --lwt-motion-hover: 0ms;
+    --lwt-motion-collapse: 0ms;
+    --lwt-motion-filter: 0ms;
+  }
+}
