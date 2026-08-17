@@ -110,6 +110,25 @@
   const microPrompt = microDetails && microTrace ? microDetails.prompt(microTrace) : '';
   const expertPrompt = `${p.prompt}\n\n設計語彙として、${vocabularyLine} を意識してください。単にブランドの表層表現を模倣するのではなく、情報階層・密度・文脈保持・操作の開示タイミングまで設計原則として再現してください。${spacePrompt}${oppositePrompt}${microPrompt}`;
 
+  // STEP15: FIRST READ用に、6軸のうちライブラリ平均から最も離れた軸を1つ求める。
+  // lens.js相当の計算をここでも行う(pattern.htmlはlens.jsを読み込んでいないため)。
+  const firstReadAxis = designSpace && p.designSpace ? designSpace.axes
+    .map(a => {
+      const value = Number(p.designSpace[a.key]);
+      const mean = Number(libraryMean[a.key]);
+      if (!Number.isFinite(value) || !Number.isFinite(mean)) return null;
+      return { name: designSpace.axisNames?.[a.key] || a.key, value: Math.round(value), diff: Math.round(value - mean) };
+    })
+    .filter(Boolean)
+    .sort((x, y) => Math.abs(y.diff) - Math.abs(x.diff))[0] : null;
+  const hasMicroTrace = !!microTrace?.groups?.length;
+  // 解像度インジケータ(STEP16): 実測済みMICRO DETAILSがあれば5段、なければ3段で止まる。
+  const resolutionMax = hasMicroTrace ? 5 : 3;
+  function resolutionDots(step) {
+    const filled = Math.min(step, resolutionMax);
+    return `<span class="resolution-dots" aria-hidden="true">${'●'.repeat(filled)}${'○'.repeat(Math.max(0, resolutionMax - filled))}</span>`;
+  }
+
   root.innerHTML = `
     <section class="detail-hero">
       <div class="breadcrumb"><a href="./#patterns">Patterns</a><span>/</span><span>${esc(p.brand)}</span><span>/</span><span>${esc(p.family)}</span></div>
@@ -122,15 +141,16 @@
 
     <section class="detail-grid">
       <article class="detail-main">
-        <section class="detail-block"><p class="eyebrow">DESIGN INTENT</p><h2>設計意図を言語化すると</h2><p class="large-copy">${esc(p.description)}</p></section>
+        <section class="detail-block first-read-block"><p class="eyebrow">00 FIRST READ</p>${resolutionDots(1)}<p class="first-read-line">${esc(p.oneLiner)}</p>${firstReadAxis ? `<p class="first-read-axis">${esc(firstReadAxis.name)} ${firstReadAxis.value} · ライブラリ平均より${firstReadAxis.diff > 0 ? '+' : ''}${firstReadAxis.diff}</p>` : ''}</section>
+        <section class="detail-block"><p class="eyebrow">01 DESIGN INTENT</p>${resolutionDots(2)}<h2>設計意図を言語化すると</h2><p class="large-copy">${esc(p.description)}</p></section>
 
         ${designSpace && p.designSpace ? `<section class="detail-block design-space-block">
-          <p class="eyebrow">DESIGN SPACE / POSITIONING</p>
+          <p class="eyebrow">02 POSITIONING</p>${resolutionDots(3)}
           <h2>このデザインは、どこに位置する？</h2>
           <p class="design-space-intro">6つの対立軸で、このパターンの設計上の重心を可視化する。レーダーは全体形状、右側のスケールは各軸の意味を読むためのもの。破線は現在のLike What?ライブラリ全体の平均。</p>
           <div class="space-layout">
             ${designSpace.radar(p.designSpace, libraryMean)}
-            ${designSpace.bars(p.designSpace, libraryMean)}
+            ${designSpace.bars(p.designSpace, libraryMean, patterns, p.id)}
           </div>
           <div class="space-profile">
             ${metaCard('Domain', p.domain)}
@@ -190,7 +210,7 @@
         </section>` : ''}
 
         <section class="detail-block grammar-block">
-          <p class="eyebrow">DESIGN GRAMMAR</p><h2>技術・デザイン・思想の3層で分解する</h2>
+          <p class="eyebrow">03 DESIGN GRAMMAR</p>${resolutionDots(4)}<h2>技術・デザイン・思想の3層で分解する</h2>
           <p class="grammar-intro">「○○風」を装飾の模倣で終わらせず、実装構造、視覚・インタラクション設計、認知・設計思想へ分解した語彙。</p>
           <div class="lexicon-grid">
             ${lexiconColumn('IMPLEMENTATION', '実装構造', lex.implementation)}
@@ -199,16 +219,21 @@
           </div>
         </section>
 
-        ${microDetails && microTrace ? microDetails.render(microTrace, esc) : ''}
+        ${microDetails ? microDetails.render(microTrace, esc, resolutionDots(5)) : ''}
         <section class="detail-block"><p class="eyebrow">VISUAL / INTERACTION PRINCIPLES</p><h2>パターンを成立させる設計原則</h2><ol class="principle-list">${p.visual.map((v,i)=>`<li><span>${String(i+1).padStart(2,'0')}</span><p>${esc(v)}</p></li>`).join('')}</ol></section>
-        <section class="detail-block two-up"><div><p class="eyebrow">GOOD FIT</p><h2>適合しやすい文脈</h2><ul>${p.useCases.map(v=>`<li>${esc(v)}</li>`).join('')}</ul></div><div><p class="eyebrow">TRADE-OFF / RISK</p><h2>相性が悪い文脈</h2><ul>${p.avoid.map(v=>`<li>${esc(v)}</li>`).join('')}</ul></div></section>
-        <section class="detail-block prompt-block"><div class="prompt-head"><div><p class="eyebrow">IMPLEMENTATION BRIEF FOR AI</p><h2>AIへ渡す設計指示</h2></div><button id="copyPrompt">コピー</button></div><pre id="promptText">${esc(expertPrompt)}</pre><p id="copyStatus" class="copy-status" aria-live="polite"></p></section>
+        <section class="detail-block"><p class="eyebrow chapter-eyebrow">05 GOOD FIT / TRADE-OFF</p>${resolutionDots(resolutionMax)}<div class="two-up"><div><p class="eyebrow">GOOD FIT</p><h2>適合しやすい文脈</h2><ul>${p.useCases.map(v=>`<li>${esc(v)}</li>`).join('')}</ul></div><div><p class="eyebrow">TRADE-OFF / RISK</p><h2>相性が悪い文脈</h2><ul>${p.avoid.map(v=>`<li>${esc(v)}</li>`).join('')}</ul></div></div></section>
+        <section class="detail-block prompt-block"><div class="prompt-head"><div><p class="eyebrow">06 TAKE IT / IMPLEMENTATION BRIEF</p><h2>AIへ渡す設計指示</h2></div><button id="copyPrompt">コピー</button></div><pre id="promptText">${esc(expertPrompt)}</pre><p id="copyStatus" class="copy-status" aria-live="polite"></p></section>
       </article>
 
       <aside class="detail-aside">
         <div class="sticky-note"><p class="eyebrow">DISCOVERY TERMS</p><h3>検索・参照に使う語彙</h3><div class="detail-tags">${[...lex.design.slice(0,3).map(x=>x.term),...p.tags].map(t=>`<a href="./?q=${encodeURIComponent(t)}#patterns">${esc(t)}</a>`).join('')}</div><hr><p class="eyebrow">SURFACE / COMPONENTS</p><div class="detail-tags muted">${p.uiParts.map(t=>`<span>${esc(t)}</span>`).join('')}</div>${p.philosophy?.length?`<hr><p class="eyebrow">PHILOSOPHICAL POSITION</p><div class="detail-tags muted">${p.philosophy.map(t=>`<span>${esc(t)}</span>`).join('')}</div>`:''}</div>
       </aside>
     </section>
+
+    ${diversity?.nearest?.pattern||diversity?.farthest?.pattern?`<nav class="detail-mobile-next" aria-label="次の参照へ">
+      ${diversity?.nearest?.pattern?`<a href="pattern.html?id=${encodeURIComponent(diversity.nearest.pattern.id)}"><small>次: 近い</small><strong>${esc(diversity.nearest.pattern.brand)}</strong></a>`:''}
+      ${diversity?.farthest?.pattern?`<a href="pattern.html?id=${encodeURIComponent(diversity.farthest.pattern.id)}"><small>次: 最も遠い</small><strong>${esc(diversity.farthest.pattern.brand)}</strong></a>`:''}
+    </nav>`:''}
 
     <section class="related"><div class="browser-head"><div><p class="eyebrow">RELATED PATTERNS</p><h2>近接する視覚文法</h2></div></div><div class="related-grid">${related.map(x=>`<a href="pattern.html?id=${encodeURIComponent(x.id)}"><div>${render(x,'related')}</div><p>${esc(x.brand)}</p><strong>${esc(x.name)}</strong></a>`).join('')}</div></section>`;
 
@@ -217,4 +242,30 @@
     try { await navigator.clipboard.writeText(expertPrompt); btn.textContent='コピー済み'; document.getElementById('copyStatus').textContent='専門語彙、Design Space座標、対極参照、細部トレースを含む設計指示をコピーした。'; setTimeout(()=>btn.textContent='コピー',1800); }
     catch { document.getElementById('copyStatus').textContent='コピーできなかったため、本文を選択してコピーしてください。'; }
   });
+
+  // STEP25: モバイルでは00 FIRST READ/01 DESIGN INTENTのみ開いた状態にし、
+  // 02以降を折り畳んで初期スクロール量を抑える。デスクトップは無変更。
+  if (window.matchMedia?.('(max-width: 640px)')?.matches) {
+    const main = document.querySelector('.detail-main');
+    const blocks = main ? [...main.children] : [];
+    const collapseFrom = blocks.findIndex((el, i) => i >= 2);
+    if (collapseFrom >= 2) {
+      const rest = blocks.slice(collapseFrom);
+      const wrap = document.createElement('div');
+      wrap.className = 'detail-mobile-collapsed';
+      rest[0].before(wrap);
+      rest.forEach(el => wrap.appendChild(el));
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'detail-mobile-expand';
+      toggle.textContent = 'このパターンをもっと読む ↓';
+      toggle.setAttribute('aria-expanded', 'false');
+      wrap.after(toggle);
+      toggle.addEventListener('click', () => {
+        wrap.classList.add('is-expanded');
+        toggle.hidden = true;
+        toggle.setAttribute('aria-expanded', 'true');
+      });
+    }
+  }
 })();

@@ -17,6 +17,39 @@
   const budgets=catalogMeta.performanceBudget||{initialPatternDetailData:0,initialPreviewRendering:0,initialDiversityCalculations:0,initialDomNodes:1000};
   window.LikeWhatPerformanceBudget=budgets;
 
+  // 訪問状態(初見/再訪/作業中)の判定。workbench.jsのlocalStorageキーを
+  // そのまま読む(exportされていないため文字列を直接参照。キー自体は
+  // workbench.js側で変更していない)。同期実行し、初回ペイントの前に
+  // body[data-visit-state]を確定させ、ちらつきを避ける。
+  function detectVisitState(){
+    const safeParse=(raw,fallback)=>{try{const v=JSON.parse(raw||'');return v??fallback;}catch{return fallback;}};
+    let recent=[],projects={};
+    try{
+      recent=safeParse(localStorage.getItem('lw:wb:recent:v1'),[]);
+      projects=safeParse(localStorage.getItem('lw:wb:projects:v1'),{});
+    }catch{/* localStorage無効環境は初見扱いにフォールバック */}
+    const hasSaved=projects&&typeof projects==='object'&&Object.values(projects).some(list=>Array.isArray(list)&&list.length>0);
+    if(hasSaved)return'working';
+    if(Array.isArray(recent)&&recent.length>0)return'returning';
+    return'first-time';
+  }
+  const visitState=detectVisitState();
+  document.body.dataset.visitState=visitState;
+  window.LikeWhatVisitState=visitState;
+
+  // STEP25: モバイルは「短時間で偶然おもしろいものを見つける」用途が強いと
+  // 仮定し、Explore Engine(SERENDIPITY)を課題選択の直後へ移動する。
+  // <main>はflex/gridではないためCSS orderが使えず、実DOM移動で対応する。
+  // 一度だけ判定(リサイズの再評価はしない。フルリロードで再評価される)。
+  function reorderForMobile(){
+    if(!window.matchMedia?.('(max-width: 640px)')?.matches)return;
+    const workbench=document.getElementById('workbench');
+    const randomizer=document.getElementById('randomizer');
+    if(!workbench||!randomizer||randomizer===workbench.nextElementSibling)return;
+    workbench.after(randomizer);
+  }
+  reorderForMobile();
+
   function setupRandomRailButton(){
     if(!railNav||railNav.querySelector('.lw-nav-random')||!randomDraw)return;
     const button=document.createElement('button');
@@ -70,7 +103,7 @@
     };
     return {meta,catalog};
   }
-  async function loadCore(){await script('design-space.js');await script('entry-kinds.js');await script('library-groups.js');await script('vocabulary.js');}
+  async function loadCore(){await script('design-space.js');await script('lens.js');await script('entry-kinds.js');await script('library-groups.js');await script('vocabulary.js');}
   async function loadRenderers(){await script('ui.js');for(const src of ['ui-extra.js','ui-wave1.js','ui-wave2.js','ui-wave3.js','ui-wave4.js','ui-wave5.js','ui-wave6.js','ui-tv.js','ui-eyewear.js'])await script(src);await script('ui-idols.js',{'data-load-expansion':'false'});await script('ui-idols2.js');await script('ui-preview-contract.js');await script('top-performance.js');}
   async function loadControllers(){await script('app.js');for(const src of ['brand-links.js','group-official-links.js','group-sort.js','library-memory.js'])await script(src);}
 

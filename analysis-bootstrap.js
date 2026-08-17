@@ -14,7 +14,7 @@
       await loadPreviewStack();await script('vocabulary-page.js');
     }else if(page==='compare'){
       const cache=new Map();window.LikeWhatDetailStore={async get(id){if(cache.has(id))return cache.get(id);const record=catalog.records.find(p=>p.id===id);if(!record)throw new Error(`Unknown pattern ${id}`);const promise=json(`generated/patterns/${encodeURIComponent(record.detailFile)}`).then(detail=>{const index=window.LIKEWHAT_PATTERNS.findIndex(p=>p.id===id);if(index>=0)window.LIKEWHAT_PATTERNS[index]=detail;return detail;});cache.set(id,promise);return promise;},size(){return cache.size;}};
-      await loadPreviewStack();await script('compare.js');
+      await loadPreviewStack();await script('micro-details.js');await script('compare.js');
     }else if(page==='coverage'){
       const history=await json('generated/history/wave3.json');window.LIKEWHAT_COVERAGE_DELTA=history;const current=window.LIKEWHAT_PATTERNS;window.LIKEWHAT_PATTERNS=history.after;window.LIKEWHAT_WAVES={wave3:{ids:history.waveIds,label:history.label}};await script('coverage-delta.js');window.LIKEWHAT_PATTERNS=current;await script('coverage.js');
     }else throw new Error(`Unknown analysis page ${page}`);

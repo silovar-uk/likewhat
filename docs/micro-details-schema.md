@@ -1,4 +1,4 @@
-# MICRO DETAILS schema v1
+# MICRO DETAILS schema v1 / v2
 
 ## Purpose
 
@@ -66,8 +66,65 @@ microDetails: {
 - `surface`
 - `layout`
 - `interaction`
+- `components` (v2)
+- `responsive` (v2)
 
-Do not force all five groups to be filled. Missing data is preferable to invented precision.
+Do not force all groups to be filled. Missing data is preferable to invented precision.
+
+## v2 additions: relations and meaning
+
+v1's `traceLevel` / `method` / `confidence` separation is unchanged in v2. v2 only adds
+two **optional** per-group fields, for the "value → relation → meaning" ladder:
+
+```js
+groups: {
+  typography: {
+    cue: '...',
+    items: [ /* same as v1 */ ],
+
+    // v2, optional: a ratio or ordering between two items in this group.
+    relations: [
+      {
+        label: 'Heading : Body',
+        value: '3.5 : 1',
+        from: 'Hero heading',   // must match an items[].label in the same group
+        to: 'Body',             // must match an items[].label in the same group
+        method: 'measured',
+        confidence: 'high'
+      }
+    ],
+
+    // v2, optional: what the relation is doing, in one sentence.
+    meaning: {
+      text: 'This large scale gap pulls attention to a single message.',
+      basis: 'relations' // 'relations' | 'items' | 'editorial'
+    }
+  }
+}
+```
+
+Set `schemaVersion: 2` when a pattern uses `relations`/`meaning` or the new groups.
+Existing `schemaVersion: 1` records remain valid and are not migrated.
+
+### Curated items must never look measured
+
+If `method` is `curated`, `value` must be words, not a number-shaped string
+(`"48px"`, `"1.5rem"`, `"3.5:1"`). Curated is an editorial read, not a measurement;
+writing a number there is the single most likely way a guess gets mistaken for a fact.
+Write `"large"` or `"tight"` instead. `scripts/check-micro-details.mjs` rejects
+numeric-looking `curated` values.
+
+### `measured` requires citable evidence
+
+Any item with `method: 'measured'` must point (via `sourceId`) to a source whose
+`kind` is `official` or `css` — not `screenshot` or `other`. A measurement without
+a checkable origin is not a measurement.
+
+### Library-wide cap
+
+The corpus-wide count of patterns carrying a `microDetails` object must stay at or
+below 20 (`scripts/check-micro-details.mjs` enforces this). This is a deliberate
+brake on scope: depth over the whole library is not the goal of this rollout stage.
 
 ## Source kinds
 

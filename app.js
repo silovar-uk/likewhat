@@ -4,6 +4,8 @@
   const render=ui.render;
   const esc=ui.esc||function(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));};
   const designSpace=window.LikeWhatDesignSpace;
+  const lens=window.LikeWhatLens;
+  const libraryMean=designSpace?designSpace.mean(patterns):{};
   const groupModel=window.LikeWhatLibraryGroups;
   const entryKinds=window.LikeWhatEntryKinds;
   const meta=window.LIKEWHAT_LIBRARY_META||{};
@@ -32,7 +34,8 @@
 
   if(!patterns.length||!groups||!render)return;
 
-  const validSorts=new Set(['brand','density','exploration','diversity','random']);
+  const lensAxisKeys=(designSpace?.axes||[]).map(a=>a.key);
+  const validSorts=new Set(['brand',...lensAxisKeys,'diversity','random']);
   const urlState=()=>{
     const p=new URLSearchParams(location.search);
     return {
@@ -159,7 +162,8 @@
   function ensureSortControl(){
     if(!facetPanel||document.getElementById('librarySort'))return;
     const row=document.createElement('div');row.className='facet-row sort-facet-row';
-    row.innerHTML='<span>Sort</span><div class="library-sort"><select id="librarySort" aria-label="ライブラリの並び順"><option value="brand">Library order</option><option value="density">Density · dense first</option><option value="exploration">Exploration · exploratory first</option><option value="diversity">Diversity · frontier first</option><option value="random">Random · stable seed</option></select><button type="button" class="sort-reroll" title="Randomを引き直す">↻</button></div>';
+    const axisOptions=(designSpace?.axes||[]).map(a=>`<option value="${esc(a.key)}">${esc(designSpace.axisNames?.[a.key]||a.key)} · ${esc(a.high)} first</option>`).join('');
+    row.innerHTML=`<span>見方 / Lens</span><div class="library-sort"><select id="librarySort" aria-label="ライブラリの並び順・レンズ"><option value="brand">近い順 · Library order</option>${axisOptions}<option value="diversity">Diversity · frontier first</option><option value="random">Random · stable seed</option></select><button type="button" class="sort-reroll" title="Randomを引き直す">↻</button></div>`;
     facetPanel.appendChild(row);
     const select=row.querySelector('select'),reroll=row.querySelector('button');select.value=state.sort;reroll.hidden=state.sort!=='random';
     select.addEventListener('change',()=>{state.sort=validSorts.has(select.value)?select.value:'brand';if(state.sort==='random'&&!state.seed)state.seed=String(Date.now()%1000000000);reroll.hidden=state.sort!=='random';syncUrl('push');document.dispatchEvent(new CustomEvent('likewhat:sort-change',{detail:{sort:state.sort,seed:state.seed}}));});
@@ -180,7 +184,28 @@
     const href=cluster?`pattern.html?id=${encodeURIComponent(group.cluster.id)}`:scene?`./?scene=${encodeURIComponent(group.scene)}#patterns`:single?`pattern.html?id=${encodeURIComponent(items[0].id)}`:`brand.html?brand=${encodeURIComponent(group.brand)}`;
     const list=cluster?(group.cluster.members||[]).map(m=>({label:m.brand,sub:m.role})):scene?items.map(p=>({label:p.brand,sub:p.family})):items.map(p=>({label:p.era||shortPatternName(p,group.brand),sub:p.family}));
     const previewMarkup=cluster?`<div class="group-preview-single">${render(group.cluster,'related')}</div>`:`<div class="group-preview-mosaic count-${Math.min(4,previews.length)}">${previews.map(p=>`<div class="group-preview-tile"><div>${render(p,'related')}</div><span>${esc(scene?p.brand:(p.era||shortPatternName(p,group.brand)))}</span></div>`).join('')}${items.length>4?`<b class="group-preview-more">+${items.length-4}</b>`:''}</div>`;
-    return `<article class="library-group-card ${cluster?'industry-cluster-card':'brand-group-card'} ${artist?'artist-group-card':''}" data-group-key="${esc(group.key)}" data-group-type="${esc(group.type)}" data-entry-kind="${esc(group.entryKind)}" data-brand="${esc(group.brand)}" data-pattern-ids="${esc(items.map(p=>p.id).join('|'))}" data-sort-index="${index}" data-sort-density="${group.centroid?.density??50}" data-sort-exploration="${group.centroid?.exploration??50}"><a class="library-group-main ${single?'is-direct':''}" href="${href}"><header><small>${kicker}</small><h3>${esc(group.title)}</h3></header><div class="library-group-preview">${previewMarkup}</div><div class="group-pattern-list">${list.slice(0,4).map(item=>`<div><strong>${esc(item.label)}</strong><span>${esc(item.sub||'')}</span></div>`).join('')}${list.length>4?`<p>+ ${list.length-4} more patterns</p>`:''}</div><footer><span>${scene?'Filter this scene':single?'Open pattern':cluster?'Open cluster':artist?'Explore artist':institution?'Explore institution':'Explore brand'}</span><b>↗</b></footer></a></article>`;
+    // 差分ラベル: catalog-core由来のcentroid/libraryMeanのみで算出、追加通信なし。
+    // 常時表示の1軸は既存footerのテキスト内に収め(レイアウト変更ゼロ)、
+    // hoverで開くさらに2軸+保存/比較ボタンだけを新規のオーバーレイ要素にする
+    // (<button>を<a>の中に入れるとネスト不可のため、姉妹要素として外に出す)。
+    // アクティブなレンズ(state.sortが軸キーの場合)があれば、その軸を先頭にする。
+    let topAxes=lens?.topDeviationAxes?.(group.centroid,libraryMean,6)||[];
+    if(lensAxisKeys.includes(state.sort)){
+      const active=topAxes.find(a=>a.key===state.sort);
+      if(active)topAxes=[active,...topAxes.filter(a=>a.key!==state.sort)];
+    }
+    topAxes=topAxes.slice(0,3);
+    const fmtDiff=d=>d>0?`+${d}`:`${d}`;
+    const primaryLabel=topAxes.length?`${esc(topAxes[0].name)} ${topAxes[0].value} · 平均より${fmtDiff(topAxes[0].diff)}`:(scene?'Filter this scene':single?'Open pattern':cluster?'Open cluster':artist?'Explore artist':institution?'Explore institution':'Explore brand');
+    const signalMarkup=topAxes.length>1?`<div class="library-group-signal">
+      <div class="signal-hover-axes">${topAxes.slice(1,3).map(axis=>`<span>${esc(axis.name)} ${axis.value}</span>`).join('')}</div>
+      <div class="signal-hover-actions">
+        <button type="button" data-wb-save-id="${esc(items[0].id)}">参考に追加</button>
+        <button type="button" data-wb-compare-id="${esc(items[0].id)}">比較に追加</button>
+      </div>
+    </div>`:'';
+    const sortAttrs=lensAxisKeys.map(key=>`data-sort-${esc(key)}="${group.centroid?.[key]??50}"`).join(' ');
+    return `<article class="library-group-card ${cluster?'industry-cluster-card':'brand-group-card'} ${artist?'artist-group-card':''}" data-group-key="${esc(group.key)}" data-group-type="${esc(group.type)}" data-entry-kind="${esc(group.entryKind)}" data-brand="${esc(group.brand)}" data-pattern-ids="${esc(items.map(p=>p.id).join('|'))}" data-sort-index="${index}" ${sortAttrs}><a class="library-group-main ${single?'is-direct':''}" href="${href}"><header><small>${kicker}</small><h3>${esc(group.title)}</h3></header><div class="library-group-preview">${previewMarkup}</div><div class="group-pattern-list">${list.slice(0,4).map(item=>`<div><strong>${esc(item.label)}</strong><span>${esc(item.sub||'')}</span></div>`).join('')}${list.length>4?`<p>+ ${list.length-4} more patterns</p>`:''}</div><footer><span>${primaryLabel}</span><b>↗</b></footer></a>${signalMarkup}</article>`;
   }
 
   function renderResults(){
@@ -264,10 +289,73 @@
   const selectionForMode=()=>randomMode==='far'?farApartTriple():randomMode==='weird'?weirdTriple():ordinaryTriple();
   function collisionPrompt(items){return `次の3つの参照を表層的に平均化せず、役割を分けて統合してください。\n\n${items.map((p,i)=>`${i+1}. ${p.brand} / ${p.name}\n   担当原則: ${(p.philosophy||p.tags||[]).slice(0,2).join(' / ')}`).join('\n')}\n\n共通化するのは色ではなく、情報階層・操作モデル・感情強度・探索性・秩序性です。どの場面でどの参照を優先するか明示してください。`;}
   function card(p){return `<a class="pattern-card" href="pattern.html?id=${encodeURIComponent(p.id)}"><div class="card-preview">${render(p,'card')}</div><div class="card-body"><div class="card-meta"><span>${esc(kindLabel(kindOf(p)))}</span><span>${esc(p.brand)}</span></div><h3>${esc(p.name)}</h3><p class="one-liner">${esc(p.oneLiner)}</p><div class="tag-row">${(p.tags||[]).slice(0,3).map(t=>`<span>${esc(t)}</span>`).join('')}</div><div class="card-arrow">Analyze <span>↗</span></div></div></a>`;}
-  function drawThree(){const selected=selectionForMode();if(selected.length<3)return;const prompt=collisionPrompt(selected);randomResults.innerHTML=`<div class="random-analysis"><div class="random-analysis-copy"><p class="eyebrow">${modeCopy[randomMode].title} / BOUNDED</p><h3>${esc(modeCopy[randomMode].description)}</h3></div><details class="collision-brief"><summary>この3つを混ぜるなら？ <span>AI brief</span></summary><div><pre>${esc(prompt)}</pre><button type="button" data-copy-collision>指示文をコピー</button></div></details></div><div class="random-grid">${selected.map(card).join('')}</div>`;randomDraw.querySelector('span').textContent='引き直す';randomResults.scrollIntoView({behavior:'smooth',block:'nearest'});}
-  function setRandomMode(mode){randomMode=modeCopy[mode]?mode:'random';randomModes?.querySelectorAll('[data-random-mode]').forEach(btn=>{const active=btn.dataset.randomMode===randomMode;btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',String(active));});if(randomDraw){randomDraw.querySelector('span').textContent=modeCopy[randomMode].label;randomDraw.querySelector('small').textContent=modeCopy[randomMode].title;}if(randomResults)randomResults.innerHTML='';}
-  randomModes?.addEventListener('click',event=>{const button=event.target.closest('[data-random-mode]');if(button)setRandomMode(button.dataset.randomMode);});randomDraw?.addEventListener('click',drawThree);randomResults?.addEventListener('click',async event=>{const button=event.target.closest('[data-copy-collision]');if(!button)return;const pre=button.closest('.collision-brief')?.querySelector('pre');if(!pre)return;try{await navigator.clipboard.writeText(pre.textContent);button.textContent='コピー済み';setTimeout(()=>button.textContent='指示文をコピー',1500);}catch{button.textContent='選択してコピー';}});
 
-  ensureSortControl();initComposer();setRandomMode('random');
+  // 引く理由: 偶然を「説明可能な偶然」にするための1行(原則: 寄り道には帰り道をつける)。
+  function reasonFor(mode,items){
+    if(mode==='far'&&items.length===3){
+      const d=Math.max(distance(items[0],items[1]),distance(items[0],items[2]),distance(items[1],items[2]));
+      return `${patterns.length}件から、6軸距離が上位のペアを起点に三角形を広げました。最大距離 ${d.toFixed(1)}。`;
+    }
+    if(mode==='weird'&&items.length===3){
+      const domains=new Set(items.map(p=>p.domain).filter(Boolean)).size;
+      const kinds=new Set(items.map(kindOf)).size;
+      return `文脈(${domains}種のDomain・${kinds}種の分類)と設計思想が交わりにくい3件を選びました。`;
+    }
+    return `${patterns.length}件から無作為に選びました。`;
+  }
+  let lastDraw=null;
+  function drawThree(){
+    const selected=selectionForMode();if(selected.length<3)return;
+    const prompt=collisionPrompt(selected);
+    const reason=reasonFor(randomMode,selected);
+    const backLink=lastDraw&&lastDraw.mode===randomMode?'':(lastDraw?`<button type="button" class="random-back-link" data-random-back>← 前回の3件に戻る</button>`:'');
+    randomResults.innerHTML=`<div class="random-analysis"><div class="random-analysis-copy"><p class="eyebrow">${modeCopy[randomMode].title} / BOUNDED</p><h3>${esc(modeCopy[randomMode].description)}</h3><p class="random-reason">${esc(reason)}</p></div>${backLink}<details class="collision-brief"><summary>この3つを混ぜるなら？ <span>AI brief</span></summary><div><pre>${esc(prompt)}</pre><button type="button" data-copy-collision>指示文をコピー</button></div></details></div><div class="random-grid">${selected.map(card).join('')}</div>`;
+    randomDraw.querySelector('span').textContent='引き直す';
+    randomResults.scrollIntoView({behavior:'smooth',block:'nearest'});
+    lastDraw={mode:randomMode,html:randomResults.innerHTML};
+  }
+  function setRandomMode(mode){randomMode=modeCopy[mode]?mode:'random';randomModes?.querySelectorAll('[data-random-mode]').forEach(btn=>{const active=btn.dataset.randomMode===randomMode;btn.classList.toggle('active',active);btn.setAttribute('aria-pressed',String(active));});if(randomDraw){randomDraw.querySelector('span').textContent=modeCopy[randomMode].label;randomDraw.querySelector('small').textContent=modeCopy[randomMode].title;}if(randomResults)randomResults.innerHTML='';}
+  randomModes?.addEventListener('click',event=>{const button=event.target.closest('[data-random-mode]');if(button)setRandomMode(button.dataset.randomMode);});
+  randomDraw?.addEventListener('click',drawThree);
+  randomResults?.addEventListener('click',async event=>{
+    const backBtn=event.target.closest('[data-random-back]');
+    if(backBtn&&lastDraw){randomResults.innerHTML=lastDraw.html;return;}
+    const button=event.target.closest('[data-copy-collision]');if(!button)return;
+    const pre=button.closest('.collision-brief')?.querySelector('pre');if(!pre)return;
+    try{await navigator.clipboard.writeText(pre.textContent);button.textContent='コピー済み';setTimeout(()=>button.textContent='指示文をコピー',1500);}catch{button.textContent='選択してコピー';}
+  });
+
+  // Explore Engineの視覚メタファ: 3ボタンの違いを、説明を読まずに伝える小さなSVG。
+  // 既存designSpace座標のみを使い、画像アセットは追加しない。187点全件を描画する。
+  function buildExploreVisuals(){
+    if(!randomModes||!designSpace)return;
+    const valid=patterns.filter(p=>p.designSpace);
+    if(valid.length<3)return;
+    const W=64,H=36;
+    const px=p=>Math.min(W,Math.max(0,(Number(p.designSpace.density)||50)/100*W));
+    const py=p=>Math.min(H,Math.max(0,H-(Number(p.designSpace.exploration)||50)/100*H));
+    const dots=valid.map((p,i)=>`<circle cx="${px(p).toFixed(1)}" cy="${py(p).toFixed(1)}" r="1" class="ee-dot" style="animation-delay:${(i%30)*100}ms"/>`).join('');
+
+    let farPair=null,farDist=-1;
+    for(let i=0;i<valid.length-1;i++)for(let j=i+1;j<valid.length;j++){
+      const d=distance(valid[i],valid[j]);
+      if(d>farDist){farDist=d;farPair=[valid[i],valid[j]];}
+    }
+    const weirdSample=weirdTriple();
+
+    const base=extra=>`<svg class="mode-visual" viewBox="0 0 ${W} ${H}" aria-hidden="true">${dots}${extra}</svg>`;
+    const randomSvg=base('');
+    const farSvg=farPair?base(`<line x1="${px(farPair[0]).toFixed(1)}" y1="${py(farPair[0]).toFixed(1)}" x2="${px(farPair[1]).toFixed(1)}" y2="${py(farPair[1]).toFixed(1)}" class="ee-line"/><circle cx="${px(farPair[0]).toFixed(1)}" cy="${py(farPair[0]).toFixed(1)}" r="2" class="ee-mark"/><circle cx="${px(farPair[1]).toFixed(1)}" cy="${py(farPair[1]).toFixed(1)}" r="2" class="ee-mark"/>`):randomSvg;
+    const weirdSvg=weirdSample.length===3?base(weirdSample.map(p=>`<circle cx="${px(p).toFixed(1)}" cy="${py(p).toFixed(1)}" r="2" class="ee-mark ee-mark-weird"/>`).join('')):randomSvg;
+
+    const svgByMode={random:randomSvg,far:farSvg,weird:weirdSvg};
+    randomModes.querySelectorAll('[data-random-mode]').forEach(btn=>{
+      if(btn.querySelector('.mode-visual'))return;
+      const svg=svgByMode[btn.dataset.randomMode];
+      if(svg)btn.insertAdjacentHTML('afterbegin',svg);
+    });
+  }
+
+  ensureSortControl();initComposer();setRandomMode('random');buildExploreVisuals();
   if(state.q)searchStore?.ensure?.().finally(scheduleRender);else scheduleRender();
 })();

@@ -3,10 +3,14 @@ import path from 'node:path';
 
 const root=process.cwd();
 const detailDir=path.join(root,'generated','patterns');
-const allowedGroups=new Set(['typography','spacing','surface','layout','interaction']);
+const allowedGroups=new Set(['typography','spacing','surface','layout','interaction','components','responsive']);
 const allowedLevels=new Set(['curated','observed','measured']);
 const allowedConfidence=new Set(['low','medium','high']);
 const allowedSourceKinds=new Set(['official','reference','css','screenshot','other']);
+const allowedSchemaVersions=new Set([1,2]);
+const measuredSourceKinds=new Set(['official','css']);
+const numericLikeValue=/\d\s*(px|em|rem|%|ms|s|:|x|pt|vh|vw)\b|^\d+(\.\d+)?\s*:\s*\d+(\.\d+)?$/i;
+const MAX_TRACED_PATTERNS=20;
 const errors=[];
 let tracedPatterns=0;
 let tracedItems=0;
@@ -38,7 +42,7 @@ for(const file of files){
   tracedPatterns+=1;
 
   if(!isObject(trace)){fail(id,'microDetails must be an object');continue;}
-  if(trace.schemaVersion!==1)fail(id,`microDetails.schemaVersion must be 1, got ${trace.schemaVersion}`);
+  if(!allowedSchemaVersions.has(trace.schemaVersion))fail(id,`microDetails.schemaVersion must be 1 or 2, got ${trace.schemaVersion}`);
   if(!allowedLevels.has(trace.traceLevel))fail(id,`invalid traceLevel ${trace.traceLevel}`);
   if(!validDate(trace.checkedAt))fail(id,`invalid checkedAt ${trace.checkedAt}`);
 
@@ -69,19 +73,53 @@ for(const file of files){
       fail(id,`${groupKey}.items[] is required`);
       continue;
     }
+    const itemLabels=new Set();
     for(const [index,item] of group.items.entries()){
       tracedItems+=1;
       const prefix=`${groupKey}.items[${index}]`;
       if(!isObject(item)){fail(id,`${prefix} must be an object`);continue;}
       if(!text(item.label))fail(id,`${prefix}.label is required`);
+      else itemLabels.add(item.label);
       if(!text(item.value))fail(id,`${prefix}.value is required`);
       if(!allowedConfidence.has(item.confidence))fail(id,`${prefix}.confidence invalid: ${item.confidence}`);
       if(!allowedLevels.has(item.method))fail(id,`${prefix}.method invalid: ${item.method}`);
       if(!text(item.sourceId))fail(id,`${prefix}.sourceId is required`);
       else if(!sourceIds.has(item.sourceId))fail(id,`${prefix}.sourceId does not match sources[]: ${item.sourceId}`);
       if(item.note!==undefined&&!text(item.note))fail(id,`${prefix}.note must be a non-empty string when present`);
+      // 捏造防止: curatedは編集的な読みであり、数値の形をした値を書けない。
+      if(item.method==='curated'&&text(item.value)&&numericLikeValue.test(item.value))
+        fail(id,`${prefix}.value looks numeric but method is 'curated' — use words, not a measured-looking value: "${item.value}"`);
+      // measuredは出典元のkindがofficial/cssでなければならない(スクリーンショットや編集推定を「測定」と偽装できないように)。
+      if(item.method==='measured'&&text(item.sourceId)){
+        const source=(trace.sources||[]).find(s=>s.id===item.sourceId);
+        if(source&&!measuredSourceKinds.has(source.kind))
+          fail(id,`${prefix}.method is 'measured' but sourceId "${item.sourceId}" has kind "${source.kind}" (must be official or css)`);
+      }
+    }
+    if(Array.isArray(group.relations)){
+      for(const [index,relation] of group.relations.entries()){
+        const prefix=`${groupKey}.relations[${index}]`;
+        if(!isObject(relation)){fail(id,`${prefix} must be an object`);continue;}
+        if(!text(relation.label))fail(id,`${prefix}.label is required`);
+        if(!text(relation.value))fail(id,`${prefix}.value is required`);
+        if(!text(relation.from)||!itemLabels.has(relation.from))fail(id,`${prefix}.from must match an items[].label in ${groupKey}: "${relation.from}"`);
+        if(!text(relation.to)||!itemLabels.has(relation.to))fail(id,`${prefix}.to must match an items[].label in ${groupKey}: "${relation.to}"`);
+        if(!allowedConfidence.has(relation.confidence))fail(id,`${prefix}.confidence invalid: ${relation.confidence}`);
+        if(!allowedLevels.has(relation.method))fail(id,`${prefix}.method invalid: ${relation.method}`);
+      }
+    }
+    if(group.meaning!==undefined){
+      if(!isObject(group.meaning))fail(id,`${groupKey}.meaning must be an object`);
+      else{
+        if(!text(group.meaning.text))fail(id,`${groupKey}.meaning.text is required`);
+        if(!['relations','items','editorial'].includes(group.meaning.basis))fail(id,`${groupKey}.meaning.basis invalid: ${group.meaning.basis}`);
+      }
     }
   }
+}
+
+if(tracedPatterns>MAX_TRACED_PATTERNS){
+  fail('(corpus)',`microDetails is set on ${tracedPatterns} patterns, exceeding the ${MAX_TRACED_PATTERNS}-pattern cap for this rollout stage`);
 }
 
 if(errors.length){

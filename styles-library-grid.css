@@ -12,6 +12,7 @@
  * The card is separated primarily by tone; border and shadow are secondary cues.
  */
 .library-group-card{
+  position:relative;
   min-width:0;
   height:430px;
   border:1px solid #cec8bd;
@@ -60,6 +61,37 @@
 .group-pattern-list p{margin:4px 0 0;font-size:6px;color:var(--muted)}
 .library-group-main>footer{margin:0 14px;border-top:1px solid #d9d4ca;display:flex;align-items:center;justify-content:space-between;font-size:8px;color:#68645d}
 .library-group-main>footer b{font-size:10px;color:var(--ink)}
+.library-group-main>footer span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/*
+ * hoverまたはキーボードfocusで、あと2軸+保存/比較ボタンを開示する。
+ * 既定はmax-height:0で高さゼロ・クリック不可(=カードのリンク領域を侵食しない)。
+ * <button>は<a>の中に入れられない(無効なHTML)ため、<a>の姉妹要素として配置し、
+ * 見た目だけ footer の直後にオーバーレイする。
+ */
+.library-group-signal{
+  position:absolute;
+  left:0;right:0;bottom:0;
+  z-index:6;
+  max-height:0;
+  overflow:hidden;
+  background:#fffefa;
+  transition:max-height var(--lwt-motion-hover,140ms) var(--lwt-ease-out,ease-out);
+}
+.library-group-card:hover .library-group-signal,
+.library-group-card:focus-within .library-group-signal{
+  max-height:76px;
+  box-shadow:0 -10px 18px rgb(23 23 21 / 7%);
+}
+.signal-hover-axes{display:flex;gap:6px;flex-wrap:wrap;padding:8px 14px 0}
+.signal-hover-axes span{font-size:7px;padding:3px 7px;border-radius:999px;background:#eeebe3;color:#55524b;white-space:nowrap}
+.signal-hover-actions{display:flex;gap:6px;padding:6px 14px 10px}
+.signal-hover-actions button{flex:1;min-width:0;border:1px solid #cec8bd;background:#fff;border-radius:999px;padding:6px 4px;font-size:7px;color:inherit;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.signal-hover-actions button:hover{border-color:#aaa39a}
+.signal-hover-actions button.is-saved,.signal-hover-actions button.is-compare{background:var(--ink);color:#fff;border-color:var(--ink)}
+@media (prefers-reduced-motion: reduce){
+  .library-group-signal{transition:none}
+}
 
 .industry-cluster-card{background:#faf7f1}
 .industry-cluster-card .library-group-main>header small{color:#68645d}
