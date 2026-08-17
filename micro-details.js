@@ -150,8 +150,19 @@
 
   function prompt(trace){
     if(!trace?.groups?.length)return '';
-    const summary=trace.groups.map(group=>`${group.title}: ${group.items.slice(0,3).map(item=>`${item.label} ${item.value}`).join(' / ')}`).join('。');
-    const caveat=trace.mode==='estimate'?'以下はLike What?上の再現レンジであり、公式CSS値ではありません。':`以下は${traceLabels[trace.mode]||'CURATED TRACE'}として保存した細部観察値です。`;
+    // 未計測(designSpace座標からのランタイム推定)は、AIへの実装指示に数値として
+    // 混入させない。画面上のMICRO DETAILS表示(render関数)はEDITORIAL ESTIMATEの
+    // 注記付きで維持するが、Briefはコピーされた瞬間にその注記から切り離されるため、
+    // 出典のない数値を事実として渡す経路をここで断つ。
+    if(trace.mode==='estimate')return '';
+    const summarizeItem=item=>{
+      const cite=trace.mode==='measured'&&item.sourceUrl?`(出典: ${item.sourceUrl})`:'';
+      return `${item.label} ${item.value}${cite}`;
+    };
+    const summary=trace.groups.map(group=>`${group.title}: ${group.items.slice(0,3).map(summarizeItem).join(' / ')}`).join('。');
+    const caveat=trace.mode==='observed'
+      ?`以下は${traceLabels[trace.mode]}として保存した観察に基づく概算です。`
+      :`以下は${traceLabels[trace.mode]||'CURATED TRACE'}として保存した細部観察値です。`;
     return `\n\n細部トレース: ${caveat} ${summary}。大きな雰囲気だけでなく、文字組み・余白・面・幅・操作の小さな判断まで揃えてください。`;
   }
 
