@@ -110,6 +110,25 @@
   const microPrompt = microDetails && microTrace ? microDetails.prompt(microTrace) : '';
   const expertPrompt = `${p.prompt}\n\n設計語彙として、${vocabularyLine} を意識してください。単にブランドの表層表現を模倣するのではなく、情報階層・密度・文脈保持・操作の開示タイミングまで設計原則として再現してください。${spacePrompt}${oppositePrompt}${microPrompt}`;
 
+  // STEP15: FIRST READ用に、6軸のうちライブラリ平均から最も離れた軸を1つ求める。
+  // lens.js相当の計算をここでも行う(pattern.htmlはlens.jsを読み込んでいないため)。
+  const firstReadAxis = designSpace && p.designSpace ? designSpace.axes
+    .map(a => {
+      const value = Number(p.designSpace[a.key]);
+      const mean = Number(libraryMean[a.key]);
+      if (!Number.isFinite(value) || !Number.isFinite(mean)) return null;
+      return { name: designSpace.axisNames?.[a.key] || a.key, value: Math.round(value), diff: Math.round(value - mean) };
+    })
+    .filter(Boolean)
+    .sort((x, y) => Math.abs(y.diff) - Math.abs(x.diff))[0] : null;
+  const hasMicroTrace = !!(microTrace?.groups?.length && microTrace.mode !== 'estimate');
+  // 解像度インジケータ(STEP16): 実測済みMICRO DETAILSがあれば5段、なければ3段で止まる。
+  const resolutionMax = hasMicroTrace ? 5 : 3;
+  function resolutionDots(step) {
+    const filled = Math.min(step, resolutionMax);
+    return `<span class="resolution-dots" aria-hidden="true">${'●'.repeat(filled)}${'○'.repeat(Math.max(0, resolutionMax - filled))}</span>`;
+  }
+
   root.innerHTML = `
     <section class="detail-hero">
       <div class="breadcrumb"><a href="./#patterns">Patterns</a><span>/</span><span>${esc(p.brand)}</span><span>/</span><span>${esc(p.family)}</span></div>
@@ -122,10 +141,11 @@
 
     <section class="detail-grid">
       <article class="detail-main">
-        <section class="detail-block"><p class="eyebrow">DESIGN INTENT</p><h2>設計意図を言語化すると</h2><p class="large-copy">${esc(p.description)}</p></section>
+        <section class="detail-block first-read-block"><p class="eyebrow">00 FIRST READ</p>${resolutionDots(1)}<p class="first-read-line">${esc(p.oneLiner)}</p>${firstReadAxis ? `<p class="first-read-axis">${esc(firstReadAxis.name)} ${firstReadAxis.value} · ライブラリ平均より${firstReadAxis.diff > 0 ? '+' : ''}${firstReadAxis.diff}</p>` : ''}</section>
+        <section class="detail-block"><p class="eyebrow">01 DESIGN INTENT</p>${resolutionDots(2)}<h2>設計意図を言語化すると</h2><p class="large-copy">${esc(p.description)}</p></section>
 
         ${designSpace && p.designSpace ? `<section class="detail-block design-space-block">
-          <p class="eyebrow">DESIGN SPACE / POSITIONING</p>
+          <p class="eyebrow">02 POSITIONING</p>${resolutionDots(3)}
           <h2>このデザインは、どこに位置する？</h2>
           <p class="design-space-intro">6つの対立軸で、このパターンの設計上の重心を可視化する。レーダーは全体形状、右側のスケールは各軸の意味を読むためのもの。破線は現在のLike What?ライブラリ全体の平均。</p>
           <div class="space-layout">
@@ -190,7 +210,7 @@
         </section>` : ''}
 
         <section class="detail-block grammar-block">
-          <p class="eyebrow">DESIGN GRAMMAR</p><h2>技術・デザイン・思想の3層で分解する</h2>
+          <p class="eyebrow">03 DESIGN GRAMMAR</p>${resolutionDots(4)}<h2>技術・デザイン・思想の3層で分解する</h2>
           <p class="grammar-intro">「○○風」を装飾の模倣で終わらせず、実装構造、視覚・インタラクション設計、認知・設計思想へ分解した語彙。</p>
           <div class="lexicon-grid">
             ${lexiconColumn('IMPLEMENTATION', '実装構造', lex.implementation)}
@@ -201,8 +221,8 @@
 
         ${microDetails && microTrace ? microDetails.render(microTrace, esc) : ''}
         <section class="detail-block"><p class="eyebrow">VISUAL / INTERACTION PRINCIPLES</p><h2>パターンを成立させる設計原則</h2><ol class="principle-list">${p.visual.map((v,i)=>`<li><span>${String(i+1).padStart(2,'0')}</span><p>${esc(v)}</p></li>`).join('')}</ol></section>
-        <section class="detail-block two-up"><div><p class="eyebrow">GOOD FIT</p><h2>適合しやすい文脈</h2><ul>${p.useCases.map(v=>`<li>${esc(v)}</li>`).join('')}</ul></div><div><p class="eyebrow">TRADE-OFF / RISK</p><h2>相性が悪い文脈</h2><ul>${p.avoid.map(v=>`<li>${esc(v)}</li>`).join('')}</ul></div></section>
-        <section class="detail-block prompt-block"><div class="prompt-head"><div><p class="eyebrow">IMPLEMENTATION BRIEF FOR AI</p><h2>AIへ渡す設計指示</h2></div><button id="copyPrompt">コピー</button></div><pre id="promptText">${esc(expertPrompt)}</pre><p id="copyStatus" class="copy-status" aria-live="polite"></p></section>
+        <section class="detail-block"><p class="eyebrow chapter-eyebrow">05 GOOD FIT / TRADE-OFF</p>${resolutionDots(resolutionMax)}<div class="two-up"><div><p class="eyebrow">GOOD FIT</p><h2>適合しやすい文脈</h2><ul>${p.useCases.map(v=>`<li>${esc(v)}</li>`).join('')}</ul></div><div><p class="eyebrow">TRADE-OFF / RISK</p><h2>相性が悪い文脈</h2><ul>${p.avoid.map(v=>`<li>${esc(v)}</li>`).join('')}</ul></div></div></section>
+        <section class="detail-block prompt-block"><div class="prompt-head"><div><p class="eyebrow">06 TAKE IT / IMPLEMENTATION BRIEF</p><h2>AIへ渡す設計指示</h2></div><button id="copyPrompt">コピー</button></div><pre id="promptText">${esc(expertPrompt)}</pre><p id="copyStatus" class="copy-status" aria-live="polite"></p></section>
       </article>
 
       <aside class="detail-aside">
