@@ -45,14 +45,15 @@
     return score;
   }
 
+  const axisKeys=new Set((ds?.axes||[]).map(a=>a.key));
+
   function apply(){
     const cards=[...root.querySelectorAll('.library-group-card')];
     const current=mode(),randomSeed=seed();
     cards.forEach(card=>{
       const index=Number(card.dataset.sortIndex||0);
       let order=index;
-      if(current==='density')order=-Number(card.dataset.sortDensity||0)*1000+index;
-      else if(current==='exploration')order=-Number(card.dataset.sortExploration||0)*1000+index;
+      if(axisKeys.has(current))order=-Number(card.dataset[`sort${current[0].toUpperCase()}${current.slice(1)}`]||0)*1000+index;
       else if(current==='diversity')order=-groupDiversity(card)*1000+index;
       else if(current==='random')order=hash(`${randomSeed}:${card.dataset.groupKey||''}`);
       card.style.order=String(order);

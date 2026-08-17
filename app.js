@@ -34,7 +34,8 @@
 
   if(!patterns.length||!groups||!render)return;
 
-  const validSorts=new Set(['brand','density','exploration','diversity','random']);
+  const lensAxisKeys=(designSpace?.axes||[]).map(a=>a.key);
+  const validSorts=new Set(['brand',...lensAxisKeys,'diversity','random']);
   const urlState=()=>{
     const p=new URLSearchParams(location.search);
     return {
@@ -161,7 +162,8 @@
   function ensureSortControl(){
     if(!facetPanel||document.getElementById('librarySort'))return;
     const row=document.createElement('div');row.className='facet-row sort-facet-row';
-    row.innerHTML='<span>Sort</span><div class="library-sort"><select id="librarySort" aria-label="ライブラリの並び順"><option value="brand">Library order</option><option value="density">Density · dense first</option><option value="exploration">Exploration · exploratory first</option><option value="diversity">Diversity · frontier first</option><option value="random">Random · stable seed</option></select><button type="button" class="sort-reroll" title="Randomを引き直す">↻</button></div>';
+    const axisOptions=(designSpace?.axes||[]).map(a=>`<option value="${esc(a.key)}">${esc(designSpace.axisNames?.[a.key]||a.key)} · ${esc(a.high)} first</option>`).join('');
+    row.innerHTML=`<span>見方 / Lens</span><div class="library-sort"><select id="librarySort" aria-label="ライブラリの並び順・レンズ"><option value="brand">近い順 · Library order</option>${axisOptions}<option value="diversity">Diversity · frontier first</option><option value="random">Random · stable seed</option></select><button type="button" class="sort-reroll" title="Randomを引き直す">↻</button></div>`;
     facetPanel.appendChild(row);
     const select=row.querySelector('select'),reroll=row.querySelector('button');select.value=state.sort;reroll.hidden=state.sort!=='random';
     select.addEventListener('change',()=>{state.sort=validSorts.has(select.value)?select.value:'brand';if(state.sort==='random'&&!state.seed)state.seed=String(Date.now()%1000000000);reroll.hidden=state.sort!=='random';syncUrl('push');document.dispatchEvent(new CustomEvent('likewhat:sort-change',{detail:{sort:state.sort,seed:state.seed}}));});
@@ -186,7 +188,13 @@
     // 常時表示の1軸は既存footerのテキスト内に収め(レイアウト変更ゼロ)、
     // hoverで開くさらに2軸+保存/比較ボタンだけを新規のオーバーレイ要素にする
     // (<button>を<a>の中に入れるとネスト不可のため、姉妹要素として外に出す)。
-    const topAxes=lens?.topDeviationAxes?.(group.centroid,libraryMean,3)||[];
+    // アクティブなレンズ(state.sortが軸キーの場合)があれば、その軸を先頭にする。
+    let topAxes=lens?.topDeviationAxes?.(group.centroid,libraryMean,6)||[];
+    if(lensAxisKeys.includes(state.sort)){
+      const active=topAxes.find(a=>a.key===state.sort);
+      if(active)topAxes=[active,...topAxes.filter(a=>a.key!==state.sort)];
+    }
+    topAxes=topAxes.slice(0,3);
     const fmtDiff=d=>d>0?`+${d}`:`${d}`;
     const primaryLabel=topAxes.length?`${esc(topAxes[0].name)} ${topAxes[0].value} · 平均より${fmtDiff(topAxes[0].diff)}`:(scene?'Filter this scene':single?'Open pattern':cluster?'Open cluster':artist?'Explore artist':institution?'Explore institution':'Explore brand');
     const signalMarkup=topAxes.length>1?`<div class="library-group-signal">
@@ -196,7 +204,8 @@
         <button type="button" data-wb-compare-id="${esc(items[0].id)}">比較に追加</button>
       </div>
     </div>`:'';
-    return `<article class="library-group-card ${cluster?'industry-cluster-card':'brand-group-card'} ${artist?'artist-group-card':''}" data-group-key="${esc(group.key)}" data-group-type="${esc(group.type)}" data-entry-kind="${esc(group.entryKind)}" data-brand="${esc(group.brand)}" data-pattern-ids="${esc(items.map(p=>p.id).join('|'))}" data-sort-index="${index}" data-sort-density="${group.centroid?.density??50}" data-sort-exploration="${group.centroid?.exploration??50}"><a class="library-group-main ${single?'is-direct':''}" href="${href}"><header><small>${kicker}</small><h3>${esc(group.title)}</h3></header><div class="library-group-preview">${previewMarkup}</div><div class="group-pattern-list">${list.slice(0,4).map(item=>`<div><strong>${esc(item.label)}</strong><span>${esc(item.sub||'')}</span></div>`).join('')}${list.length>4?`<p>+ ${list.length-4} more patterns</p>`:''}</div><footer><span>${primaryLabel}</span><b>↗</b></footer></a>${signalMarkup}</article>`;
+    const sortAttrs=lensAxisKeys.map(key=>`data-sort-${esc(key)}="${group.centroid?.[key]??50}"`).join(' ');
+    return `<article class="library-group-card ${cluster?'industry-cluster-card':'brand-group-card'} ${artist?'artist-group-card':''}" data-group-key="${esc(group.key)}" data-group-type="${esc(group.type)}" data-entry-kind="${esc(group.entryKind)}" data-brand="${esc(group.brand)}" data-pattern-ids="${esc(items.map(p=>p.id).join('|'))}" data-sort-index="${index}" ${sortAttrs}><a class="library-group-main ${single?'is-direct':''}" href="${href}"><header><small>${kicker}</small><h3>${esc(group.title)}</h3></header><div class="library-group-preview">${previewMarkup}</div><div class="group-pattern-list">${list.slice(0,4).map(item=>`<div><strong>${esc(item.label)}</strong><span>${esc(item.sub||'')}</span></div>`).join('')}${list.length>4?`<p>+ ${list.length-4} more patterns</p>`:''}</div><footer><span>${primaryLabel}</span><b>↗</b></footer></a>${signalMarkup}</article>`;
   }
 
   function renderResults(){
