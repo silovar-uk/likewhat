@@ -121,7 +121,7 @@
     })
     .filter(Boolean)
     .sort((x, y) => Math.abs(y.diff) - Math.abs(x.diff))[0] : null;
-  const hasMicroTrace = !!(microTrace?.groups?.length && microTrace.mode !== 'estimate');
+  const hasMicroTrace = !!microTrace?.groups?.length;
   // 解像度インジケータ(STEP16): 実測済みMICRO DETAILSがあれば5段、なければ3段で止まる。
   const resolutionMax = hasMicroTrace ? 5 : 3;
   function resolutionDots(step) {
@@ -219,7 +219,7 @@
           </div>
         </section>
 
-        ${microDetails && microTrace ? microDetails.render(microTrace, esc, resolutionDots(5)) : ''}
+        ${microDetails ? microDetails.render(microTrace, esc, resolutionDots(5)) : ''}
         <section class="detail-block"><p class="eyebrow">VISUAL / INTERACTION PRINCIPLES</p><h2>パターンを成立させる設計原則</h2><ol class="principle-list">${p.visual.map((v,i)=>`<li><span>${String(i+1).padStart(2,'0')}</span><p>${esc(v)}</p></li>`).join('')}</ol></section>
         <section class="detail-block"><p class="eyebrow chapter-eyebrow">05 GOOD FIT / TRADE-OFF</p>${resolutionDots(resolutionMax)}<div class="two-up"><div><p class="eyebrow">GOOD FIT</p><h2>適合しやすい文脈</h2><ul>${p.useCases.map(v=>`<li>${esc(v)}</li>`).join('')}</ul></div><div><p class="eyebrow">TRADE-OFF / RISK</p><h2>相性が悪い文脈</h2><ul>${p.avoid.map(v=>`<li>${esc(v)}</li>`).join('')}</ul></div></div></section>
         <section class="detail-block prompt-block"><div class="prompt-head"><div><p class="eyebrow">06 TAKE IT / IMPLEMENTATION BRIEF</p><h2>AIへ渡す設計指示</h2></div><button id="copyPrompt">コピー</button></div><pre id="promptText">${esc(expertPrompt)}</pre><p id="copyStatus" class="copy-status" aria-live="polite"></p></section>
