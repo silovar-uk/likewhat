@@ -15,6 +15,7 @@
     await script('taxonomy.js');await script('design-space.js');await script('entry-kinds.js');await script('vocabulary.js');await script('ui.js');
     for(const src of ['ui-extra.js','ui-wave1.js','ui-wave2.js','ui-wave3.js','ui-wave4.js','ui-wave5.js','ui-wave6.js','ui-tv.js','ui-eyewear.js'])await script(src);
     await script('ui-idols.js',{'data-load-expansion':'false'});await script('ui-idols2.js');await script('ui-preview-contract.js');
+    await script('site-polish.js?v=20260817-polish1');
     await script('pattern.js');await script('cluster-detail.js');await script('pattern-idol.js');await script('brand-links.js');await script('discovery-v2.js');await script('context-neighbors.js');await script('pattern-tools.js');
     window.LikeWhatPatternLoadMetrics={selectedId:id,referenceCount:catalog.referenceCount,fullDetailRecords:1,compactRecords:catalog.records.length-1,durationMs:Math.round(performance.now()-started),runtimeCatalog:'generated/catalog-core.json'};
     window.dispatchEvent(new CustomEvent('likewhat:pattern-ready',{detail:window.LikeWhatPatternLoadMetrics}));
