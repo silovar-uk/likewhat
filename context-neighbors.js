@@ -24,8 +24,10 @@
     const d=distance(p);const diffs=ds.differenceBreakdown(selected.designSpace,p.designSpace).slice(0,2);
     return `<a class="context-neighbor" href="compare.html?a=${encodeURIComponent(selected.id)}&b=${encodeURIComponent(p.id)}"><div class="context-neighbor-preview">${ui.render(p,'related')}</div><div class="context-neighbor-copy"><small>${esc(label)}</small><strong>${esc(p.brand)}</strong><span>${esc(p.name)}</span><p>${esc(copy)} Distance ${d.toFixed(1)}.</p><div class="context-neighbor-diffs">${diffs.map(x=>`<b>${esc(x.name)} Δ${Math.round(x.diff)}</b>`).join('')}</div></div></a>`;
   }
-  const section=document.createElement('section');section.className='context-neighbors';
-  section.innerHTML=`<div class="context-neighbors-head"><div><p class="eyebrow">CONTEXT SWITCH / SERIOUS × SERENDIPITY</p><h2>近い、を2種類に分ける。</h2></div><p>同じ問題領域で微差を見る比較と、別世界へ原則を持ち運ぶ比較を混ぜない。</p></div><div class="context-neighbor-grid">${card(within,'WITHIN CONTEXT','同じScene / Institution / Domainを優先した最寄り参照。')}${card(across,'ACROSS WORLDS','別文脈の中で設計座標が比較的近い参照。原則の移植可能性を見る。')}</div>`;
+  // STEP14: 関係セクションの重複感を減らすため、既定で畳んだ<details>にする
+  // (ネイティブ要素・キーボード操作可能・計算ロジックは無変更)。
+  const section=document.createElement('details');section.className='context-neighbors detail-block relation-collapse';
+  section.innerHTML=`<summary><p class="eyebrow">CONTEXT SWITCH / SERIOUS × SERENDIPITY</p><h2>近い、を2種類に分ける。</h2></summary><div class="relation-collapse-body"><p>同じ問題領域で微差を見る比較と、別世界へ原則を持ち運ぶ比較を混ぜない。</p><div class="context-neighbor-grid">${card(within,'WITHIN CONTEXT','同じScene / Institution / Domainを優先した最寄り参照。')}${card(across,'ACROSS WORLDS','別文脈の中で設計座標が比較的近い参照。原則の移植可能性を見る。')}</div></div>`;
   const next=root.querySelector('.next-references-block');
   if(next)next.before(section);else root.querySelector('.detail-grid')?.after(section);
 })();

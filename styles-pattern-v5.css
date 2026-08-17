@@ -26,3 +26,16 @@ body[data-analysis-page="pattern"] .diversity-score strong,
 body[data-analysis-page="pattern"] .distance {
   font-variant-numeric: var(--lwt-numeric);
 }
+
+/*
+ * STEP14: 関係セクション(CONTEXT SWITCH / NEXT REFERENCES)を<details>化。
+ * ネイティブ要素なのでキーボード操作・aria状態はブラウザ標準に任せる。
+ */
+.relation-collapse{margin:0 auto 36px;max-width:1380px;padding:0 clamp(18px,4vw,54px)}
+.relation-collapse > summary{cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.relation-collapse > summary::-webkit-details-marker{display:none}
+.relation-collapse > summary::before{content:'+';font-size:16px;line-height:1;color:var(--muted);margin-right:2px}
+.relation-collapse[open] > summary::before{content:'–'}
+.relation-collapse > summary .eyebrow{margin:0}
+.relation-collapse > summary h2{margin:0;font-size:clamp(20px,2.4vw,28px)}
+.relation-collapse-body{margin-top:14px}

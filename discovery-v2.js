@@ -154,13 +154,16 @@
       </article>`;
     }
 
+    // STEP14: 関係セクションの出口をページ末尾の1箇所へ集約する
+    // (抽象→具体の降下を関係カードで中断させないため)。計算ロジックは無変更、
+    // 挿入位置のみ.detail-main末尾へ変更。
     const section=document.createElement('section');
     section.className='detail-block next-references-block';
     section.innerHTML=`<div class="next-references-heading"><div><p class="eyebrow">NEXT REFERENCES / EXPLAINABLE ROUTES</p><h2>次に何を見ると、この設計がもっと分かる？</h2><p>似ているもの、原則を共有する別文脈、優先順位を反転したもの。推薦理由を3種類に分け、同じ「関連」を混ぜない。</p></div><a href="compare.html?a=${encodeURIComponent(current.id)}&b=${encodeURIComponent(lanes[0].target.id)}">Contrastを開く ↗</a></div><div class="next-reference-grid">${lanes.map(laneMarkup).join('')}</div><p class="next-references-note">推薦は現在の${patterns.length}パターン、6軸Design Space、Vocabulary、編集上のrelated指定から計算する。SimilarityとOppositionは同じ意味ではない。</p>`;
 
-    const oldCompare=root.querySelector('.compare-route-block');
-    if(oldCompare)oldCompare.replaceWith(section);
-    else root.querySelector('.detail-grid')?.before(section);
+    root.querySelector('.compare-route-block')?.remove();
+    const main=root.querySelector('.detail-main');
+    if(main)main.appendChild(section);else root.querySelector('.detail-grid')?.before(section);
     root.querySelector('.related')?.remove();
   }
 
