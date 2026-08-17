@@ -7,3 +7,11 @@
 .axis-compare-group-label span{font-size:9px;font-weight:500;color:var(--muted)}
 .axis-compare-group--largest .axis-compare-group-label{color:#8a3a1f}
 .axis-compare-row.is-top-diff{border-color:#8a3a1f;box-shadow:0 0 0 1px #8a3a1f inset}
+
+/* STEP22: MICRO DETAILS DELTA */
+.micro-compare-note{margin:16px 0 0;font-size:11px;line-height:1.7;color:var(--muted);max-width:640px}
+.micro-compare-list{display:grid;gap:8px;margin-top:16px}
+.micro-compare-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:baseline;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:#fff}
+.micro-compare-row small{font-size:9px;color:var(--muted)}
+.micro-compare-values{display:flex;gap:14px;font-size:12px;font-variant-numeric:tabular-nums}
+.micro-compare-values b{margin-right:4px;font-size:9px;color:var(--muted)}

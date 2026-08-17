@@ -4,6 +4,7 @@
   const vocab=window.LikeWhatVocabulary;
   const ui=window.LikeWhatUI;
   const store=window.LikeWhatDetailStore;
+  const microDetails=window.LikeWhatMicroDetails;
   if(!patterns.length||!ds||!vocab||!ui||!store)return;
   const {render,esc}=ui;
   const byId=new Map(patterns.map(p=>[p.id,p]));
@@ -95,6 +96,30 @@
   function patternPanel(p,label){return `<article class="compare-pattern"><div class="compare-pattern-head"><div><small>${esc(label)}</small><h2>${esc(p.brand)}</h2><p>${esc(p.name)}</p></div><a href="pattern.html?id=${encodeURIComponent(p.id)}">Analyze ↗</a></div><div class="compare-preview">${render(p,'detail')}</div><p class="compare-liner">${esc(p.oneLiner)}</p><div class="compare-context"><span><small>DOMAIN</small><b>${esc(p.domain||'—')}</b></span><span><small>ARCHETYPE</small><b>${esc(p.archetype||'—')}</b></span></div></article>`;}
   function termChips(items){return items.length?items.slice(0,10).map(t=>`<a href="vocabulary.html?term=${encodeURIComponent(t.term)}">${esc(t.term)}</a>`).join(''):'<span class="empty-chip">—</span>';}
   function listItems(items,limit=4){return(items||[]).slice(0,limit).map(v=>`<li>${esc(v)}</li>`).join('');}
+  // STEP22: 両方に実測MICRO DETAILSがある場合のみ細部比較を表示する。
+  // 片方だけの場合は、比較不能である理由を正直に1行示す(原則P7)。
+  function microDetailsSection(){
+    if(!microDetails)return'';
+    const traceA=microDetails.forPattern(a),traceB=microDetails.forPattern(b);
+    if(!traceA&&!traceB)return'';
+    if(!traceA||!traceB){
+      const missing=traceA?b.brand:a.brand;
+      return `<section class="compare-section micro-compare-section"><div class="compare-section-head"><p class="eyebrow">MICRO DETAILS DELTA</p><h2>細部までは、まだ比べられない。</h2></div><p class="micro-compare-note">${esc(missing)}はMICRO DETAILSが未計測のため、細部の比較はまだできません。</p></section>`;
+    }
+    const groupsA=new Map(traceA.groups.map(g=>[g.key,g]));
+    const rows=[];
+    traceB.groups.forEach(groupB=>{
+      const groupA=groupsA.get(groupB.key);
+      if(!groupA)return;
+      const itemsA=new Map(groupA.items.map(i=>[i.label,i]));
+      groupB.items.forEach(itemB=>{
+        const itemA=itemsA.get(itemB.label);
+        if(itemA)rows.push({group:groupB.title,label:itemB.label,a:itemA.value,b:itemB.value});
+      });
+    });
+    if(!rows.length)return `<section class="compare-section micro-compare-section"><div class="compare-section-head"><p class="eyebrow">MICRO DETAILS DELTA</p><h2>細部までは、まだ比べられない。</h2></div><p class="micro-compare-note">両者とも計測済みだが、同じ項目を計測していないため、直接比較できる値が今のところない。</p></section>`;
+    return `<section class="compare-section micro-compare-section"><div class="compare-section-head"><p class="eyebrow">MICRO DETAILS DELTA</p><h2>細部の値を、直接重ねる。</h2><p>両者が同じ項目を実測している場合のみ、値を並べる。</p></div><div class="micro-compare-list">${rows.map(r=>`<div class="micro-compare-row"><small>${esc(r.group)} / ${esc(r.label)}</small><div class="micro-compare-values"><span><b>A</b>${esc(r.a)}</span><span><b>B</b>${esc(r.b)}</span></div></div>`).join('')}</div></section>`;
+  }
   function insight(rows){
     const ordered=[...rows].sort((x,y)=>x.diff-y.diff),nearest=ordered[0],furthest=ordered[ordered.length-1];
     return `両者で最も近いのは ${nearest.name}（${a.brand} ${Math.round(nearest.a)} / ${b.brand} ${Math.round(nearest.b)}）。最大の分岐は ${furthest.name} で、${a.brand} は「${furthest.aLabel}」、${b.brand} は「${furthest.bLabel}」側に位置する。同じ問題を扱っていても、この軸の置き方で体験の性格が変わる。`;
@@ -133,6 +158,7 @@
       <section class="compare-section"><div class="compare-section-head"><p class="eyebrow">DESIGN SPACE / AXIS DELTA</p><h2>同じ場所と、分岐する場所。</h2><p>差が大きい軸を先に見せる。「最大の違い」がこの2つを分けている最大の要因。</p></div><div class="axis-compare-list">${axisGroupsMarkup(rows)}</div></section>
       <section class="compare-section"><div class="compare-section-head"><p class="eyebrow">VOCABULARY DELTA</p><h2>同じ原則を、どこまで共有している？</h2></div><div class="vocab-delta-grid"><article><small>SHARED</small><h3>共通語彙</h3><div class="compare-chips shared">${termChips(terms.shared)}</div></article><article><small>${esc(a.brand)} ONLY</small><h3>A側で強い語彙</h3><div class="compare-chips">${termChips(terms.onlyA)}</div></article><article><small>${esc(b.brand)} ONLY</small><h3>B側で強い語彙</h3><div class="compare-chips">${termChips(terms.onlyB)}</div></article></div></section>
       <section class="compare-section"><div class="compare-section-head"><p class="eyebrow">DECISION RULE</p><h2>どちらを選ぶべきか。</h2><p>「どちらが優れているか」ではなく、目的・利用文脈と設計優先順位の適合で選ぶ。</p></div><div class="decision-grid"><article><small>CHOOSE A / ${esc(a.brand)}</small><h3>${esc(a.oneLiner)}</h3><ul>${listItems(a.useCases)}</ul><div class="avoid"><b>避けたい文脈</b><ul>${listItems(a.avoid,3)}</ul></div></article><article><small>CHOOSE B / ${esc(b.brand)}</small><h3>${esc(b.oneLiner)}</h3><ul>${listItems(b.useCases)}</ul><div class="avoid"><b>避けたい文脈</b><ul>${listItems(b.avoid,3)}</ul></div></article></div></section>
+      ${microDetailsSection()}
       <section class="compare-section brief-section"><div class="compare-section-head"><p class="eyebrow">COMPARE BRIEF FOR AI</p><h2>差分そのものを、指示にする。</h2></div><div class="compare-brief"><pre id="compareBrief">${esc(brief)}</pre><button type="button" id="copyCompare">比較指示をコピー</button></div></section>`;
     document.getElementById('copyCompare')?.addEventListener('click',async e=>{try{await navigator.clipboard.writeText(document.getElementById('compareBrief').textContent);e.currentTarget.textContent='コピー済み';setTimeout(()=>e.currentTarget.textContent='比較指示をコピー',1400);}catch{e.currentTarget.textContent='選択してコピー';}});
   }
