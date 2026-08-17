@@ -17,6 +17,26 @@
   const budgets=catalogMeta.performanceBudget||{initialPatternDetailData:0,initialPreviewRendering:0,initialDiversityCalculations:0,initialDomNodes:1000};
   window.LikeWhatPerformanceBudget=budgets;
 
+  // 訪問状態(初見/再訪/作業中)の判定。workbench.jsのlocalStorageキーを
+  // そのまま読む(exportされていないため文字列を直接参照。キー自体は
+  // workbench.js側で変更していない)。同期実行し、初回ペイントの前に
+  // body[data-visit-state]を確定させ、ちらつきを避ける。
+  function detectVisitState(){
+    const safeParse=(raw,fallback)=>{try{const v=JSON.parse(raw||'');return v??fallback;}catch{return fallback;}};
+    let recent=[],projects={};
+    try{
+      recent=safeParse(localStorage.getItem('lw:wb:recent:v1'),[]);
+      projects=safeParse(localStorage.getItem('lw:wb:projects:v1'),{});
+    }catch{/* localStorage無効環境は初見扱いにフォールバック */}
+    const hasSaved=projects&&typeof projects==='object'&&Object.values(projects).some(list=>Array.isArray(list)&&list.length>0);
+    if(hasSaved)return'working';
+    if(Array.isArray(recent)&&recent.length>0)return'returning';
+    return'first-time';
+  }
+  const visitState=detectVisitState();
+  document.body.dataset.visitState=visitState;
+  window.LikeWhatVisitState=visitState;
+
   function setupRandomRailButton(){
     if(!railNav||railNav.querySelector('.lw-nav-random')||!randomDraw)return;
     const button=document.createElement('button');

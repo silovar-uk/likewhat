@@ -277,3 +277,24 @@
 .explore-tool:nth-child(1):hover,.explore-tool:nth-child(2):hover,.explore-tool:nth-child(3):hover{background:#f8f9fb!important}
 .randomizer .eyebrow{color:#596273!important}
 .randomizer:before{color:rgb(32 36 45 / 3%)!important}
+
+/*
+ * STEP 13: 訪問状態(body[data-visit-state])によるHome出し分け。
+ * セクションは削除・並び替えせず、表示密度のみを変える。
+ * - 初見: RESUME/Reference Boardは中身が空なので、縦スペースを圧縮する
+ *   (情報は失われない。「まだありません」の空状態文言のみ短く見える)。
+ * - 再訪/作業中: 既に読んだHero説明文を畳み、Libraryへ早く到達できるようにする。
+ */
+body[data-visit-state="first-time"] .wb-recent,
+body[data-visit-state="first-time"] .wb-board{
+  max-height:112px;
+  overflow:hidden;
+}
+body[data-visit-state="returning"] .wb-board{
+  max-height:112px;
+  overflow:hidden;
+}
+body[data-visit-state="returning"] .hero-copy,
+body[data-visit-state="working"] .hero-copy{
+  display:none;
+}
