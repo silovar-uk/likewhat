@@ -55,6 +55,33 @@
   }
   function axisClass(diff){if(diff<=8)return'shared';if(diff<=18)return'close';if(diff<=32)return'shift';return'diverge';}
   function axisClassLabel(diff){if(diff<=8)return'Shared';if(diff<=18)return'Close';if(diff<=32)return'Shift';return'Diverges';}
+  // STEP21: 6軸を差の降順で3群(最大の違い/大きな違い/ほぼ同じ)へ分類する。
+  // 既存のaxisClass閾値(shared<=8/close<=18/shift<=32/diverge>32)をそのまま再利用し、
+  // shared+closeを「ほぼ同じ」、shiftを「大きな違い」、divergeを「最大の違い」に束ねる。
+  function axisBucket(diff){if(diff>32)return'largest';if(diff>18)return'big';return'same';}
+  const bucketMeta={
+    largest:{label:'最大の違い',hint:'ここで体験の性格が最も変わる'},
+    big:{label:'大きな違い',hint:'目的に応じて優先順位が分かれる'},
+    same:{label:'ほぼ同じ',hint:'両者が共有している基盤'}
+  };
+  function groupedAxisRows(rows){
+    const sorted=[...rows].sort((x,y)=>y.diff-x.diff);
+    const groups={largest:[],big:[],same:[]};
+    sorted.forEach(row=>groups[axisBucket(row.diff)].push(row));
+    return groups;
+  }
+  function axisRowMarkup(r,isTopDiff){
+    return `<div class="axis-compare-row ${axisClass(r.diff)}${isTopDiff?' is-top-diff':''}"><div class="axis-compare-title"><strong>${esc(r.name)}</strong><span>${axisClassLabel(r.diff)} · Δ${Math.round(r.diff)}</span></div><div class="axis-compare-values"><span><b>A</b>${esc(r.aLabel)} ${Math.round(r.a)}</span><span><b>B</b>${esc(r.bLabel)} ${Math.round(r.b)}</span></div><div class="axis-compare-track"><i class="axis-a" style="left:${r.a}%"></i><i class="axis-b" style="left:${r.b}%"></i></div><div class="axis-compare-poles"><span>${esc(r.axis.low)}</span><span>${esc(r.axis.high)}</span></div></div>`;
+  }
+  function axisGroupsMarkup(rows){
+    const groups=groupedAxisRows(rows);
+    const topDiffKey=[...rows].sort((x,y)=>y.diff-x.diff)[0]?.axis?.key;
+    return(['largest','big','same']).map(key=>{
+      const list=groups[key];
+      if(!list.length)return'';
+      return `<div class="axis-compare-group axis-compare-group--${key}"><p class="axis-compare-group-label">${esc(bucketMeta[key].label)}<span>${esc(bucketMeta[key].hint)}</span></p>${list.map(r=>axisRowMarkup(r,r.axis.key===topDiffKey)).join('')}</div>`;
+    }).join('');
+  }
   function option(p){return `<option value="${esc(p.id)}">${esc(p.brand)} — ${esc(p.name)}</option>`;}
   function renderSelectors(){
     const sorted=[...patterns].sort((x,y)=>`${x.brand} ${x.name}`.localeCompare(`${y.brand} ${y.name}`,'ja'));
@@ -103,7 +130,7 @@
       <section class="compare-headline"><div><p class="eyebrow">CURRENT CONTRAST</p><h1>${esc(a.brand)} <span>vs</span> ${esc(b.brand)}</h1><p>${esc(insight(rows))}</p></div><div class="compare-score"><strong>${distance.toFixed(1)}</strong><span>Design Distance</span><small>${esc(ds.distanceLabel(distance))}</small></div></section>
       <section class="compare-pattern-grid">${patternPanel(a,'REFERENCE A')}<div class="compare-versus" aria-hidden="true">↔</div>${patternPanel(b,'REFERENCE B')}</section>
       <section class="compare-metrics"><div><strong>${sharedAxes}</strong><span>near-shared axes</span></div><div><strong>${divergedAxes}</strong><span>divergent axes</span></div><div><strong>${terms.shared.length}</strong><span>shared vocabulary</span></div><div><strong>${new Set([a.domain,b.domain]).size}</strong><span>domains</span></div></section>
-      <section class="compare-section"><div class="compare-section-head"><p class="eyebrow">DESIGN SPACE / AXIS DELTA</p><h2>同じ場所と、分岐する場所。</h2><p>6軸を同じ物差しで重ねる。差が小さい軸は共通基盤、大きい軸は体験を分ける設計判断。</p></div><div class="axis-compare-list">${rows.map(r=>`<div class="axis-compare-row ${axisClass(r.diff)}"><div class="axis-compare-title"><strong>${esc(r.name)}</strong><span>${axisClassLabel(r.diff)} · Δ${Math.round(r.diff)}</span></div><div class="axis-compare-values"><span><b>A</b>${esc(r.aLabel)} ${Math.round(r.a)}</span><span><b>B</b>${esc(r.bLabel)} ${Math.round(r.b)}</span></div><div class="axis-compare-track"><i class="axis-a" style="left:${r.a}%"></i><i class="axis-b" style="left:${r.b}%"></i></div><div class="axis-compare-poles"><span>${esc(r.axis.low)}</span><span>${esc(r.axis.high)}</span></div></div>`).join('')}</div></section>
+      <section class="compare-section"><div class="compare-section-head"><p class="eyebrow">DESIGN SPACE / AXIS DELTA</p><h2>同じ場所と、分岐する場所。</h2><p>差が大きい軸を先に見せる。「最大の違い」がこの2つを分けている最大の要因。</p></div><div class="axis-compare-list">${axisGroupsMarkup(rows)}</div></section>
       <section class="compare-section"><div class="compare-section-head"><p class="eyebrow">VOCABULARY DELTA</p><h2>同じ原則を、どこまで共有している？</h2></div><div class="vocab-delta-grid"><article><small>SHARED</small><h3>共通語彙</h3><div class="compare-chips shared">${termChips(terms.shared)}</div></article><article><small>${esc(a.brand)} ONLY</small><h3>A側で強い語彙</h3><div class="compare-chips">${termChips(terms.onlyA)}</div></article><article><small>${esc(b.brand)} ONLY</small><h3>B側で強い語彙</h3><div class="compare-chips">${termChips(terms.onlyB)}</div></article></div></section>
       <section class="compare-section"><div class="compare-section-head"><p class="eyebrow">DECISION RULE</p><h2>どちらを選ぶべきか。</h2><p>「どちらが優れているか」ではなく、目的・利用文脈と設計優先順位の適合で選ぶ。</p></div><div class="decision-grid"><article><small>CHOOSE A / ${esc(a.brand)}</small><h3>${esc(a.oneLiner)}</h3><ul>${listItems(a.useCases)}</ul><div class="avoid"><b>避けたい文脈</b><ul>${listItems(a.avoid,3)}</ul></div></article><article><small>CHOOSE B / ${esc(b.brand)}</small><h3>${esc(b.oneLiner)}</h3><ul>${listItems(b.useCases)}</ul><div class="avoid"><b>避けたい文脈</b><ul>${listItems(b.avoid,3)}</ul></div></article></div></section>
       <section class="compare-section brief-section"><div class="compare-section-head"><p class="eyebrow">COMPARE BRIEF FOR AI</p><h2>差分そのものを、指示にする。</h2></div><div class="compare-brief"><pre id="compareBrief">${esc(brief)}</pre><button type="button" id="copyCompare">比較指示をコピー</button></div></section>`;
