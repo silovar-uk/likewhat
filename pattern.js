@@ -230,6 +230,11 @@
       </aside>
     </section>
 
+    ${diversity?.nearest?.pattern||diversity?.farthest?.pattern?`<nav class="detail-mobile-next" aria-label="次の参照へ">
+      ${diversity?.nearest?.pattern?`<a href="pattern.html?id=${encodeURIComponent(diversity.nearest.pattern.id)}"><small>次: 近い</small><strong>${esc(diversity.nearest.pattern.brand)}</strong></a>`:''}
+      ${diversity?.farthest?.pattern?`<a href="pattern.html?id=${encodeURIComponent(diversity.farthest.pattern.id)}"><small>次: 最も遠い</small><strong>${esc(diversity.farthest.pattern.brand)}</strong></a>`:''}
+    </nav>`:''}
+
     <section class="related"><div class="browser-head"><div><p class="eyebrow">RELATED PATTERNS</p><h2>近接する視覚文法</h2></div></div><div class="related-grid">${related.map(x=>`<a href="pattern.html?id=${encodeURIComponent(x.id)}"><div>${render(x,'related')}</div><p>${esc(x.brand)}</p><strong>${esc(x.name)}</strong></a>`).join('')}</div></section>`;
 
   const btn = document.getElementById('copyPrompt');
@@ -237,4 +242,30 @@
     try { await navigator.clipboard.writeText(expertPrompt); btn.textContent='コピー済み'; document.getElementById('copyStatus').textContent='専門語彙、Design Space座標、対極参照、細部トレースを含む設計指示をコピーした。'; setTimeout(()=>btn.textContent='コピー',1800); }
     catch { document.getElementById('copyStatus').textContent='コピーできなかったため、本文を選択してコピーしてください。'; }
   });
+
+  // STEP25: モバイルでは00 FIRST READ/01 DESIGN INTENTのみ開いた状態にし、
+  // 02以降を折り畳んで初期スクロール量を抑える。デスクトップは無変更。
+  if (window.matchMedia?.('(max-width: 640px)')?.matches) {
+    const main = document.querySelector('.detail-main');
+    const blocks = main ? [...main.children] : [];
+    const collapseFrom = blocks.findIndex((el, i) => i >= 2);
+    if (collapseFrom >= 2) {
+      const rest = blocks.slice(collapseFrom);
+      const wrap = document.createElement('div');
+      wrap.className = 'detail-mobile-collapsed';
+      rest[0].before(wrap);
+      rest.forEach(el => wrap.appendChild(el));
+      const toggle = document.createElement('button');
+      toggle.type = 'button';
+      toggle.className = 'detail-mobile-expand';
+      toggle.textContent = 'このパターンをもっと読む ↓';
+      toggle.setAttribute('aria-expanded', 'false');
+      wrap.after(toggle);
+      toggle.addEventListener('click', () => {
+        wrap.classList.add('is-expanded');
+        toggle.hidden = true;
+        toggle.setAttribute('aria-expanded', 'true');
+      });
+    }
+  }
 })();

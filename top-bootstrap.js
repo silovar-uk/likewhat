@@ -37,6 +37,19 @@
   document.body.dataset.visitState=visitState;
   window.LikeWhatVisitState=visitState;
 
+  // STEP25: モバイルは「短時間で偶然おもしろいものを見つける」用途が強いと
+  // 仮定し、Explore Engine(SERENDIPITY)を課題選択の直後へ移動する。
+  // <main>はflex/gridではないためCSS orderが使えず、実DOM移動で対応する。
+  // 一度だけ判定(リサイズの再評価はしない。フルリロードで再評価される)。
+  function reorderForMobile(){
+    if(!window.matchMedia?.('(max-width: 640px)')?.matches)return;
+    const workbench=document.getElementById('workbench');
+    const randomizer=document.getElementById('randomizer');
+    if(!workbench||!randomizer||randomizer===workbench.nextElementSibling)return;
+    workbench.after(randomizer);
+  }
+  reorderForMobile();
+
   function setupRandomRailButton(){
     if(!railNav||railNav.querySelector('.lw-nav-random')||!randomDraw)return;
     const button=document.createElement('button');

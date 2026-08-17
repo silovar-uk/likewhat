@@ -46,3 +46,20 @@ body[data-analysis-page="pattern"] .distance {
 .first-read-axis{font-size:11px;color:var(--muted);margin:0}
 .resolution-dots{display:inline-block;margin-left:8px;font-size:9px;letter-spacing:.12em;color:var(--muted);vertical-align:middle}
 .chapter-eyebrow{margin-bottom:0!important}
+
+/* STEP25: モバイルで02章以降を折り畳む(初期スクロール量を抑える) */
+@media(max-width:640px){
+  .detail-mobile-collapsed{max-height:64px;overflow:hidden;position:relative;-webkit-mask-image:linear-gradient(to bottom,#000 0,transparent 100%);mask-image:linear-gradient(to bottom,#000 0,transparent 100%)}
+  .detail-mobile-collapsed.is-expanded{max-height:none;-webkit-mask-image:none;mask-image:none}
+  .detail-mobile-expand{display:block;width:100%;margin:8px 0 40px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:12px;font-weight:700;color:var(--ink);cursor:pointer}
+}
+@media(min-width:641px){.detail-mobile-expand{display:none}}
+
+/* STEP26: モバイル専用の1件送り(タップのみ、スワイプは実装しない) */
+.detail-mobile-next{display:none}
+@media(max-width:640px){
+  .detail-mobile-next{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 auto 40px;padding:0 clamp(18px,4vw,54px);max-width:1380px}
+  .detail-mobile-next a{display:block;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--surface);text-decoration:none;color:inherit;min-height:44px}
+  .detail-mobile-next small{display:block;font-size:9px;color:var(--muted);margin-bottom:4px}
+  .detail-mobile-next strong{display:block;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+}
