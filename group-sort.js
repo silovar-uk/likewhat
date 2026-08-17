@@ -46,9 +46,14 @@
   }
 
   const axisKeys=new Set((ds?.axes||[]).map(a=>a.key));
+  const reduceMotion=()=>window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
 
-  function apply(){
+  // レンズ切替(sort-change)でカードが並び替わったことを視覚的に伝えるため、
+  // FLIP法(位置を記録→再配置→差分をtransformで戻して0へアニメ)で320ms動かす。
+  // 初回描画(groups-rendered)はanimate=falseで即時反映のみ。
+  function apply(animate){
     const cards=[...root.querySelectorAll('.library-group-card')];
+    const before=animate&&!reduceMotion()?new Map(cards.map(card=>[card,card.getBoundingClientRect()])):null;
     const current=mode(),randomSeed=seed();
     cards.forEach(card=>{
       const index=Number(card.dataset.sortIndex||0);
@@ -58,9 +63,24 @@
       else if(current==='random')order=hash(`${randomSeed}:${card.dataset.groupKey||''}`);
       card.style.order=String(order);
     });
+    if(!before)return;
+    requestAnimationFrame(()=>{
+      cards.forEach(card=>{
+        const prev=before.get(card),next=card.getBoundingClientRect();
+        const dx=prev.left-next.left,dy=prev.top-next.top;
+        if(!dx&&!dy)return;
+        card.style.transition='none';
+        card.style.transform=`translate(${dx}px,${dy}px)`;
+        requestAnimationFrame(()=>{
+          card.style.transition='transform var(--lwt-motion-lens,320ms) var(--lwt-ease-out,ease-out)';
+          card.style.transform='';
+          card.addEventListener('transitionend',()=>{card.style.transition='';},{once:true});
+        });
+      });
+    });
   }
 
-  document.addEventListener('likewhat:sort-change',apply);
-  root.addEventListener('likewhat:groups-rendered',apply);
-  apply();
+  document.addEventListener('likewhat:sort-change',()=>apply(true));
+  root.addEventListener('likewhat:groups-rendered',()=>apply(false));
+  apply(false);
 })();
