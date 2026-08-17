@@ -33,6 +33,7 @@ jobs:
       - name: Generate and lint library data
         run: |
           node scripts/build-pattern-data.mjs
+          node scripts/check-micro-details.mjs
           node scripts/build-share-shells.mjs
           node scripts/stamp-static-html.mjs
       - name: Verify generated runtime data
