@@ -26,9 +26,13 @@ window.LIKEWHAT_CATALOG={
 };
 
 (function(){
-  if(document.querySelector('script[data-lw-site-polish]'))return;
-  const script=document.createElement('script');
-  script.src='site-polish.js?v=20260817-polish1';
-  script.dataset.lwSitePolish='true';
-  document.head.appendChild(script);
+  const load=(src,key)=>{
+    if(document.querySelector(`script[data-${key}]`))return;
+    const script=document.createElement('script');
+    script.src=src;
+    script.setAttribute(`data-${key}`,'true');
+    document.head.appendChild(script);
+  };
+  load('site-polish.js?v=20260817-polish1','lw-site-polish');
+  load('suiyobi-polish.js?v=20260817-suiyobi1','lw-suiyobi-polish');
 })();
