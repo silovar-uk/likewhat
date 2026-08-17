@@ -14,15 +14,32 @@
     if(value&&typeof value==='object')return Object.entries(value).map(([label,item])=>({label,value:String(item)}));
     return value?[{label:'NOTE',value:String(value)}]:[];
   };
-  const curatedGroups=raw=>{
+  const groupLabels={typography:['TYPOGRAPHY','文字組み'],spacing:['SPACING','余白と間'],surface:['SURFACE','面・罫線・角丸'],layout:['LAYOUT','幅と整列'],interaction:['INTERACTION','操作と動き']};
+  const traceLabels={curated:'CURATED TRACE',observed:'OBSERVED TRACE',measured:'MEASURED TRACE',estimate:'EDITORIAL ESTIMATE'};
+
+  const legacyCuratedGroups=raw=>{
     if(!raw)return null;
     if(Array.isArray(raw))return raw.map((group,index)=>({key:group.key||`group-${index+1}`,label:group.label||group.title||'DETAIL',title:group.title||group.label||'Detail',items:asItems(group.items||group.values||group.details),cue:group.cue||''})).filter(group=>group.items.length);
     if(typeof raw!=='object')return null;
-    const labels={typography:['TYPOGRAPHY','文字組み'],spacing:['SPACING','余白と間'],surface:['SURFACE','面・罫線・角丸'],layout:['LAYOUT','幅と整列'],interaction:['INTERACTION','操作と動き']};
     return Object.entries(raw).map(([key,value])=>{
-      const meta=labels[key]||[String(key).toUpperCase(),String(key)];
+      const meta=groupLabels[key]||[String(key).toUpperCase(),String(key)];
       return {key,label:meta[0],title:meta[1],items:asItems(value?.items||value),cue:value?.cue||''};
     }).filter(group=>group.items.length);
+  };
+
+  const schemaTrace=raw=>{
+    if(!raw||raw.schemaVersion!==1||!raw.groups||typeof raw.groups!=='object')return null;
+    const sources=new Map((raw.sources||[]).map(source=>[source.id,source]));
+    const groups=Object.entries(raw.groups).map(([key,value])=>{
+      const meta=groupLabels[key]||[String(key).toUpperCase(),String(key)];
+      const items=asItems(value?.items||[]).map(item=>{
+        const source=sources.get(item.sourceId);
+        return {...item,sourceLabel:source?.label||'',sourceUrl:source?.url||''};
+      });
+      return {key,label:meta[0],title:meta[1],items,cue:value?.cue||''};
+    }).filter(group=>group.items.length);
+    if(!groups.length)return null;
+    return {mode:raw.traceLevel||'curated',checkedAt:raw.checkedAt||'',sources:[...sources.values()],groups};
   };
 
   function inferredTrace(pattern){
@@ -102,34 +119,39 @@
   }
 
   function forPattern(pattern){
-    const curated=curatedGroups(pattern?.microDetails);
-    if(curated?.length)return {mode:'curated',groups:curated};
+    const schema=schemaTrace(pattern?.microDetails);
+    if(schema)return schema;
+    const legacy=legacyCuratedGroups(pattern?.microDetails);
+    if(legacy?.length)return {mode:'curated',groups:legacy};
     return {mode:'estimate',groups:inferredTrace(pattern)};
   }
 
   function render(trace,esc){
     if(!trace?.groups?.length)return '';
-    const modeLabel=trace.mode==='curated'?'CURATED TRACE':'EDITORIAL ESTIMATE';
+    const modeLabel=traceLabels[trace.mode]||traceLabels.curated;
     const cards=trace.groups.map(group=>`<article class="micro-detail-card">
       <div class="micro-detail-card-head"><small>${esc(group.label)}</small><span>${esc(modeLabel)}</span></div>
       <h3>${esc(group.title)}</h3>
-      <dl>${group.items.map(item=>`<div><dt>${esc(item.label||'Detail')}</dt><dd>${esc(item.value||'—')}</dd></div>`).join('')}</dl>
+      <dl>${group.items.map(item=>`<div><dt>${esc(item.label||'Detail')}</dt><dd>${esc(item.value||'—')}${item.confidence||item.method?`<small class="micro-detail-item-meta">${esc([item.method,item.confidence].filter(Boolean).join(' · '))}</small>`:''}</dd></div>`).join('')}</dl>
       ${group.cue?`<p class="micro-detail-cue"><strong>Observed cue</strong>${esc(group.cue)}</p>`:''}
     </article>`).join('');
+    const evidence=trace.mode==='estimate'
+      ? '数値レンジは公式CSS値の転載ではなく、Like What?で再現へ落とすための編集的な目安。参照先でCSS・ガイド・実測値を確認できた場合は、schema v1の microDetails でこの推定を上書きする。'
+      : `schema v1で保存した観察値。${trace.checkedAt?`最終確認 ${trace.checkedAt}。`:''}${trace.sources?.length?`参照ソース ${trace.sources.length}件。`:''}`;
     return `<section class="detail-block micro-details-block">
       <div class="micro-details-heading">
         <div><p class="eyebrow">MICRO DETAILS / TRACE THE SMALL DECISIONS</p><h2>細部を、再現できる単位まで見る</h2><p>「雰囲気が似ている」で止めず、文字サイズ・行間・余白・角丸・幅・操作フィードバックまで分解する。</p></div>
         <span class="micro-trace-mode">${esc(modeLabel)}</span>
       </div>
       <div class="micro-details-grid">${cards}</div>
-      <p class="micro-details-note">${trace.mode==='curated'?'この項目は個別パターンに保存した観察値を表示。':'数値レンジは公式CSS値の転載ではなく、Like What?で再現へ落とすための編集的な目安。参照先でCSS・ガイド・実測値を確認できた場合は、個別の microDetails を保存してこの推定を上書きする。'}</p>
+      <p class="micro-details-note">${esc(evidence)}</p>
     </section>`;
   }
 
   function prompt(trace){
     if(!trace?.groups?.length)return '';
     const summary=trace.groups.map(group=>`${group.title}: ${group.items.slice(0,3).map(item=>`${item.label} ${item.value}`).join(' / ')}`).join('。');
-    const caveat=trace.mode==='curated'?'以下は個別に記録した細部観察値です。':'以下はLike What?上の再現レンジであり、公式CSS値ではありません。';
+    const caveat=trace.mode==='estimate'?'以下はLike What?上の再現レンジであり、公式CSS値ではありません。':`以下は${traceLabels[trace.mode]||'CURATED TRACE'}として保存した細部観察値です。`;
     return `\n\n細部トレース: ${caveat} ${summary}。大きな雰囲気だけでなく、文字組み・余白・面・幅・操作の小さな判断まで揃えてください。`;
   }
 
