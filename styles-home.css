@@ -7,3 +7,23 @@
 @media(max-width:650px){.explore-hub{padding:0 14px;margin-bottom:22px}.explore-hub-head{display:block;margin-bottom:10px}.explore-hub-head h2{font-size:25px}.explore-hub-head>div>p:last-child{font-size:10px}.explore-tool-grid{display:flex;overflow-x:auto;scrollbar-width:none;margin-right:-14px;padding-right:14px}.explore-tool-grid::-webkit-scrollbar{display:none}.explore-tool{min-width:270px;min-height:102px;padding:10px;grid-template-columns:72px minmax(0,1fr) auto}.explore-visual{height:68px}.explore-tool-copy strong{font-size:15px}.explore-tool-copy span{font-size:8px}.randomizer{margin:0 12px 24px!important;padding:18px 14px!important;border-radius:20px!important;grid-template-columns:1fr!important;gap:13px!important;align-items:start!important}.randomizer:before{right:14px;top:13px;font-size:6px}.randomizer-copy .eyebrow{padding-right:80px}.randomizer-copy h2{font-size:28px!important;max-width:92%}.randomizer-copy>p:last-of-type{font-size:10px!important;line-height:1.55!important}.random-modes{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;width:100%!important;margin-top:11px!important}.random-modes button{min-width:0!important;padding:7px 5px!important}.random-modes strong{font-size:8px!important}.random-draw-button{width:max-content!important;height:34px!important;justify-self:start!important;padding:0 11px!important}.random-results{grid-column:auto!important}.random-analysis{padding:10px 11px!important}.random-analysis-copy{grid-template-columns:minmax(0,1fr) auto!important;gap:4px 8px!important}.random-analysis-copy h3{font-size:11px!important;line-height:1.4!important}.random-reroll-inline{padding:5px 7px;font-size:8px}.collision-brief>div{grid-template-columns:1fr!important}.random-grid{grid-template-columns:1fr!important;gap:8px!important}.random-grid .pattern-card:last-child{grid-column:auto!important}.random-grid .card-preview{height:118px!important}.random-grid .card-body{padding:11px 12px 12px!important}}
 @media(max-width:420px){.explore-tool{min-width:248px}.randomizer-copy h2{font-size:25px!important}.random-modes strong{font-size:7px!important}.random-analysis-copy h3{font-size:10px!important}.random-reroll-inline span:last-child{display:none}.random-reroll-inline{width:28px;height:28px;padding:0;justify-content:center}.random-reroll-inline span:first-child{font-size:13px}}
 @media(prefers-reduced-motion:reduce){.random-draw-button,.random-reroll-inline{transition:none!important}.random-draw-button:hover,.random-reroll-inline:hover{transform:none!important}}
+
+/*
+ * STEP 10/11: Explore Engineの3モード視覚メタファ + 引く理由。
+ * .random-modes button は既存CSS(!important多用)がpadding/レイアウトを
+ * 決め切っているため、新規セレクタ(.mode-visual等)のみを追加し、
+ * 既存ルールは一切変更しない。
+ */
+.random-modes button{position:relative}
+.mode-visual{display:block;width:100%;height:26px;margin:0 0 4px}
+.ee-dot{fill:#c9c5ba}
+.ee-line{stroke:var(--ink);stroke-width:.6}
+.ee-mark{fill:var(--ink)}
+.ee-mark-weird{fill:#8a5a3c}
+[data-random-mode="random"] .ee-dot{animation:eePulse 3s ease-in-out infinite}
+@keyframes eePulse{0%,88%,100%{opacity:.35}94%{opacity:1}}
+@media(prefers-reduced-motion:reduce){[data-random-mode="random"] .ee-dot{animation:none;opacity:.6}}
+
+.random-reason{margin:6px 0 0;font-size:9px;line-height:1.6;color:var(--muted)}
+.random-back-link{display:inline-block;margin:8px 0 0;border:0;background:transparent;color:var(--muted);font-size:9px;text-decoration:underline;cursor:pointer;padding:0}
+.random-back-link:hover{color:var(--ink)}
