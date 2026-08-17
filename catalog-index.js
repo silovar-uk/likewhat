@@ -24,3 +24,11 @@ window.LIKEWHAT_CATALOG={
     initialDomNodes:1000
   }
 };
+
+(function(){
+  if(document.querySelector('script[data-lw-site-polish]'))return;
+  const script=document.createElement('script');
+  script.src='site-polish.js?v=20260817-polish1';
+  script.dataset.lwSitePolish='true';
+  document.head.appendChild(script);
+})();
