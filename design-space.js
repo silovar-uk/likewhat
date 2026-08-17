@@ -74,16 +74,45 @@
     return 'Balanced';
   }
 
-  function bars(space,baseline){
+  const escHtml=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+
+  // STEP23: 各軸について、ライブラリ内で最も近い思想/最も遠い思想の実在パターンを
+  // 2件ずつ探す。追加のネットワーク取得は発生しない(patternsは既にページが
+  // 保持している配列をそのまま渡すだけ)。1軸だけのシンプルな距離(絶対値の差)で
+  // 判定する(6軸合成距離は別の指標としてDiversity Score側が既に担っている)。
+  function axisNeighbors(axisKey,value,patterns,excludeId){
+    const others=(patterns||[]).filter(p=>p.id!==excludeId&&p.designSpace&&Number.isFinite(Number(p.designSpace[axisKey])));
+    if(!others.length)return{near:[],far:[]};
+    const withDelta=others.map(p=>({p,delta:Math.abs(Number(p.designSpace[axisKey])-value)}));
+    const uniqueByBrand=(list)=>{
+      const seen=new Set();const out=[];
+      for(const item of list){if(seen.has(item.p.brand))continue;seen.add(item.p.brand);out.push(item);if(out.length===2)break;}
+      return out;
+    };
+    const near=uniqueByBrand([...withDelta].sort((a,b)=>a.delta-b.delta));
+    const far=uniqueByBrand([...withDelta].sort((a,b)=>b.delta-a.delta));
+    return{near:near.map(x=>x.p),far:far.map(x=>x.p)};
+  }
+
+  function bars(space,baseline,patterns,currentId){
     return `<div class="space-axis-list">${axes.map(axis=>{
       const value=Math.round(clamp(space?.[axis.key]??50));
       const avg=Math.round(clamp(baseline?.[axis.key]??50));
+      // STEP24: 軸名をクリックすると、その軸をレンズにしたLibraryへ遷移する
+      // (STEP08で追加したstate.sort=軸キーの仕組みをそのまま再利用)。
+      const axisHeading=`<a class="space-axis-lens-link" href="./?sort=${encodeURIComponent(axis.key)}#patterns" title="${escHtml(axisNames[axis.key])}をレンズにLibraryを見る">${escHtml(axisNames[axis.key])}</a>`;
+      const neighbors=patterns?axisNeighbors(axis.key,value,patterns,currentId):null;
+      const neighborsMarkup=neighbors&&(neighbors.near.length||neighbors.far.length)?`<div class="space-axis-neighbors">
+        ${neighbors.near.length?`<span class="space-axis-near">近い思想: ${neighbors.near.map(p=>escHtml(p.brand)).join(' / ')}</span>`:''}
+        ${neighbors.far.length?`<span class="space-axis-far">遠い思想: ${neighbors.far.map(p=>escHtml(p.brand)).join(' / ')}</span>`:''}
+      </div>`:'';
       return `<div class="space-axis-row">
-        <div class="space-axis-head"><strong>${axisNames[axis.key]}</strong><span>${axisPosition(axis,value)} · ${value}</span></div>
+        <div class="space-axis-head"><strong>${axisHeading}</strong><span>${axisPosition(axis,value)} · ${value}</span></div>
         <div class="space-scale-labels"><span>${axis.low}</span><span>${axis.high}</span></div>
         <div class="space-track" aria-label="${axisNames[axis.key]} ${value} / 100">
           <span class="space-midline"></span><span class="space-average" style="left:${avg}%" title="Library mean ${avg}"></span><span class="space-value" style="left:${value}%"></span>
         </div>
+        ${neighborsMarkup}
       </div>`;
     }).join('')}</div>`;
   }

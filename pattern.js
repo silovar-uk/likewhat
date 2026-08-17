@@ -150,7 +150,7 @@
           <p class="design-space-intro">6つの対立軸で、このパターンの設計上の重心を可視化する。レーダーは全体形状、右側のスケールは各軸の意味を読むためのもの。破線は現在のLike What?ライブラリ全体の平均。</p>
           <div class="space-layout">
             ${designSpace.radar(p.designSpace, libraryMean)}
-            ${designSpace.bars(p.designSpace, libraryMean)}
+            ${designSpace.bars(p.designSpace, libraryMean, patterns, p.id)}
           </div>
           <div class="space-profile">
             ${metaCard('Domain', p.domain)}
