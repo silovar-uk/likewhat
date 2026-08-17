@@ -126,7 +126,7 @@
     return {mode:'estimate',groups:inferredTrace(pattern)};
   }
 
-  function render(trace,esc){
+  function render(trace,esc,resolutionDotsHtml){
     if(!trace?.groups?.length)return '';
     const modeLabel=traceLabels[trace.mode]||traceLabels.curated;
     const cards=trace.groups.map(group=>`<article class="micro-detail-card">
@@ -140,7 +140,7 @@
       : `schema v1で保存した観察値。${trace.checkedAt?`最終確認 ${trace.checkedAt}。`:''}${trace.sources?.length?`参照ソース ${trace.sources.length}件。`:''}`;
     return `<section class="detail-block micro-details-block">
       <div class="micro-details-heading">
-        <div><p class="eyebrow">MICRO DETAILS / TRACE THE SMALL DECISIONS</p><h2>細部を、再現できる単位まで見る</h2><p>「雰囲気が似ている」で止めず、文字サイズ・行間・余白・角丸・幅・操作フィードバックまで分解する。</p></div>
+        <div><p class="eyebrow">04 MICRO DETAILS / TRACE THE SMALL DECISIONS</p>${resolutionDotsHtml||''}<h2>細部を、再現できる単位まで見る</h2><p>「雰囲気が似ている」で止めず、文字サイズ・行間・余白・角丸・幅・操作フィードバックまで分解する。</p></div>
         <span class="micro-trace-mode">${esc(modeLabel)}</span>
       </div>
       <div class="micro-details-grid">${cards}</div>
