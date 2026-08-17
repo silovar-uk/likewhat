@@ -4,6 +4,8 @@
   const render=ui.render;
   const esc=ui.esc||function(value){return String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));};
   const designSpace=window.LikeWhatDesignSpace;
+  const lens=window.LikeWhatLens;
+  const libraryMean=designSpace?designSpace.mean(patterns):{};
   const groupModel=window.LikeWhatLibraryGroups;
   const entryKinds=window.LikeWhatEntryKinds;
   const meta=window.LIKEWHAT_LIBRARY_META||{};
@@ -180,7 +182,21 @@
     const href=cluster?`pattern.html?id=${encodeURIComponent(group.cluster.id)}`:scene?`./?scene=${encodeURIComponent(group.scene)}#patterns`:single?`pattern.html?id=${encodeURIComponent(items[0].id)}`:`brand.html?brand=${encodeURIComponent(group.brand)}`;
     const list=cluster?(group.cluster.members||[]).map(m=>({label:m.brand,sub:m.role})):scene?items.map(p=>({label:p.brand,sub:p.family})):items.map(p=>({label:p.era||shortPatternName(p,group.brand),sub:p.family}));
     const previewMarkup=cluster?`<div class="group-preview-single">${render(group.cluster,'related')}</div>`:`<div class="group-preview-mosaic count-${Math.min(4,previews.length)}">${previews.map(p=>`<div class="group-preview-tile"><div>${render(p,'related')}</div><span>${esc(scene?p.brand:(p.era||shortPatternName(p,group.brand)))}</span></div>`).join('')}${items.length>4?`<b class="group-preview-more">+${items.length-4}</b>`:''}</div>`;
-    return `<article class="library-group-card ${cluster?'industry-cluster-card':'brand-group-card'} ${artist?'artist-group-card':''}" data-group-key="${esc(group.key)}" data-group-type="${esc(group.type)}" data-entry-kind="${esc(group.entryKind)}" data-brand="${esc(group.brand)}" data-pattern-ids="${esc(items.map(p=>p.id).join('|'))}" data-sort-index="${index}" data-sort-density="${group.centroid?.density??50}" data-sort-exploration="${group.centroid?.exploration??50}"><a class="library-group-main ${single?'is-direct':''}" href="${href}"><header><small>${kicker}</small><h3>${esc(group.title)}</h3></header><div class="library-group-preview">${previewMarkup}</div><div class="group-pattern-list">${list.slice(0,4).map(item=>`<div><strong>${esc(item.label)}</strong><span>${esc(item.sub||'')}</span></div>`).join('')}${list.length>4?`<p>+ ${list.length-4} more patterns</p>`:''}</div><footer><span>${scene?'Filter this scene':single?'Open pattern':cluster?'Open cluster':artist?'Explore artist':institution?'Explore institution':'Explore brand'}</span><b>↗</b></footer></a></article>`;
+    // 差分ラベル: catalog-core由来のcentroid/libraryMeanのみで算出、追加通信なし。
+    // 常時表示の1軸は既存footerのテキスト内に収め(レイアウト変更ゼロ)、
+    // hoverで開くさらに2軸+保存/比較ボタンだけを新規のオーバーレイ要素にする
+    // (<button>を<a>の中に入れるとネスト不可のため、姉妹要素として外に出す)。
+    const topAxes=lens?.topDeviationAxes?.(group.centroid,libraryMean,3)||[];
+    const fmtDiff=d=>d>0?`+${d}`:`${d}`;
+    const primaryLabel=topAxes.length?`${esc(topAxes[0].name)} ${topAxes[0].value} · 平均より${fmtDiff(topAxes[0].diff)}`:(scene?'Filter this scene':single?'Open pattern':cluster?'Open cluster':artist?'Explore artist':institution?'Explore institution':'Explore brand');
+    const signalMarkup=topAxes.length>1?`<div class="library-group-signal">
+      <div class="signal-hover-axes">${topAxes.slice(1,3).map(axis=>`<span>${esc(axis.name)} ${axis.value}</span>`).join('')}</div>
+      <div class="signal-hover-actions">
+        <button type="button" data-wb-save-id="${esc(items[0].id)}">参考に追加</button>
+        <button type="button" data-wb-compare-id="${esc(items[0].id)}">比較に追加</button>
+      </div>
+    </div>`:'';
+    return `<article class="library-group-card ${cluster?'industry-cluster-card':'brand-group-card'} ${artist?'artist-group-card':''}" data-group-key="${esc(group.key)}" data-group-type="${esc(group.type)}" data-entry-kind="${esc(group.entryKind)}" data-brand="${esc(group.brand)}" data-pattern-ids="${esc(items.map(p=>p.id).join('|'))}" data-sort-index="${index}" data-sort-density="${group.centroid?.density??50}" data-sort-exploration="${group.centroid?.exploration??50}"><a class="library-group-main ${single?'is-direct':''}" href="${href}"><header><small>${kicker}</small><h3>${esc(group.title)}</h3></header><div class="library-group-preview">${previewMarkup}</div><div class="group-pattern-list">${list.slice(0,4).map(item=>`<div><strong>${esc(item.label)}</strong><span>${esc(item.sub||'')}</span></div>`).join('')}${list.length>4?`<p>+ ${list.length-4} more patterns</p>`:''}</div><footer><span>${primaryLabel}</span><b>↗</b></footer></a>${signalMarkup}</article>`;
   }
 
   function renderResults(){
